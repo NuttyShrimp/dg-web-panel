@@ -7,13 +7,14 @@ stages:
   variables:
     GOPATH: "$CI_PROJECT_DIR/.cache"
   before_script:
+    - cd server
     - mkdir -p .cache
     - make dep-vendor
     - cp config.template.yml config.yml
   cache:
     key: "$CI_COMMIT_REF_NAME-golang-cache"
     paths:
-      - .cache
+      - server/.cache
 
 compile:
   stage: build
@@ -24,4 +25,4 @@ compile:
     - go build -o builded-binaries ./...
   artifacts:
     paths:
-      - builded-binaries
+      - server/builded-binaries
