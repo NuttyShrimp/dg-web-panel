@@ -1,0 +1,13 @@
+@use "src/styles/variables";
+
+.centerBox {
+  &-inner {
+    width: 25vw;
+    text-align: center;
+    margin-top: 10vh;
+    border-radius: 1vh;
+    padding: 5vh;
+    box-shadow: 0.3vh 0.3vh 0.3vh variables.$primary_darker, -0.3vh 0.3vh 0.3vh variables.$primary_darker,
+      0.3vh -0.3vh 0.3vh variables.$primary_darker, -0.3vh -0.3vh 0.3vh variables.$primary_darker;
+  }
+}

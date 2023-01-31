@@ -1,0 +1,23 @@
+@use "src/styles/variables";
+
+.editor {
+  &-wrapper {
+    min-height: 10vh;
+    padding: 1vh;
+    border: 0.1vh solid variables.$gray_normal;
+    border-radius: 1vh;
+
+    & .ProseMirror {
+      padding: 0.5vh;
+      background-color: variables.$primary_darker;
+      border: 0.1vh solid variables.$gray_normal;
+      border-radius: 0.5vh;
+      margin-bottom: 1vh;
+      min-height: 10vh;
+
+      &-focused {
+        outline: variables.$primary_light solid 0.2vh;
+      }
+    }
+  }
+}
