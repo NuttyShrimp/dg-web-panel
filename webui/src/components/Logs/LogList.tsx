@@ -1,4 +1,4 @@
-import { Box, Button, Center, Code, Container, Divider, Flex, Pagination, Stack, Text } from "@mantine/core";
+import { Box, Button, Center, Code, Container, Divider, Flex, Pagination, Text } from "@mantine/core";
 import { displayUnixDate } from "@src/helpers/time";
 import { useState } from "react";
 import { List } from "../List";
