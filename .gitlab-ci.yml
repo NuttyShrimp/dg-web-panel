@@ -1,0 +1,27 @@
+stages:
+  - build
+  - test
+
+.go_setup:
+  image: golang:latest
+  variables:
+    GOPATH: "$CI_PROJECT_DIR/.cache"
+  before_script:
+    - mkdir -p .cache
+    - make dep-vendor
+    - cp config.template.yml config.yml
+  cache:
+    key: "$CI_COMMIT_REF_NAME-golang-cache"
+    paths:
+      - .cache
+
+compile:
+  stage: build
+  extends:
+    - .go_setup
+  script:
+    - mkdir -p builded-binaries
+    - go build -o builded-binaries ./...
+  artifacts:
+    paths:
+      - builded-binaries

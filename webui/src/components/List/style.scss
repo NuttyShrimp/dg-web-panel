@@ -1,0 +1,24 @@
+@use "src/styles/variables";
+
+.list {
+  &-container {
+    max-width: 50vw;
+    width: 100%;
+    min-height: 60vh;
+    border: 0.1vh solid variables.$gray_dark;
+    border-radius: 0.5rem;
+    &-highlight > .list-entry:hover {
+      background-color: variables.$primary-darker;
+    }
+
+    &-no-overflow {
+      height: 80vh;
+      overflow: scroll;
+    }
+  }
+  &-entry {
+    display: flex;
+    align-items: flex-start;
+    padding: 1vh 1vw;
+  }
+}

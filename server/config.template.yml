@@ -1,0 +1,57 @@
+server:
+  host: localhost
+  port: 3000
+  env: development
+  reqpsec: 200
+  cors:
+    origins:
+      - localhost:*
+  sessionSecret: ***REMOVED***
+
+discord:
+  redirectURL: http://localhost:3000/api/auth/callback
+  # Info here is from a test application
+  clientID: 745192879168684152
+  clientSecret: ***REMOVED***
+  # Guild id of server we are targeting
+  # In this case: degrensRP
+  guild: 706892662271246366
+  roles:
+    - name: developer
+      id: 706903572058603541
+    - name: staff
+      id: 747854877094576129
+    - name: police
+      id: 711197025600798810
+    - name: ambulance
+      id: 711197065463463976
+
+redis:
+  host: redis-13581.c250.eu-central-1-1.ec2.cloud.redislabs.com
+  port: 13581
+  password: WnTuNuWwXrOAYqlG1eJLtNu8EhI4R3IA
+
+mariaDB:
+  panel:
+    host: localhost
+    port: 3306
+    user: root
+    password: root
+    database: degrens-panel
+  cfx:
+    host: localhost
+    port: 3306
+    user: root
+    password: root
+    database: degrens2
+
+graylog:
+  url: https://graylog.nuttyshrimp.me
+  token: ***REMOVED***
+  streamId: ***REMOVED***
+  panelStreamId: ***REMOVED***
+  gelf: https://graylog.nuttyshrimp.me/gelf
+ 
+cfx:
+  server: http://localhost:30120
+  apiKey: 

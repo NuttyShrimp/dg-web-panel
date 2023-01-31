@@ -1,0 +1,32 @@
+@use "src/styles/variables.scss";
+
+.report-message {
+  &-wrapper {
+    width: 100%;
+    background-color: variables.$primary_darker_darker;
+    border: 0.1vh solid variables.$gray_normal;
+    padding: 1vh 2vh;
+    border-radius: 0.75vh;
+    &:not(:first-of-type) {
+      margin-top: 1vh;
+    }
+  }
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    & > div {
+      display: flex;
+      align-items: center;
+    }
+  }
+  &-title {
+    & > span {
+      font-weight: 400;
+      color: variables.$gray_normal;
+    }
+  }
+  &-content {
+    margin-top: 2vh;
+  }
+}

@@ -1,0 +1,7 @@
+@use "src/styles/variables.scss" as colors;
+
+.main-navbar {
+  &-wrapper {
+    display: flex;
+  }
+}
