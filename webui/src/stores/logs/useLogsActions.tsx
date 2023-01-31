@@ -1,11 +1,11 @@
 import { showNotification } from "@mantine/notifications";
 import { axiosInstance } from "@src/helpers/axiosInstance";
 import { useState } from "react";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { logState } from "./state";
 
 export const useLogsActions = () => {
-  const [panelLogs, setPanelLogs] = useRecoilState(logState.panelLogs);
+  const setPanelLogs = useSetRecoilState(logState.panelLogs);
   const [loading, setLoading] = useState(false);
 
   const fetchPanelLogs = async (offset = 0) => {
