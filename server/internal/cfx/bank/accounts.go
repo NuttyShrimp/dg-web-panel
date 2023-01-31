@@ -12,7 +12,7 @@ func getAccounts(cid uint) (*[]cfx_models.BankAccount, error) {
 	accs := []cfx_models.BankAccount{}
 	for _, perm := range acc_perms {
 		acc := cfx_models.BankAccount{}
-		acc_err := db.CfxMariaDB.Client.Where("account_id = ?", perm.AccountId).Find(&acc).Error
+		acc_err := db.CfxMariaDB.Client.Where("account_id = ?", perm.AccountId).First(&acc).Error
 		if acc_err != nil {
 			return nil, acc_err
 		}
