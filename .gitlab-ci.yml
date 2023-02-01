@@ -1,28 +1,50 @@
 stages:
-  - build
   - test
+  - build
 
 .go_setup:
-  image: golang:latest
   variables:
     GOPATH: "$CI_PROJECT_DIR/.cache"
+    # GOLANGCI_LINT_CACHE: $CI_PROJECT_DIR/.golangci-lint
   before_script:
     - cd server
-    - mkdir -p .cache
+    - mkdir -p .cache .golangci-lint
     - make dep-vendor
     - cp config.template.yml config.yml
   cache:
     key: "$CI_COMMIT_REF_NAME-golang-cache"
     paths:
-      - server/.cache
+      - server/.cache/pkg/mod
+      # - server/.golangci-lint/
 
 compile:
+  image: golang:latest
   stage: build
   extends:
     - .go_setup
   script:
+    - cd server
     - mkdir -p builded-binaries
     - go build -o builded-binaries ./...
   artifacts:
     paths:
       - server/builded-binaries
+        
+# lint:
+#   extends: 
+#     - .go_setup
+#   image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
+#   stage: test
+#   script:
+#     - cd server
+#     - golangci-lint --version
+#     # Use default .golangci.yml file from the image if one is not present in the project root.
+#     - '[ -e .golangci.yml ] || cp /golangci/.golangci.yml .'
+#     # Write the code coverage report to gl-code-quality-report.json
+#     # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+#     - golangci-lint run --out-format colored-line-number:stdout,code-climate:gl-code-quality-report.json
+#   artifacts:
+#     reports:
+#       codequality: server/gl-code-quality-report.json
+#     paths:
+#       - server/gl-code-quality-report.json
