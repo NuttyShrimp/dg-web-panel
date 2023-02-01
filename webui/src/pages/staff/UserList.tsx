@@ -1,10 +1,10 @@
 import { Center, Container, Stack, Title } from "@mantine/core";
 import { SearchAndSelect } from "@src/components/Users/SearchAndSelect";
-import { useCfxActions } from "@src/stores/cfx/useCfxActions";
+import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
 import { useEffect } from "react";
 
 export const UserList = () => {
-  const { loadPlayers } = useCfxActions();
+  const { loadPlayers } = useCfxPlayer();
   useEffect(() => {
     loadPlayers();
   }, [loadPlayers]);

@@ -3,6 +3,7 @@ package staff
 import (
 	"degrens/panel/internal/auth/authinfo"
 	"degrens/panel/internal/cfx"
+	"degrens/panel/internal/cfx/business"
 	"degrens/panel/internal/routes"
 	"degrens/panel/internal/staff/reports"
 	"degrens/panel/lib/errors"
@@ -42,6 +43,7 @@ func (SR *StaffRouter) RegisterRoutes() {
 	SR.RouterGroup.DELETE("/notes/:id", SR.deleteStaffNote)
 
 	reports.NewReportRouter(SR.RouterGroup, &SR.Logger)
+	business.NewBusinessRouter(SR.RouterGroup, &SR.Logger)
 }
 
 func (SR *StaffRouter) DashboardHandler() gin.HandlerFunc {
