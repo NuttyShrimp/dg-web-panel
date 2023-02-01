@@ -1,5 +1,5 @@
 import { Divider } from "@mantine/core";
-import { Children, ReactNode } from "react";
+import { Children, ReactNode, MouseEventHandler } from "react";
 import "./style.scss";
 
 declare interface ListProps {
@@ -26,4 +26,13 @@ export const List = ({ children, highlightHover, hideOverflow }: ListProps) => {
   );
 };
 
-List.Entry = ({ children }: { children: ReactNode }) => <div className="list-entry">{children}</div>;
+declare interface ListEntryProps {
+  children: ReactNode;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+}
+
+List.Entry = ({ children, onClick }: ListEntryProps) => (
+  <div className="list-entry" onClick={onClick}>
+    {children}
+  </div>
+);

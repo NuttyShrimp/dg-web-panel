@@ -14,6 +14,8 @@ import { CharacterPage } from "./staff/Character";
 import { UserList } from "./staff/UserList";
 import { UserPage } from "./staff/User";
 import { PanelLogs } from "./dev/PanelLogs";
+import { BusinessList } from "./staff/BusinessList";
+import { Business } from "./staff/Business";
 
 type ExtNonIndexRouteObject = Omit<NonIndexRouteObject, "children"> & {
   children?: ExtRouteObject[];
@@ -82,6 +84,21 @@ export const staffRoute: ExtRouteObject = {
           path: ":steamid",
           title: "Player",
           element: <UserPage />,
+        },
+      ],
+    },
+    {
+      path: "business",
+      title: "Businesses",
+      element: <PageLoader />,
+      children: [
+        {
+          index: true,
+          element: <BusinessList />,
+        },
+        {
+          path: ":id",
+          element: <Business />,
         },
       ],
     },

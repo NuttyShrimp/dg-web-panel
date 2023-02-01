@@ -5,14 +5,14 @@ import { CharacterInfo } from "@src/components/Characters/Info";
 import { SearchAndSelect } from "@src/components/Characters/SearchAndSelect";
 import { VehicleInfo } from "@src/components/Characters/Vehicles";
 import { FontAwesomeIcon } from "@src/components/Icon";
-import { useCfxActions } from "@src/stores/cfx/useCfxActions";
+import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
 import { characterState } from "@src/stores/character/state";
 import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 
 export const CharacterPage = () => {
-  const { validateCid } = useCfxActions();
+  const { validateCid } = useCfxPlayer();
   const { cid } = useParams();
   const [selectedCid, setSelectedCid] = useRecoilState(characterState.cid);
   // 0 =loading, 1 = succ, 2 = failed

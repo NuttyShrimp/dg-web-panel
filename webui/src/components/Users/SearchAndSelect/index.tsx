@@ -1,6 +1,6 @@
 import { Box, Select, Text } from "@mantine/core";
 import { cfxState } from "@src/stores/cfx/state";
-import { useCfxActions } from "@src/stores/cfx/useCfxActions";
+import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
 import { FC, forwardRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -24,7 +24,7 @@ export const SearchAndSelect: FC<{ cid?: string }> = ({ cid }) => {
   const players = useRecoilValue(cfxState.players);
   const selectPlayer = useSetRecoilState(cfxState.player);
   const navigate = useNavigate();
-  const { loadPlayers } = useCfxActions();
+  const { loadPlayers } = useCfxPlayer();
 
   useEffect(() => {
     if (players.length === 0) {

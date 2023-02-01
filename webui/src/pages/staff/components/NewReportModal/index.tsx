@@ -1,7 +1,7 @@
 import { Button, Group, Modal, MultiSelect, TextInput } from "@mantine/core";
 import { ReportTag } from "@src/components/ReportTag";
 import { cfxState } from "@src/stores/cfx/state";
-import { useCfxActions } from "@src/stores/cfx/useCfxActions";
+import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
 import { reportState } from "@src/stores/reports/state";
 import { useReportActions } from "@src/stores/reports/useReportActions";
 import { FC, useEffect, useState } from "react";
@@ -21,7 +21,7 @@ export const NewReportModal: FC<{ open: boolean; onClose: () => void }> = props 
     tags: [],
   });
   const [creatingReport, setCreatingReport] = useState(false);
-  const { loadPlayers } = useCfxActions();
+  const { loadPlayers } = useCfxPlayer();
   const { refreshTags, createReport } = useReportActions();
   const cfxPlayers = useRecoilValue(cfxState.selectPlayers);
   const tags = useRecoilValue(reportState.tags);

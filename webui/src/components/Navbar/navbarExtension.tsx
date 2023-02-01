@@ -1,7 +1,7 @@
 import { createStyles, Navbar, Title } from "@mantine/core";
 import { ExtRouteObject } from "@src/pages/routes";
 import { FC, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const useStyles = createStyles(theme => ({
   wrapper: {
@@ -22,6 +22,7 @@ const useStyles = createStyles(theme => ({
     paddingLeft: theme.spacing.md,
     marginRight: theme.spacing.md,
     borderRadius: `0 ${theme.spacing.md}px ${theme.spacing.md}px 0`,
+    textDecoration: "none",
     "&:hover": {
       cursor: "pointer",
       backgroundColor: theme.colors.dark[5],
@@ -42,17 +43,13 @@ const NavbarEntry: FC<{
 }> = ({ route, base }) => {
   const { classes, cx } = useStyles();
   const location = useLocation();
-  const navigate = useNavigate();
   const isActive = useMemo(() => {
     return route.path && location.pathname.startsWith(`/${base.replaceAll(/\//g, "")}/${route.path}`);
   }, [location, base, route]);
-  const goToRoute = () => {
-    navigate(`${base}/${route.path}`);
-  };
   return (
-    <div className={cx(classes.entry, { [classes.activeEntry]: isActive })} onClick={goToRoute}>
+    <Link className={cx(classes.entry, { [classes.activeEntry]: isActive })} to={`${base}/${route.path}`}>
       <Title order={6}>{route.title ?? route.path?.replaceAll(/\//, "") ?? "Wrong configured route"}</Title>
-    </div>
+    </Link>
   );
 };
 

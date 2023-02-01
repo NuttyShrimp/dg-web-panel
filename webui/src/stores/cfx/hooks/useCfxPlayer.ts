@@ -1,8 +1,8 @@
 import { axiosInstance } from "@src/helpers/axiosInstance";
 import { useSetRecoilState } from "recoil";
-import { cfxState } from "./state";
+import { cfxState } from "../state";
 
-export const useCfxActions = () => {
+export const useCfxPlayer = () => {
   const setPlayers = useSetRecoilState(cfxState.players);
 
   const loadPlayers = async () => {

@@ -39,4 +39,35 @@ declare namespace CfxState {
       created_at: string;
     };
   }
+  namespace Business {
+    interface Type {
+      id: number;
+      name: string;
+    }
+    interface Entry {
+      name: string;
+      label: string;
+      id: number;
+      bankAccountId: string;
+      type: Type;
+    }
+    interface Log {
+      id: number;
+      type: string;
+      action: string;
+      businessId: number;
+      character: Omit<Character, "info">;
+    }
+    interface Role {
+      id: number;
+      name: string;
+      permissions: string[];
+    }
+    interface Employee {
+      id: number;
+      isOwner: bool;
+      character: Character;
+      role: Role;
+    }
+  }
 }
