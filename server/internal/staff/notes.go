@@ -4,6 +4,7 @@ import (
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
 	"degrens/panel/lib/graylogger"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -24,7 +25,7 @@ func CreateNote(userId uint, note string) error {
 	}
 	err := db.MariaDB.Client.Save(&dbNote).Error
 	if err == nil {
-		graylogger.Log("staff:notes:create", "userId", userId, "note", note)
+		graylogger.Log("staff:notes:create", fmt.Sprintf("%d created a staff note", userId), "userId", userId, "note", note)
 	}
 	return err
 }
@@ -39,7 +40,7 @@ func UpdateNote(userId uint, noteId uint, note string) error {
 	dbNote.Note = note
 	err = db.MariaDB.Client.Save(&dbNote).Error
 	if err == nil {
-		graylogger.Log("staff:notes:update", "userId", userId, "originalNote", orgNote, "newNote", note, "noteStruct", dbNote)
+		graylogger.Log("staff:notes:update", fmt.Sprintf("%d updated a staff note", userId), "userId", userId, "originalNote", orgNote, "newNote", note, "noteStruct", dbNote)
 	}
 	return err
 }
@@ -52,7 +53,7 @@ func DeleteNote(userId uint, noteId uint) error {
 	}
 	err = db.MariaDB.Client.Where("id = ?", noteId).Delete(&panel_models.Notes{}).Error
 	if err == nil {
-		graylogger.Log("staff:notes:delete", "userId", userId, "note", dbNote)
+		graylogger.Log("staff:notes:delete", fmt.Sprintf("%d deleted a staff note", userId), "userId", userId, "note", dbNote)
 	}
 	return err
 }
