@@ -2,6 +2,7 @@ package users
 
 import (
 	"degrens/panel/internal/auth/authinfo"
+	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/db"
 	"degrens/panel/internal/storage"
 	"degrens/panel/models"
@@ -21,7 +22,7 @@ func GetUserInfo(c *gin.Context) (*models.UserInfo, error) {
 	userInfo := models.UserInfo{
 		Roles: userAuthInfo.Roles,
 	}
-	if userAuthInfo.AuthMethod == authinfo.Discord {
+	if userAuthInfo.AuthMethod == authinfo.Discord || userAuthInfo.AuthMethod == authinfo.APIToken {
 		DBUser := db.MariaDB.Repository.GetUserById(userAuthInfo.ID)
 		if &DBUser == nil {
 			storage.RemoveCookie(c, "userInfo")
@@ -29,12 +30,15 @@ func GetUserInfo(c *gin.Context) (*models.UserInfo, error) {
 		}
 		userInfo.AvatarUrl = DBUser.AvatarUrl
 		userInfo.Username = DBUser.Username
-	} else {
+	} else if userAuthInfo.AuthMethod == authinfo.CFXToken {
+		info := cfxtoken.GetInfoForToken(userAuthInfo.ID)
+		userInfo.Username = info.Username
 	}
 	return &userInfo, nil
 }
 
 func GetAuthInfo(userId uint) authinfo.AuthInfo {
+	// TODO: take other authentication methods in account
 	user := db.MariaDB.Repository.GetUserById(userId)
 	registerdRoles := []string{}
 	for _, role := range user.Roles {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"degrens/panel/internal/auth/apikeys"
 	"degrens/panel/internal/auth/authinfo"
+	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/auth/discord"
 	"degrens/panel/internal/routes"
 	"degrens/panel/internal/storage"
@@ -112,6 +113,23 @@ func (AR *AuthRouter) loginHandler() gin.HandlerFunc {
 				"url": discord.GetOAuthConf().AuthCodeURL(state),
 			})
 			return
+		case "cfxtoken":
+			token := c.GetHeader("Authorization")
+			if token == "" {
+				// No header given, yeet req
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": "Failed to get a valid token from the request",
+				})
+				return
+			}
+			err := cfxtoken.AuthorizeToken(c, token)
+			if err != nil {
+				AR.Logger.Error("Failed to authorize a cfx token", "token", token, "err", err)
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error": "Failed to use cfx token to create session",
+				})
+				return
+			}
 		}
 	}
 }
@@ -135,6 +153,7 @@ func (AR *AuthRouter) logoutHandler() gin.HandlerFunc {
 		case authinfo.CFXToken:
 			{
 				// Send request to Cfx API to invalidate login token
+				cfxtoken.RemoveToken(userInfo.ID)
 				break
 			}
 		default:
