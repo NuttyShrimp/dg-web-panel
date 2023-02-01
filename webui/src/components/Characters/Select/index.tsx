@@ -1,9 +1,8 @@
-import { Box, Select, Text } from "@mantine/core";
+import { Box, Button, Center, Select, Text } from "@mantine/core";
 import { characterState } from "@src/stores/character/state";
 import { useCharacterActions } from "@src/stores/character/useCharacterActions";
-import { FC, forwardRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { FC, forwardRef, useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
 declare type CharacterItemProps = React.ComponentPropsWithoutRef<"div"> & CfxState.Character;
 
@@ -36,11 +35,9 @@ const SelectItem = forwardRef<HTMLDivElement, CharacterItemProps>(
 
 const caseInsensitiveMatch = (s1: string, s2: string) => s1.toLowerCase().includes(s2.toLowerCase().trim());
 
-export const SearchAndSelect: FC<{ cid?: string }> = ({ cid }) => {
+export const SelectCharacter: FC<{ cid?: string; onChange: (cid: number) => void }> = ({ cid, onChange }) => {
   const characters = useRecoilValue(characterState.list);
-  const selectCid = useSetRecoilState(characterState.cid);
-  const navigate = useNavigate();
-  const { resetStores, fetchCharacters } = useCharacterActions();
+  const { fetchCharacters } = useCharacterActions();
 
   useEffect(() => {
     if (characters.length === 0) {
@@ -67,11 +64,19 @@ export const SearchAndSelect: FC<{ cid?: string }> = ({ cid }) => {
         caseInsensitiveMatch(`${item.info.firstname} ${item.info.lastname}`, value) ||
         caseInsensitiveMatch(String(item.citizenid), value)
       }
-      onChange={val => {
-        resetStores();
-        selectCid(Number(val));
-        navigate(`/staff/characters/${val}`);
-      }}
+      onChange={val => onChange(val ? Number(val) : 0)}
     />
+  );
+};
+
+export const SelectCharacterModal = ({ onAccept }: { onAccept: (cid: number) => void }) => {
+  const [selectedCid, setSelectedCid] = useState(0);
+  return (
+    <>
+      <SelectCharacter onChange={setSelectedCid} />
+      <Center mt={4}>
+        <Button onClick={() => onAccept(selectedCid)}>Accept</Button>
+      </Center>
+    </>
   );
 };
