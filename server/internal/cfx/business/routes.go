@@ -97,7 +97,15 @@ func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 		})
 		return
 	}
-	page := ctx.GetInt("page")
+	page, err := strconv.ParseUint(ctx.DefaultQuery("page", "0"), 10, 32)
+	if err != nil {
+		BR.Logger.Error("Failed to convert page to uint", "error", err, "id", id, "page", ctx.Query("page"))
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Parseing error",
+			Description: "We encountered an error while trying to read page from URL",
+		})
+		return
+	}
 	if page < 0 {
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request error",
@@ -105,7 +113,7 @@ func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 		})
 		return
 	}
-	logs, err := FetchLogs(uint(id), page)
+	logs, err := FetchLogs(uint(id), int(page))
 	if err != nil {
 		BR.Logger.Error("Failed to fetch logs for business", "error", err, "id", id, "page", page)
 		ctx.JSON(500, models.RouteErrorMessage{
