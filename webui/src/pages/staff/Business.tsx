@@ -1,15 +1,19 @@
 import { Container, Tabs, Title } from "@mantine/core";
 import { InfoIcon } from "@primer/octicons-react";
+import { BusinessActionMenu } from "@src/components/Business/ActionMenu";
 import { BusinessEmployees } from "@src/components/Business/Employees";
 import { BusinessInfo } from "@src/components/Business/Info";
 import { BusinessLogs } from "@src/components/Business/Logs";
 import { FontAwesomeIcon } from "@src/components/Icon";
+import { authState } from "@src/stores/auth/state";
 import { useCfxBusiness } from "@src/stores/cfx/hooks/useCfxBusiness";
 import { Link, useParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 
 export const Business = () => {
   const { id } = useParams();
   const { getInfo } = useCfxBusiness();
+  const userInfo = useRecoilValue(authState.userInfo);
 
   const business = getInfo(id ?? "0");
 
@@ -31,8 +35,9 @@ export const Business = () => {
             Employees
           </Tabs.Tab>
           <Tabs.Tab value="logs" icon={<FontAwesomeIcon icon={"book"} size={"sm"} />}>
-            Logs
+            Action Logs
           </Tabs.Tab>
+          {userInfo && userInfo.roles.includes("developer") && <BusinessActionMenu id={Number(id)} />}
         </Tabs.List>
 
         <Tabs.Panel value="info">{business && <BusinessInfo info={business} />}</Tabs.Panel>

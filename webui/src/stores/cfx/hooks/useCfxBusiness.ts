@@ -41,9 +41,30 @@ export const useCfxBusiness = () => {
     }
   };
 
+  const deleteBusiness = async (id: number) => {
+    try {
+      await axiosInstance.delete(`/staff/business/${id}`);
+      setBusinesses(bs => bs.filter(b => b.id !== id));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const changeOwner = async (id: number, cid: number) => {
+    try {
+      await axiosInstance.post(`/staff/business/${id}/owner`, {
+        cid,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return {
     fetchAll,
     fetchLogs,
     getInfo,
+    deleteBusiness,
+    changeOwner,
   };
 };

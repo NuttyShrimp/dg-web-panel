@@ -1,4 +1,4 @@
-import { Flex, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { cfxState } from "@src/stores/cfx/state";
 import { useEffect } from "react";
 import { useRecoilRefresher_UNSTABLE, useRecoilValue } from "recoil";
@@ -20,6 +20,7 @@ export const BusinessEmployees = ({ id }: { id: number }) => {
               {e.character.info.firstname} {e.character.info.lastname} |{" "}
               <Link to={`/staff/characters/${e.character.citizenid}`}>{e.character.citizenid}</Link> |{" "}
               <Link to={`/staff/users/${e.character.steamId}`}>{e.character.steamId}</Link>
+              {e.isOwner && " | Owner"}
             </Text>
             <Text>
               {e.role.name} | {e.role.permissions.join(",")}
