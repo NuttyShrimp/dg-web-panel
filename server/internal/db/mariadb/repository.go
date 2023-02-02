@@ -24,10 +24,10 @@ func (r *Repository) GetUserById(id uint) panel_models.User {
 }
 
 func (r *Repository) GetReportMemberBySteamId(steamId string, reportId uint) panel_models.ReportMember {
-	member := panel_models.ReportMember{
+	member := panel_models.ReportMember{}
+	r.Client.Where(&panel_models.ReportMember{
 		ReportID: reportId,
 		SteamID:  steamId,
-	}
-	r.Client.First(&member)
+	}).First(&member)
 	return member
 }

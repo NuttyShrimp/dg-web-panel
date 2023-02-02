@@ -15,14 +15,14 @@ export const ReportMessage: FC<{ message: ReportState.Message }> = ({ message })
     <div className="report-message-wrapper">
       <div className="report-message-header">
         <div>
-          <Avatar src={message.sender.avatarUrl} radius="xl" />
+          <Avatar src={message.sender.avatarUrl} radius="xl" size={"sm"} />
           <Text className="report-message-title" weight={"bold"} ml={"xs"}>
             {message.sender.username}
             <span> op {displayDate(message.createdAt)}</span>
           </Text>
         </div>
       </div>
-      <div className="report-message-content">
+      <div>
         <EditorContent editor={editor} />
       </div>
     </div>

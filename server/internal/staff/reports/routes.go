@@ -1,9 +1,9 @@
 package reports
 
 import (
+	"degrens/panel/internal/auth/authinfo"
 	panel_models "degrens/panel/internal/db/models/panel"
 	"degrens/panel/internal/routes"
-	"degrens/panel/internal/staff/reportmessages"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
@@ -53,31 +53,57 @@ func NewReportRouter(rg *gin.RouterGroup, logger *log.Logger) {
 func (RR *ReportRouter) RegisterRoutes() {
 	RR.RouterGroup.POST("/new", RR.NewReportHandler())
 
+	RR.RouterGroup.GET("/all", RR.FetchReports)
+
 	RR.RouterGroup.GET("/:id", RR.FetchReportHandler())
 
 	RR.RouterGroup.POST("/:id/member/:steamid", RR.HandleNewReportMember())
-
-	RR.RouterGroup.GET("/join/:id", RR.HandleReportWS())
 
 	RR.RouterGroup.GET("/tags", RR.FetchTagHandler())
 	RR.RouterGroup.POST("/tags", RR.ReportTagHandler())
 	RR.RouterGroup.PUT("/tags", RR.NewTagHandler())
 }
 
-func (RR *ReportRouter) HandleReportWS() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		reportId, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-		if err != nil {
-			RR.Logger.Error("Failed to convert reportId to uint", "error", err, "id", ctx.Param("id"))
-			ctx.JSON(500, models.RouteErrorMessage{
-				Title:       "Parsing error",
-				Description: "We encountered an error while trying to identify the report you are trying to join",
-			})
-			return
-		}
-		room := reportmessages.GetRoom(uint(reportId), RR.Logger)
-		reportmessages.JoinReportRoom(ctx, room)
+func (RR *ReportRouter) FetchReports(ctx *gin.Context) {
+	var body FetchReportsBody
+	if err := ctx.ShouldBind(&body); err != nil {
+		RR.Logger.Error("Failed to read body on GET /staff/reports request", "error", err)
+		ctx.JSON(500, errors.BodyParsingFailed)
+		return
 	}
+
+	userInfoPtr, exists := ctx.Get("userInfo")
+	if !exists {
+		ctx.JSON(403, errors.Unauthorized)
+		return
+	}
+	userInfo := userInfoPtr.(*authinfo.AuthInfo)
+
+	reportList, err := FetchReports(body.Filter, body.Offset, body.Tags, body.Open, body.Closed, userInfo)
+	if err != nil {
+		RR.Logger.Error("Failed to retrieve reports", "error", err, "filter", body)
+
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Database Error",
+			Description: "Seems like we had an error while fetching the reports in our database",
+		})
+		return
+	}
+	var reportTotal int64
+	reportTotal, err = FetchReportCount(body.Filter, body.Offset, body.Tags, body.Open, body.Closed)
+	if err != nil {
+		RR.Logger.Error("Failed to retrieve report count", "error", err, "filter", body)
+
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Database Error",
+			Description: "Seems like we had an error while fetching the report count in our database",
+		})
+		return
+	}
+	ctx.JSON(200, gin.H{
+		"reports": reportList,
+		"total":   reportTotal,
+	})
 }
 
 func (RR *ReportRouter) NewReportHandler() gin.HandlerFunc {

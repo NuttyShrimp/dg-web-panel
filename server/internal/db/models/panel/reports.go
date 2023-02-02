@@ -43,15 +43,16 @@ type ReportMessageSender struct {
 }
 
 type ReportMember struct {
-	ID       uint `gorm:"primaryKey"`
-	SteamID  string
-	ReportID uint
+	ID       uint   `gorm:"primaryKey" json:"-"`
+	Name     string `json:"name"`
+	SteamID  string `json:"steamId"`
+	ReportID uint   `json:"-"`
 }
 
 type ReportTag struct {
 	Name    string   `gorm:"primaryKey" json:"name"`
 	Color   string   `json:"color"`
-	Reports []Report `gorm:"many2many:report_tags_link"json:"-"`
+	Reports []Report `gorm:"many2many:report_tags_link" json:"-"`
 }
 
 func (rm *ReportMessage) BeforeCreate(tx *gorm.DB) error {

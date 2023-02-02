@@ -19,7 +19,7 @@ type Client struct {
 	// Buffered channels of outbound network
 	// Room sends data to this channel
 	send     chan []byte
-	userinfo *authinfo.AuthInfo
+	authInfo *authinfo.AuthInfo
 }
 
 type ClientMessage struct {
@@ -59,7 +59,7 @@ func JoinReportRoom(ctx *gin.Context, room *Room) {
 		conn:     conn,
 		room:     room,
 		send:     make(chan []byte, 256),
-		userinfo: clientInfo,
+		authInfo: clientInfo,
 	}
 	client.room.register <- client
 	go client.readRoutine()

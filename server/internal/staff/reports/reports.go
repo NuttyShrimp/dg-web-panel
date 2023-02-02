@@ -1,6 +1,9 @@
 package reports
 
 import (
+	"degrens/panel/internal/auth/authinfo"
+	"degrens/panel/internal/auth/cfxtoken"
+	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
 	"degrens/panel/lib/graylogger"
@@ -11,8 +14,13 @@ import (
 func CreateNewReport(creator, title string, memberIds, tagNames []string) (uint, error) {
 	members := []panel_models.ReportMember{}
 	for _, v := range memberIds {
+		plyInfo, err := cfx.GetCfxPlayerInfo(v)
+		if err != nil {
+			return 0, err
+		}
 		members = append(members, panel_models.ReportMember{
 			SteamID: v,
+			Name:    plyInfo.Name,
 		})
 	}
 	tags := []panel_models.ReportTag{}
@@ -55,18 +63,31 @@ func AddMemberToReport(userId string, reportId uint, steamId string) error {
 		SteamID:  steamId,
 		ReportID: report.ID,
 	}
+	plyInfo, err := cfx.GetCfxPlayerInfo(steamId)
+	if err != nil {
+		member.Name = plyInfo.Name
+	}
 	graylogger.Log("reports:member_add", fmt.Sprintf("%s has added a new member(%s) to report %d", userId, steamId, reportId), "steamId", steamId, "reportId", reportId)
 	return db.MariaDB.Client.Create(&member).Error
 }
 
-func FetchReports(titleFilter string, offset int, tags []string, includeOpen, includeClosed bool) (*[]panel_models.Report, error) {
+func FetchReports(titleFilter string, offset int, tags []string, includeOpen, includeClosed bool, authInfo *authinfo.AuthInfo) (*[]panel_models.Report, error) {
 	dbQuery := db.MariaDB.Client.Preload("Tags")
 	if len(tags) > 0 {
 		dbQuery.Joins("inner join report_tags_link rtl on rtl.report_id = reports.id ").
 			Joins("inner join report_tags t on t.name = rtl.report_tag_name").
 			Where("t.name IN ?", tags)
 	}
-	dbQuery.Preload("Members").Offset(offset*25).Limit(25).Order("id desc").Where("title LIKE ?", "%"+titleFilter+"%")
+	if authInfo != nil && authInfo.AuthMethod == authinfo.CFXToken {
+		tokenInfo := cfxtoken.GetInfoForToken(authInfo.ID)
+		if tokenInfo == nil {
+			return nil, errors.New("Failed to get info bound to cfx token")
+		}
+		dbQuery.Joins("Members", db.MariaDB.Client.Where(&panel_models.ReportMember{SteamID: tokenInfo.SteamId}))
+	} else {
+		dbQuery.Preload("Members")
+	}
+	dbQuery.Offset(offset*25).Limit(25).Order("id desc").Where("title LIKE ?", "%"+titleFilter+"%")
 	if includeOpen && !includeClosed {
 		dbQuery = dbQuery.Where("open = ?", true)
 	} else if includeClosed && !includeOpen {
