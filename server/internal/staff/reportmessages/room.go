@@ -3,6 +3,8 @@ package reportmessages
 import (
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
+	"degrens/panel/internal/staff/reports"
+	"degrens/panel/internal/users"
 	dgerrors "degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
 	"encoding/json"
@@ -25,7 +27,7 @@ type Room struct {
 
 	logger log.Logger
 
-	reportId uint
+	report *reports.Report
 }
 
 // The messages we send as server to clients
@@ -51,8 +53,8 @@ var (
 	rooms = make(map[uint]*Room)
 )
 
-func GetRoom(reportId uint, logger log.Logger) *Room {
-	room, exists := rooms[reportId]
+func GetRoom(report *reports.Report, logger log.Logger) *Room {
+	room, exists := rooms[report.Data.ID]
 	if !exists {
 		// Create room
 		room = &Room{
@@ -60,8 +62,8 @@ func GetRoom(reportId uint, logger log.Logger) *Room {
 			register:   make(chan *Client),
 			unregister: make(chan *Client),
 			clients:    make(map[*Client]bool),
-			logger:     logger.With("roomId", reportId),
-			reportId:   reportId,
+			logger:     logger.With("roomId", report.Data.ID),
+			report:     report,
 		}
 		go room.run()
 	}
@@ -142,7 +144,7 @@ func (r *Room) parseIncomingMessage(msgArr []byte) (*WebsocketMessage, error) {
 
 func (r *Room) sendMessages(c *Client, offset int) {
 	var msgs []panel_models.ReportMessage
-	err := db.MariaDB.Client.Order("id DESC").Offset(offset*50).Limit(50).Where("report_id = ?", r.reportId).Find(&msgs).Error
+	err := db.MariaDB.Client.Order("id DESC").Offset(offset*50).Limit(50).Where("report_id = ?", r.report.Data.ID).Find(&msgs).Error
 	if err != nil {
 		r.logger.Error("Failed to fetch messages", "error", err)
 		c.send <- r.generateError("Failed to fetch message batch")
@@ -181,7 +183,7 @@ func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error
 	switch msg.Type {
 	case "addMessage":
 		// TODO data should be marshaled to str not
-		reportMsg, err := saveMessage(r.reportId, msg.Data, origin.userinfo)
+		reportMsg, err := saveMessage(r.report.Data.ID, msg.Data, origin.authInfo)
 		if err != nil {
 			r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)
 			return errors.New("Failed to save message")
@@ -195,6 +197,58 @@ func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error
 		if err != nil {
 			r.logger.Error("Failed to encode websocket message while trying to announce new report message", "error", err)
 			return errors.New("Failed to spread new message")
+		}
+		r.sendToClients(responseStr)
+		return nil
+	case "removeMember":
+		if !users.DoesUserHaveRole(origin.authInfo.Roles, "staff") {
+			return errors.New("missing permissions to do this")
+		}
+		steamId, ok := msg.Data.(string)
+		if !ok {
+			return errors.New("Failed to convert data to a valid steamId")
+		}
+		err := r.report.RemoveMember(steamId)
+		if err != nil {
+			r.logger.Error("Failed to remove member from report", "error", err)
+			return errors.New("Failed to remove member")
+		}
+
+		response := WebsocketMessage{
+			Type: "setMembers",
+			Data: nil,
+		}
+		responseStr, err := json.Marshal(response)
+		if err != nil {
+			r.logger.Error("Failed to encode websocket message while removing a member", "error", err)
+			return errors.New("Failed to set new members")
+		}
+		r.sendToClients(responseStr)
+		return nil
+	case "addMember":
+		// Currently allow players to add others to reports, if this is getting to much fucked with
+		// we will add restrictions to it
+		// if !users.DoesUserHaveRole(origin.authInfo.Roles, "staff") {
+		// 	return errors.New("missing permissions to do this")
+		// }
+		steamId, ok := msg.Data.(string)
+		if !ok {
+			return errors.New("Failed to convert data to a valid steamId")
+		}
+		err := r.report.AddMember(steamId)
+		if err != nil {
+			r.logger.Error("Failed to add member", "error", err)
+			return errors.New("Failed to add member")
+		}
+
+		response := WebsocketMessage{
+			Type: "setMembers",
+			Data: nil,
+		}
+		responseStr, err := json.Marshal(response)
+		if err != nil {
+			r.logger.Error("Failed to encode websocket message while adding a member", "error", err)
+			return errors.New("Failed to set new members")
 		}
 		r.sendToClients(responseStr)
 		return nil

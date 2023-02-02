@@ -24,7 +24,7 @@ export const useReportActions = () => {
       pFilter = pFilter ?? filter;
       tags = tags ?? selectedTags.map(t => t.name);
       try {
-        const res = await axiosInstance.get<{ reports: ReportState.Report[]; total: number }>("/staff/reports", {
+        const res = await axiosInstance.get<{ reports: ReportState.Report[]; total: number }>("/staff/reports/all", {
           params: {
             filter: pFilter.search,
             open: pFilter.open,
@@ -149,5 +149,23 @@ export const useReportActions = () => {
     [loadReports, setFilter, filter]
   );
 
-  return { refreshTags, selectTag, unSelectTag, clearSelectedTags, createTag, createReport, loadReports, updateFilter };
+  const fetchReport = async (id: number) => {
+    if (Number.isNaN(id)) {
+      throw new Error(`${id} is not a number`);
+    }
+    const res = await axiosInstance.get<{ report: ReportState.Report }>(`/staff/reports/${id}`);
+    return res.data.report;
+  };
+
+  return {
+    refreshTags,
+    selectTag,
+    unSelectTag,
+    clearSelectedTags,
+    createTag,
+    createReport,
+    loadReports,
+    updateFilter,
+    fetchReport,
+  };
 };

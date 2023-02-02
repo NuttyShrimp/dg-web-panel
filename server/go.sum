@@ -35,6 +35,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/aidenwallis/go-utils v0.0.14 h1:k+1qyPQkYsouhF20LQSXt6zd/yxLXB+TdHZzz9r/72E=
 github.com/aidenwallis/go-utils v0.0.14/go.mod h1:0HMdAWOlLjH3p8nA2bMxK3dB2RSkiHQ6RuZehAA0v/A=
+github.com/aidenwallis/go-utils v0.0.15 h1:TSyCzdcDE5clGjhDxSUYiawczOjVmBgJEM7LCoiEyy8=
+github.com/aidenwallis/go-utils v0.0.15/go.mod h1:0HMdAWOlLjH3p8nA2bMxK3dB2RSkiHQ6RuZehAA0v/A=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=

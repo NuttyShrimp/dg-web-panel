@@ -2,9 +2,11 @@ package staff
 
 import (
 	"degrens/panel/internal/auth/authinfo"
+	"degrens/panel/internal/auth/middlewares/role"
 	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/cfx/business"
 	"degrens/panel/internal/routes"
+	"degrens/panel/internal/staff/reportmessages"
 	"degrens/panel/internal/staff/reports"
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
@@ -22,17 +24,18 @@ type StaffRouter struct {
 func NewStaffRouter(rg *gin.RouterGroup, logger *log.Logger) {
 	router := &StaffRouter{
 		routes.Router{
-			RouterGroup: rg.Group("/staff"),
+			RouterGroup: rg.Group("/staff", role.New([]string{"staff"})),
 			Logger:      *logger,
 		},
 	}
+	reportRG := rg.Group("/staff", role.New([]string{"staff", "player"}))
+	reports.NewReportRouter(reportRG, logger)
+	reportmessages.NewReportRouter(reportRG, logger)
 	InitStaffService(logger)
 	router.RegisterRoutes()
 }
 
 func (SR *StaffRouter) RegisterRoutes() {
-	SR.RouterGroup.GET("/reports", SR.FetchReportsHandler())
-
 	// TODO: Move to secured endpoint which validates user roles to include staff or higher
 	SR.RouterGroup.GET("/dashboard", SR.DashboardHandler())
 	SR.RouterGroup.GET("/info/players", SR.FetchCfxPlayersHandler())
@@ -42,7 +45,6 @@ func (SR *StaffRouter) RegisterRoutes() {
 	SR.RouterGroup.POST("/notes/:id", SR.updateStaffNote)
 	SR.RouterGroup.DELETE("/notes/:id", SR.deleteStaffNote)
 
-	reports.NewReportRouter(SR.RouterGroup, &SR.Logger)
 	business.NewBusinessRouter(SR.RouterGroup, &SR.Logger)
 }
 
@@ -79,42 +81,6 @@ func (SR *StaffRouter) FetchCfxPlayersHandler() gin.HandlerFunc {
 			result <- &plys
 		}()
 		ctx.JSON(<-statusCode, <-result)
-	}
-}
-
-func (SR *StaffRouter) FetchReportsHandler() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		var body reports.FetchReportsBody
-		if err := ctx.ShouldBind(&body); err != nil {
-			SR.Logger.Error("Failed to read body on GET /staff/reports request", "error", err)
-			ctx.JSON(500, errors.BodyParsingFailed)
-			return
-		}
-		reportList, err := reports.FetchReports(body.Filter, body.Offset, body.Tags, body.Open, body.Closed)
-		if err != nil {
-			SR.Logger.Error("Failed to retrieve reports", "error", err, "filter", body)
-
-			ctx.JSON(500, models.RouteErrorMessage{
-				Title:       "Database Error",
-				Description: "Seems like we had an error while fetching the reports in our database",
-			})
-			return
-		}
-		var reportTotal int64
-		reportTotal, err = reports.FetchReportCount(body.Filter, body.Offset, body.Tags, body.Open, body.Closed)
-		if err != nil {
-			SR.Logger.Error("Failed to retrieve report count", "error", err, "filter", body)
-
-			ctx.JSON(500, models.RouteErrorMessage{
-				Title:       "Database Error",
-				Description: "Seems like we had an error while fetching the report count in our database",
-			})
-			return
-		}
-		ctx.JSON(200, gin.H{
-			"reports": reportList,
-			"total":   reportTotal,
-		})
 	}
 }
 

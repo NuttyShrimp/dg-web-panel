@@ -17,7 +17,7 @@ type DevRouter struct {
 func NewDevRouter(rg *gin.RouterGroup, logger *log.Logger) {
 	router := &DevRouter{
 		routes.Router{
-			RouterGroup: rg.Group("/dev", role.New("developer")),
+			RouterGroup: rg.Group("/dev", role.New([]string{"developer"})),
 			Logger:      *logger,
 		},
 	}

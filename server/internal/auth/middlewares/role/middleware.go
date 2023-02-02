@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/aidenwallis/go-utils/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func New(role string) gin.HandlerFunc {
+func New(roles []string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		if exists == false {
@@ -20,8 +21,12 @@ func New(role string) gin.HandlerFunc {
 			return
 		}
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
-		if !users.DoesUserHaveRole(userInfo.Roles, role) {
-			graylogger.Log("auth:missing_role", fmt.Sprintf("user %d tried to access a link without having the right roles", userInfo.ID), "userInfo", userInfo, "requiredRole", role, "link", ctx.Request.URL)
+
+		_, ok := utils.SliceFind(roles, func(role string) bool {
+			return users.DoesUserHaveRole(userInfo.Roles, role)
+		})
+		if !ok {
+			graylogger.Log("auth:missing_role", fmt.Sprintf("user %d tried to access a link without having the right roles", userInfo.ID), "userInfo", userInfo, "requiredRoles", roles, "link", ctx.Request.URL)
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

@@ -1,5 +1,4 @@
-import { axiosInstance } from "@src/helpers/axiosInstance";
-import { atom, selectorFamily } from "recoil";
+import { atom } from "recoil";
 
 export const reportState = {
   loadingList: atom({
@@ -40,16 +39,5 @@ export const reportState = {
   reportMessages: atom<ReportState.Message[]>({
     key: "report-current-messages",
     default: [],
-  }),
-  getReport: selectorFamily<ReportState.Report | null, number>({
-    key: "report-get-report",
-    get: id => async () => {
-      if (Number.isNaN(id)) return null;
-      const res = await axiosInstance.get<{ report: ReportState.Report }>(`/staff/reports/${id}`);
-      if (res.status !== 200) {
-        return null;
-      }
-      return res.data.report;
-    },
-  }),
+  })
 };

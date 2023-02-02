@@ -34,7 +34,7 @@ func AuthorizeToken(ctx *gin.Context, token string) error {
 
 	authInfo := authinfo.AuthInfo{
 		ID:         uint(id),
-		Roles:      tokenInfo.Roles,
+		Roles:      append(tokenInfo.Roles, "player"),
 		AuthMethod: "cfxtoken",
 	}
 	cookieSet := authInfo.Assign(ctx)
