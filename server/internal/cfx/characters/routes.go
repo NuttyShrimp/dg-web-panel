@@ -6,6 +6,7 @@ import (
 	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/log"
+	"degrens/panel/lib/utils"
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
@@ -30,6 +31,7 @@ func NewCharacterRouter(rg *gin.RouterGroup, logger *log.Logger) {
 func (CR *CharacterRouter) RegisterRoutes() {
 	CR.RouterGroup.GET("/:cid", CR.ValidateCID)
 	CR.RouterGroup.GET("/all", CR.FetchAllCharacters)
+	CR.RouterGroup.GET("/all/:steamId", CR.FetchUserCharacters)
 	CR.RouterGroup.GET("/:cid/info", CR.FetchCharInfo)
 	CR.RouterGroup.GET("/:cid/reputation", CR.FetchCharRep)
 	bank.NewBankRouter(CR.RouterGroup, &CR.Logger)
@@ -112,4 +114,32 @@ func (CR *CharacterRouter) FetchCharRep(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, rep)
+}
+
+func (CR *CharacterRouter) FetchUserCharacters(ctx *gin.Context) {
+	steamid := ctx.Param("steamId")
+	if steamid == "" {
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request error",
+			Description: "Missing a valid steamId to request it characters",
+		})
+		return
+	}
+	if !utils.ValidateSteamId(steamid) {
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request error",
+			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
+		})
+		return
+	}
+	chars, err := GetCharactersForSteamId(steamid)
+	if err != nil {
+		CR.Logger.Error("Failed to fetch characters for steamid", "error", err, "steamid", steamid)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Parsing error",
+			Description: "We encountered an error while trying to fetch the user characters",
+		})
+		return
+	}
+	ctx.JSON(200, chars)
 }
