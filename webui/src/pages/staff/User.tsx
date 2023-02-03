@@ -1,6 +1,9 @@
-import { Container, Divider, Flex, Group, Text, Title } from "@mantine/core";
+import { Container, Divider, Flex, Group, Tabs, Text, Title } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { InfoIcon } from "@primer/octicons-react";
+import { FontAwesomeIcon } from "@src/components/Icon";
 import { UserBanStatus } from "@src/components/Users/BanStatus";
+import { UserCharList } from "@src/components/Users/CharList";
 import { displayDate } from "@src/helpers/time";
 import { cfxState } from "@src/stores/cfx/state";
 import { useMemo } from "react";
@@ -30,24 +33,39 @@ export const UserPage = () => {
         <UserBanStatus steamId={steamid} />
       </Group>
       <Divider mb={"xs"} />
-      <div>
-        <Flex>
-          <Text weight={"bolder"}>Name:&nbsp;</Text>
-          <Text>{player.name}</Text>
-        </Flex>
-        <Flex>
-          <Text weight={"bolder"}>SteamId:&nbsp;</Text>
-          <Text>{player.steamId}</Text>
-        </Flex>
-        <Flex>
-          <Text weight={"bolder"}>First Joined:&nbsp;</Text>
-          <Text>{displayDate(player.created_at)}</Text>
-        </Flex>
-        <Flex>
-          <Text weight={"bolder"}>Last Update:&nbsp;</Text>
-          <Text>{displayDate(player.last_updated)}</Text>
-        </Flex>
-      </div>
+      <Tabs variant="pills" defaultValue={"info"} keepMounted={false} pt={"sm"}>
+        <Tabs.List mb={"xs"}>
+          <Tabs.Tab value="info" icon={<InfoIcon size={14} />}>
+            Info
+          </Tabs.Tab>
+          <Tabs.Tab value="chars" icon={<FontAwesomeIcon icon="users" size={"sm"} />}>
+            Characters
+          </Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="info">
+          <div>
+            <Flex>
+              <Text weight={"bolder"}>Name:&nbsp;</Text>
+              <Text>{player.name}</Text>
+            </Flex>
+            <Flex>
+              <Text weight={"bolder"}>SteamId:&nbsp;</Text>
+              <Text>{player.steamId}</Text>
+            </Flex>
+            <Flex>
+              <Text weight={"bolder"}>First Joined:&nbsp;</Text>
+              <Text>{displayDate(player.created_at)}</Text>
+            </Flex>
+            <Flex>
+              <Text weight={"bolder"}>Last Update:&nbsp;</Text>
+              <Text>{displayDate(player.last_updated)}</Text>
+            </Flex>
+          </div>
+        </Tabs.Panel>
+        <Tabs.Panel value="chars">
+          <UserCharList steamId={steamid} />
+        </Tabs.Panel>
+      </Tabs>
     </Container>
   );
 };
