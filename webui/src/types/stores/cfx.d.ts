@@ -39,6 +39,16 @@ declare namespace CfxState {
       created_at: string;
     };
   }
+  interface Penalty {
+    id: number;
+    steamId: string;
+    penalty: "ban" | "warn" | "kick";
+    reason: string;
+    points: number;
+    length: number;
+    date: string;
+    automated: string;
+  }
   namespace Business {
     interface Type {
       id: number;

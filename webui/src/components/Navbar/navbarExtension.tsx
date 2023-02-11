@@ -1,7 +1,7 @@
 import { createStyles, Navbar, Title } from "@mantine/core";
 import { ExtRouteObject } from "@src/pages/routes";
 import { FC, useMemo } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const useStyles = createStyles(theme => ({
   wrapper: {

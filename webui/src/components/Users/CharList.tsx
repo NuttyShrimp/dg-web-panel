@@ -24,7 +24,7 @@ export const UserCharList = ({ steamId }: { steamId: string }) => {
     <List>
       {data.map(c => (
         <List.Entry key={c.citizenid}>
-          <Link to={`/staff/character/${c.citizenid}`} noColor>
+          <Link to={`/staff/characters/${c.citizenid}`} noColor>
             <Group spacing={4}>
               <Text>
                 {c.info.firstname} {c.info.lastname} | {c.citizenid}
