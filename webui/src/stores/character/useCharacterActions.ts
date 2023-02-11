@@ -1,9 +1,9 @@
 import { axiosInstance } from "@src/helpers/axiosInstance";
-import { useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 import { characterState } from "./state";
 
 export const useCharacterActions = () => {
-  const setListStore = useSetRecoilState(characterState.list);
+  const [charList, setListStore] = useRecoilState(characterState.list);
   const setBankStore = useSetRecoilState(characterState.bank);
   const setVehicleStore = useSetRecoilState(characterState.vehicles);
 
@@ -23,6 +23,18 @@ export const useCharacterActions = () => {
     }
   };
 
+  const fetchActiveCharacters = async () => {
+    try {
+      await fetchCharacters();
+      const res = await axiosInstance.get<number[]>(`/character/active`);
+      if (res.status !== 200) return [];
+      return charList.filter(c => res.data.includes(c.citizenid));
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
   const fetchCharReputation = async (cid: number) => {
     try {
       const res = await axiosInstance.get<Record<string, number>>(`/character/${cid}/reputation`);
@@ -39,6 +51,7 @@ export const useCharacterActions = () => {
   return {
     resetStores,
     fetchCharReputation,
+    fetchActiveCharacters,
     fetchCharacters,
   };
 };

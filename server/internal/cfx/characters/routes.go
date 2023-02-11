@@ -1,6 +1,7 @@
 package characters
 
 import (
+	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/cfx/bank"
 	"degrens/panel/internal/cfx/vehicles"
 	cfx_models "degrens/panel/internal/db/models/cfx"
@@ -11,6 +12,7 @@ import (
 	"fmt"
 	"strconv"
 
+	aiden_utils "github.com/aidenwallis/go-utils/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,6 +34,7 @@ func (CR *CharacterRouter) RegisterRoutes() {
 	CR.RouterGroup.GET("/:cid", CR.ValidateCID)
 	CR.RouterGroup.GET("/all", CR.FetchAllCharacters)
 	CR.RouterGroup.GET("/all/:steamId", CR.FetchUserCharacters)
+	CR.RouterGroup.GET("/active", CR.FetchActiveCharacters)
 	CR.RouterGroup.GET("/:cid/info", CR.FetchCharInfo)
 	CR.RouterGroup.GET("/:cid/reputation", CR.FetchCharRep)
 	bank.NewBankRouter(CR.RouterGroup, &CR.Logger)
@@ -142,4 +145,19 @@ func (CR *CharacterRouter) FetchUserCharacters(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, chars)
+}
+
+func (CR *CharacterRouter) FetchActiveCharacters(ctx *gin.Context) {
+	activeInfo, err := cfx.GetActivePlayers()
+	if err != nil {
+		CR.Logger.Error("Failed to fetch active players", "error", err)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an error while trying to fetch the active users",
+		})
+		return
+	}
+	ctx.JSON(200, aiden_utils.SliceMap(activeInfo, func(info cfx.ActivePlayerInfo) uint {
+		return info.CitizenId
+	}))
 }

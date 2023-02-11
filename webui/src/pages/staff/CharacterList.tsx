@@ -1,4 +1,5 @@
 import { Center, Container, Stack, Title } from "@mantine/core";
+import { ActiveCharacterList } from "@src/components/Characters/ActiveList";
 import { SelectCharacter } from "@src/components/Characters/Select";
 import { characterState } from "@src/stores/character/state";
 import { useCharacterActions } from "@src/stores/character/useCharacterActions";
@@ -13,7 +14,7 @@ export const CharacterList = () => {
 
   useEffect(() => {
     fetchCharacters();
-  }, [fetchCharacters]);
+  }, []);
 
   return (
     <Container>
@@ -27,6 +28,7 @@ export const CharacterList = () => {
             }}
           />
           <Title size="h2">Search for a character</Title>
+          <ActiveCharacterList />
         </Stack>
       </Center>
     </Container>

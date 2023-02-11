@@ -17,7 +17,7 @@ export const UserCharList = ({ steamId }: { steamId: string }) => {
   }
 
   if (isError) {
-    return <Text>Failed to load characters: {error.message}</Text>;
+    return <Text>Failed to load active characters: {error.message}</Text>;
   }
 
   return (
