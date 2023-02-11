@@ -39,5 +39,5 @@ export const reportState = {
   reportMessages: atom<ReportState.Message[]>({
     key: "report-current-messages",
     default: [],
-  })
+  }),
 };

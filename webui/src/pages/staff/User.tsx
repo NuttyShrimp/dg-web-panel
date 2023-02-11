@@ -2,8 +2,10 @@ import { Container, Divider, Flex, Group, Tabs, Text, Title } from "@mantine/cor
 import { showNotification } from "@mantine/notifications";
 import { InfoIcon } from "@primer/octicons-react";
 import { FontAwesomeIcon } from "@src/components/Icon";
+import { UserActionMenu } from "@src/components/Users/ActionMenu";
 import { UserBanStatus } from "@src/components/Users/BanStatus";
 import { UserCharList } from "@src/components/Users/CharList";
+import { UserPenaltyList } from "@src/components/Users/PenaltyList";
 import { displayDate } from "@src/helpers/time";
 import { cfxState } from "@src/stores/cfx/state";
 import { useMemo } from "react";
@@ -41,6 +43,10 @@ export const UserPage = () => {
           <Tabs.Tab value="chars" icon={<FontAwesomeIcon icon="users" size={"sm"} />}>
             Characters
           </Tabs.Tab>
+          <Tabs.Tab value="penalties" icon={<FontAwesomeIcon icon="hammer-war" size={"sm"} />}>
+            Penalties
+          </Tabs.Tab>
+          <UserActionMenu steamId={steamid} />
         </Tabs.List>
         <Tabs.Panel value="info">
           <div>
@@ -64,6 +70,9 @@ export const UserPage = () => {
         </Tabs.Panel>
         <Tabs.Panel value="chars">
           <UserCharList steamId={steamid} />
+        </Tabs.Panel>
+        <Tabs.Panel value="penalties">
+          <UserPenaltyList steamId={steamid} />
         </Tabs.Panel>
       </Tabs>
     </Container>

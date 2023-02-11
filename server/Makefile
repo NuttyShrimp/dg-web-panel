@@ -10,6 +10,9 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 run:
 	go run cmds/panel/main.go -config ./config.yml
 
+run-redis:
+	go run cmds/panel/main.go -config ./config.redis.yml
+
 test:
 	go test ./... -v -coverprofile=coverage.out
 
