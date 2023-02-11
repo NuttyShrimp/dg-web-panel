@@ -16,6 +16,11 @@ type PlayersCache struct {
 	UpdatedAt time.Time
 }
 
+type ActivePlayerInfo struct {
+	CitizenId uint `json:"cid"`
+	ServerId  int  `json:"serverId"`
+}
+
 func GetCfxPlayers() (*[]cfx_models.User, error) {
 	cache := getCache()
 	cache.Mutex.Lock()
@@ -118,4 +123,16 @@ func GetSteamIdFromDiscordId(discordId string) string {
 		}
 	}
 	return ""
+}
+
+func GetActivePlayers() ([]ActivePlayerInfo, error) {
+	info := []ActivePlayerInfo{}
+	ai, err := api.CfxApi.DoRequest("GET", "/info/active", nil, &info)
+	if err != nil {
+		return info, err
+	}
+	if ai.Message != "" {
+		return info, errors.New(ai.Message)
+	}
+	return info, nil
 }
