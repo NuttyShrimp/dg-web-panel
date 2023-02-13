@@ -42,11 +42,11 @@ func CreateNewReport(creator, title string, memberIds, tagNames []string) (uint,
 	if result.Error != nil {
 		return 0, result.Error
 	}
-	for _, member := range members {
-		member.ReportID = report.ID
-		db.MariaDB.Client.Save(&member)
+	for i := range members {
+		members[i].ReportID = report.ID
+		db.MariaDB.Client.Save(members[i])
 	}
-	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", title), "members", memberIds, "tags", tagNames)
+	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", creator, title), "members", memberIds, "tags", tagNames)
 	return report.ID, nil
 }
 
@@ -57,7 +57,7 @@ func AddMemberToReport(userId string, reportId uint, steamId string) error {
 		return err
 	}
 	if report.ID == 0 {
-		return errors.New(fmt.Sprintf("failed to find report with id %d while adding new member", reportId))
+		return fmt.Errorf("failed to find report with id %d while adding new member", reportId)
 	}
 	member := panel_models.ReportMember{
 		SteamID:  steamId,

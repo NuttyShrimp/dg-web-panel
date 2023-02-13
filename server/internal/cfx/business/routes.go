@@ -17,11 +17,11 @@ type BusinessRouter struct {
 	routes.Router
 }
 
-func NewBusinessRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewBusinessRouter(rg *gin.RouterGroup, logger log.Logger) {
 	br = BusinessRouter{
 		Router: routes.Router{
 			RouterGroup: rg.Group("/business"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	br.RegisterRoutes()
@@ -106,13 +106,6 @@ func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 		})
 		return
 	}
-	if page < 0 {
-		ctx.JSON(400, models.RouteErrorMessage{
-			Title:       "Request error",
-			Description: "page parameter cannot be negative",
-		})
-		return
-	}
 	logs, err := FetchLogs(uint(id), int(page))
 	if err != nil {
 		BR.Logger.Error("Failed to fetch logs for business", "error", err, "id", id, "page", page)
@@ -160,7 +153,7 @@ func (BR *BusinessRouter) DeleteBusiness(ctx *gin.Context) {
 
 	ctxUserInfo, exists := ctx.Get("userInfo")
 	authInfo := ctxUserInfo.(*authinfo.AuthInfo)
-	if exists == false {
+	if !exists {
 		BR.Logger.Error("Failed to get userinfo in request trying to make an API key")
 		ctx.JSON(403, errors.Unauthorized)
 		return
@@ -204,7 +197,7 @@ func (BR *BusinessRouter) ChangeOwner(ctx *gin.Context) {
 
 	ctxUserInfo, exists := ctx.Get("userInfo")
 	authInfo := ctxUserInfo.(*authinfo.AuthInfo)
-	if exists == false {
+	if !exists {
 		BR.Logger.Error("Failed to get userinfo in request trying to make an API key")
 		ctx.JSON(403, errors.Unauthorized)
 		return

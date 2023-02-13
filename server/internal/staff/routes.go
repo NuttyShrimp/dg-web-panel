@@ -22,11 +22,11 @@ type StaffRouter struct {
 	routes.Router
 }
 
-func NewStaffRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewStaffRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &StaffRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/staff", role.New([]string{"staff"})),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	reportRG := rg.Group("/staff", role.New([]string{"staff", "player"}))
@@ -37,7 +37,6 @@ func NewStaffRouter(rg *gin.RouterGroup, logger *log.Logger) {
 }
 
 func (SR *StaffRouter) RegisterRoutes() {
-	// TODO: Move to secured endpoint which validates user roles to include staff or higher
 	SR.RouterGroup.GET("/dashboard", SR.DashboardHandler())
 	SR.RouterGroup.GET("/info/players", SR.FetchCfxPlayersHandler())
 
@@ -46,8 +45,8 @@ func (SR *StaffRouter) RegisterRoutes() {
 	SR.RouterGroup.POST("/notes/:id", SR.updateStaffNote)
 	SR.RouterGroup.DELETE("/notes/:id", SR.deleteStaffNote)
 
-	business.NewBusinessRouter(SR.RouterGroup, &SR.Logger)
-	players.NewPlayerRouter(SR.RouterGroup, &SR.Logger)
+	business.NewBusinessRouter(SR.RouterGroup, SR.Logger)
+	players.NewPlayerRouter(SR.RouterGroup, SR.Logger)
 }
 
 func (SR *StaffRouter) DashboardHandler() gin.HandlerFunc {
@@ -61,7 +60,6 @@ func (SR *StaffRouter) DashboardHandler() gin.HandlerFunc {
 		} else {
 			c.JSON(200, info)
 		}
-		return
 	}
 }
 

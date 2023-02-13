@@ -28,7 +28,7 @@ func AuthorizeToken(ctx *gin.Context, token string) error {
 		return err
 	}
 	if ai.Message != "" {
-		return errors.New(fmt.Sprintf("Token error: %s", ai.Message))
+		return fmt.Errorf("Token error: %s", ai.Message)
 	}
 	tokenInfoStore[token] = &tokenInfo
 
@@ -67,5 +67,8 @@ func GetInfoForToken(id uint) *TokenInfo {
 		return nil
 	}
 	info, exists := tokenInfoStore[token]
+	if !exists {
+		return nil
+	}
 	return info
 }

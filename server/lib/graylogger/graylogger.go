@@ -19,24 +19,28 @@ type GraylogMessage[M interface{}] struct {
 	Timestamp    int64  `json:"timestamp"`
 }
 
-var logger *log.Logger
+var logger log.Logger
 var gelfURL string
 
-func InitGrayLogger(cfg *config.ConfigGraylog, log *log.Logger) {
-	logger = log
+func InitGrayLogger(cfg *config.ConfigGraylog, logger2 log.Logger) {
+	logger = logger2
 	gelfURL = cfg.Gelf
 }
 
 func pushLog(msg *GraylogMessage[interface{}]) {
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
-		(*logger).Error("Failed to serialize graylogger message", "message", &msg)
+		logger.Error("Failed to serialize graylogger message", "message", &msg)
 		return
 	}
-	_, err = http.Post(gelfURL, "application/json", bytes.NewBuffer(msgStr))
+	resp, err := http.Post(gelfURL, "application/json", bytes.NewBuffer(msgStr))
 	if err != nil {
-		(*logger).Error("Failed to send graylogger message", "message", &msg)
+		logger.Error("Failed to send graylogger message", "message", &msg)
 		return
+	}
+	err = resp.Body.Close()
+	if err != nil {
+		logger.Error("Failed to close graylogger request", "message", &msg)
 	}
 }
 
@@ -48,21 +52,21 @@ func createMessage() *GraylogMessage[interface{}] {
 	}
 }
 
-func Log(logtype string, message string, kvpPair ...interface{}) {
+func Log(logtype, message string, kvpPair ...interface{}) {
 	if len(kvpPair)%2 == 1 {
-		(*logger).Errorf("log of %s has uneven key-value pairs", logtype)
+		logger.Errorf("log of %s has uneven key-value pairs", logtype)
 		return
 	}
 	fields := make(map[string]interface{})
 	if len(kvpPair) != 0 {
-		for i := 0; i < len(kvpPair)-1; i = i + 2 {
+		for i := 0; i < len(kvpPair)-1; i += 2 {
 			fields[kvpPair[i].(string)] = kvpPair[i+1]
 		}
 	}
 
 	fieldsStr, err := json.Marshal(&fields)
 	if err != nil {
-		(*logger).Error("failed to serialize log fields", "error", err, "logtype", logtype, "fields", fields)
+		logger.Error("failed to serialize log fields", "error", err, "logtype", logtype, "fields", fields)
 		return
 	}
 

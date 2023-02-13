@@ -11,10 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var logger log.Logger
-
-func NewMiddleWare(logger2 *log.Logger) gin.HandlerFunc {
-	logger = *logger2
+func NewMiddleWare(logger log.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check for header this is highest in rank
 		header := c.GetHeader("X-Api-Key")
@@ -28,7 +25,7 @@ func NewMiddleWare(logger2 *log.Logger) gin.HandlerFunc {
 				})
 				return
 			}
-			userInfo = users.GetAuthInfo(apikey.UserID)
+			userInfo = users.GetApiTokenAuthInfo(apikey.UserID)
 		} else {
 			// get sessionID
 			userInfo, err = authinfo.GetUserInfo(c)
@@ -39,7 +36,7 @@ func NewMiddleWare(logger2 *log.Logger) gin.HandlerFunc {
 				return
 			}
 		}
-		if &userInfo == nil || userInfo.ID == 0 {
+		if userInfo.ID == 0 {
 			storage.RemoveCookie(c, "userInfo")
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return

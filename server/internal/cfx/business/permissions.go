@@ -20,7 +20,7 @@ func refetchBusinessPerms() bool {
 		return false
 	}
 	for perm, mask := range perms {
-		permissionCache.AddEntry(uint(mask), perm)
+		permissionCache.AddEntry(mask, perm)
 	}
 	return true
 }

@@ -32,7 +32,7 @@ func fetchDashboardInfo() error {
 		if errors.Is(err, &models.RouteError{}) {
 			return err
 		}
-		logger.Error("An error occured while fetching from the Cfx Api", "endpoint", "/info", "error", err.Error())
+		logger.Error("An error occurred while fetching from the Cfx Api", "endpoint", "/info", "error", err.Error())
 		return &models.RouteError{
 			Message: models.RouteErrorMessage{
 				Title:       "Unexpected error from the fivem server",

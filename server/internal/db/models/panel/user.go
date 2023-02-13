@@ -12,10 +12,10 @@ type User struct {
 	Roles     []Role
 }
 
-func (u User) GetRoleNames() []string {
+func (u *User) GetRoleNames() []string {
 	roleNames := []string{}
-	for _, role := range u.Roles {
-		roleNames = append(roleNames, role.Name)
+	for i := range u.Roles {
+		roleNames = append(roleNames, u.Roles[i].Name)
 	}
 	return roleNames
 }

@@ -13,29 +13,16 @@ func TestInitStateTokenStorage(t *testing.T) {
 	}
 }
 
-func TestGetStateTokenStorage(t *testing.T) {
-	// Cannot be nil
-	if storage.GetStateTokenStorage() == nil {
-		t.Error("StateTokenStorage cannot be nil")
-		return
-	}
-	// Should be instanced of Storage
-	if _, ok := (*storage.GetStateTokenStorage()).(storage.Storage); !ok {
-		t.Error("StateTokenStorage must be instanced of Storage")
-		return
-	}
-}
-
 func TestStateTokenStorage_Add(t *testing.T) {
 	// Should return nil
-	if err := (*storage.GetStateTokenStorage()).Add("test", "test"); err != nil {
+	if err := storage.GetStateTokenStorage().Add("test", "test"); err != nil {
 		t.Error("StateTokenStorage.Add() must return nil", "err:", err)
 		return
 	}
 }
 
 func TestStateTokenStorage_Get(t *testing.T) {
-	STS := *storage.GetStateTokenStorage()
+	STS := storage.GetStateTokenStorage()
 	STS.Clear()
 	// STS should be empty
 	if _, err := STS.Get("test"); err == nil {
@@ -57,7 +44,7 @@ func TestStateTokenStorage_Get(t *testing.T) {
 }
 
 func TestStateTokenStorage_Remove(t *testing.T) {
-	STS := *storage.GetStateTokenStorage()
+	STS := storage.GetStateTokenStorage()
 	STS.Clear()
 
 	// Removing an inexistent key should return an error
@@ -86,7 +73,7 @@ func TestStateTokenStorage_Remove(t *testing.T) {
 }
 
 func TestStateTokenStorage_Move(t *testing.T) {
-	STS := *storage.GetStateTokenStorage()
+	STS := storage.GetStateTokenStorage()
 	STS.Clear()
 
 	// Moving an inexistent key should return an error
@@ -116,7 +103,7 @@ func TestStateTokenStorage_Move(t *testing.T) {
 }
 
 func TestStateTokenStorage_Clear(t *testing.T) {
-	STS := *storage.GetStateTokenStorage()
+	STS := storage.GetStateTokenStorage()
 	STS.Clear()
 	STS.Add("test", "test")
 	STS.Clear()
@@ -128,7 +115,7 @@ func TestStateTokenStorage_Clear(t *testing.T) {
 }
 
 func TestStateTokenStorage_String(t *testing.T) {
-	STS := *storage.GetStateTokenStorage()
+	STS := storage.GetStateTokenStorage()
 	STS.Clear()
 	STS.Add("test", "test")
 	if STS.String() != "map[test:test]" {

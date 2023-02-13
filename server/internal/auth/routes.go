@@ -37,11 +37,11 @@ type DeleteAPIKeyBody struct {
 	Keys []string `json:"keys"`
 }
 
-func NewAuthRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewAuthRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &AuthRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/auth"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -64,7 +64,7 @@ func (AR *AuthRouter) RefreshHandler(c *gin.Context) {
 		})
 		return
 	}
-	if &userInfo == nil {
+	if userInfo.ID == 0 {
 		// No session cookie
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "No session cookie",
@@ -73,23 +73,19 @@ func (AR *AuthRouter) RefreshHandler(c *gin.Context) {
 	}
 	switch userInfo.AuthMethod {
 	case authinfo.Discord:
-		{
-			isExpired := discord.IsTokenExpired(userInfo.ID)
-			c.JSON(http.StatusOK, gin.H{
-				"isExpired": isExpired,
-			})
-			if !isExpired {
-				discord.RefreshToken(userInfo.ID)
-			}
-			return
+		isExpired := discord.IsTokenExpired(userInfo.ID)
+		c.JSON(http.StatusOK, gin.H{
+			"isExpired": isExpired,
+		})
+		if !isExpired {
+			discord.RefreshToken(userInfo.ID)
 		}
+		return
 	default:
-		{
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "No refresh method for this auth method",
-			})
-			return
-		}
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "No refresh method for this auth method",
+		})
+		return
 	}
 }
 
@@ -138,7 +134,7 @@ func (AR *AuthRouter) logoutHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userInfoPtr, exists := c.Get("userInfo")
 		userInfo := userInfoPtr.(*authinfo.AuthInfo)
-		if exists == false {
+		if !exists {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Failed to get your details",
 			})
@@ -146,25 +142,20 @@ func (AR *AuthRouter) logoutHandler() gin.HandlerFunc {
 		}
 		switch userInfo.AuthMethod {
 		case authinfo.Discord:
-			{
-				discord.RemoveUserTokens(userInfo.ID)
-				break
-			}
+			discord.RemoveUserTokens(userInfo.ID)
 		case authinfo.CFXToken:
-			{
-				// Send request to Cfx API to invalidate login token
-				cfxtoken.RemoveToken(userInfo.ID)
-				break
+			// Send request to Cfx API to invalidate login token
+			err := cfxtoken.RemoveToken(userInfo.ID)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Failed to get your details",
+				})
 			}
 		default:
-			{
-				AR.Logger.Error("Logout procedure failed to determine authentication type", "info", fmt.Sprintf("%+v", userInfo))
-				break
-			}
+			AR.Logger.Error("Logout procedure failed to determine authentication type", "info", fmt.Sprintf("%+v", userInfo))
 		}
 		storage.RemoveCookie(c, "userInfo")
 		c.String(http.StatusOK, "")
-		return
 	}
 }
 
@@ -172,7 +163,7 @@ func (AR *AuthRouter) discordCallbackHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the state from the cookies
 		var state string
-		if err := storage.GetPublicCookie(c, "state", &state); &state == nil || err != nil {
+		if err := storage.GetPublicCookie(c, "state", &state); state == "" || err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "Failed to get authentication state",
 			})
@@ -222,17 +213,21 @@ func (AR *AuthRouter) discordCallbackHandler() gin.HandlerFunc {
 			Roles:      roles,
 			AuthMethod: authinfo.Discord,
 		}
-		authInfo.Assign(c)
+		err = authInfo.Assign(c)
+		if err != nil {
+			AR.Logger.Error(err.Error())
+			c.Redirect(http.StatusTemporaryRedirect, "/errors/500")
+		}
 
 		c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 }
 
-func NewSecuredAuthRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewSecuredAuthRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &SecuredAuthRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/auth"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -278,7 +273,7 @@ func (SAR *SecuredAuthRouter) fetchAPIKeys() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
-		if exists == false {
+		if !exists {
 			SAR.Logger.Error("Failed to get userinfo while fetching API keys")
 			ctx.JSON(403, errors.Unauthorized)
 			return
@@ -301,13 +296,20 @@ func (SAR *SecuredAuthRouter) handleAPIKeyCreation() gin.HandlerFunc {
 		}
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
-		if exists == false {
+		if !exists {
 			SAR.Logger.Error("Failed to get userinfo in request trying to make an API key")
 			ctx.JSON(403, errors.Unauthorized)
 			return
 		}
 		var key string
 		key, err = apikeys.CreateAPIKey(userInfo.ID, body.Comment, time.Duration(body.Duration)*time.Minute)
+		if err != nil {
+			SAR.Logger.Error("Failed to create API key", "error", err, "body", body)
+			ctx.JSON(500, models.RouteErrorMessage{
+				Title:       "Server error",
+				Description: "We encountered an error in the process of creating your API key",
+			})
+		}
 		ctx.JSON(200, gin.H{
 			"key": key,
 		})
@@ -325,7 +327,7 @@ func (SAR *SecuredAuthRouter) handleAPIKeyDeletion() gin.HandlerFunc {
 		}
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
-		if exists == false {
+		if !exists {
 			SAR.Logger.Error("Failed to get userinfo in request trying to make an API key")
 			ctx.JSON(403, errors.Unauthorized)
 			return
@@ -342,14 +344,7 @@ func (SAR *SecuredAuthRouter) handleAPIKeyDeletion() gin.HandlerFunc {
 				}
 			}
 		}
-		err = apikeys.DeleteAPIKeys(userInfo.ID, body.Keys)
-		if err != nil {
-			SAR.Logger.Error("Failed to delete API key", "error", err, "keys", body.Keys)
-			ctx.JSON(500, models.RouteErrorMessage{
-				Title:       "Server error",
-				Description: "We encountered an error in the process of deleting your API key",
-			})
-		}
+		apikeys.DeleteAPIKeys(userInfo.ID, body.Keys)
 		ctx.JSON(200, gin.H{})
 	}
 }
@@ -358,7 +353,7 @@ func (SAR *SecuredAuthRouter) fetchAllAPIKeys() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
-		if exists == false {
+		if !exists {
 			SAR.Logger.Error("Failed to get userinfo in request to fetch all API keys")
 			ctx.JSON(403, errors.Unauthorized)
 			return

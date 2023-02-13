@@ -3,16 +3,9 @@ package characters
 import (
 	"degrens/panel/internal/db"
 	cfx_models "degrens/panel/internal/db/models/cfx"
-	"degrens/panel/lib/log"
-	"degrens/panel/models"
-	"time"
 
 	"github.com/aidenwallis/go-utils/utils"
 )
-
-var cidCache = []models.CfxCharacter{}
-var cacheTimer *time.Timer
-var logger *log.Logger
 
 func DoesCIDExist(cid uint) bool {
 	chars := int64(0)

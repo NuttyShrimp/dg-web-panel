@@ -33,8 +33,8 @@ func LoadBareEnv() *Env {
 		Config: testConfig,
 	}
 
-	discord.InitDiscordConf(testConfig, &env.Logger)
-	storage.InitStorages(testConfig, &env.Logger)
+	discord.InitDiscordConf(testConfig, env.Logger)
+	storage.InitStorages(testConfig, env.Logger)
 
 	loadedEnvs["bare"] = true
 	return &env
@@ -46,7 +46,7 @@ func LoadGraylogEnv() *Env {
 		return nil
 	}
 
-	api.CreateGraylogApi(&env.Config.Graylog, &env.Logger)
+	api.CreateGraylogApi(&env.Config.Graylog, env.Logger)
 
 	loadedEnvs["graylog"] = true
 	return env

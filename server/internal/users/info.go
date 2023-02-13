@@ -24,7 +24,7 @@ func GetUserInfo(c *gin.Context) (*models.UserInfo, error) {
 	}
 	if userAuthInfo.AuthMethod == authinfo.Discord || userAuthInfo.AuthMethod == authinfo.APIToken {
 		DBUser := db.MariaDB.Repository.GetUserById(userAuthInfo.ID)
-		if &DBUser == nil {
+		if DBUser.ID == 0 {
 			storage.RemoveCookie(c, "userInfo")
 			return nil, errors.New("User not found")
 		}
@@ -37,8 +37,7 @@ func GetUserInfo(c *gin.Context) (*models.UserInfo, error) {
 	return &userInfo, nil
 }
 
-func GetAuthInfo(userId uint) authinfo.AuthInfo {
-	// TODO: take other authentication methods in account
+func GetApiTokenAuthInfo(userId uint) authinfo.AuthInfo {
 	user := db.MariaDB.Repository.GetUserById(userId)
 	registerdRoles := []string{}
 	for _, role := range user.Roles {
@@ -59,18 +58,12 @@ func GetUserIdentifier(ctx *gin.Context) (string, error) {
 	authInfo := authInfoPtr.(*authinfo.AuthInfo)
 	switch authInfo.AuthMethod {
 	case "discord":
-		{
-			return strconv.Itoa(int(authInfo.ID)) + " (db)", nil
-		}
+		return strconv.Itoa(int(authInfo.ID)) + " (db)", nil
 	case "apitoken":
-		{
-			return strconv.Itoa(int(authInfo.ID)) + " (token)", nil
-		}
+		return strconv.Itoa(int(authInfo.ID)) + " (token)", nil
 	case "cfxtoken":
-		{
-			// TODO: get steamid from CFX API
-			return strconv.Itoa(int(authInfo.ID)) + " (cfx)", nil
-		}
+		tokenInfo := cfxtoken.GetInfoForToken(authInfo.ID)
+		return fmt.Sprintf("%s - %s (cfx)", tokenInfo.Username, tokenInfo.SteamId), nil
 	}
-	return "", errors.New(fmt.Sprintf("failed to interpret authinfo for a valid user identifier: %+v", authInfo))
+	return "", fmt.Errorf("failed to interpret authinfo for a valid user identifier: %+v", authInfo)
 }

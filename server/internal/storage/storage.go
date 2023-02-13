@@ -14,7 +14,7 @@ type Storage interface {
 	String() string
 }
 
-func InitStorages(config *config.Config, logger *log.Logger) {
+func InitStorages(conf *config.Config, logger log.Logger) {
 	InitStateTokenStorage()
-	InitCookieStore(config, logger)
+	InitCookieStore(conf, logger)
 }
