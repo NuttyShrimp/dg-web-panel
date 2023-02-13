@@ -3,7 +3,6 @@ package reports
 import (
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
-	"errors"
 	"fmt"
 )
 
@@ -39,8 +38,8 @@ func UpdateReportTags(reportId uint, tagNames []string) error {
 	}
 	var report panel_models.Report
 	db.MariaDB.Client.First(&report, reportId)
-	if &report == nil {
-		return errors.New(fmt.Sprintf("Failed to find report with id %d", reportId))
+	if report.ID == 0 {
+		return fmt.Errorf("Failed to find report with id %d", reportId)
 	}
 	report.Tags = tags
 	db.MariaDB.Client.Save(&report)

@@ -21,8 +21,8 @@ func generateKey() string {
 	}
 }
 
-func filterKeys(keys []panel_models.APIKey) *[]panel_models.APIKey {
-	filteredKeys := []panel_models.APIKey{}
+func filterKeys(keys []*panel_models.APIKey) []*panel_models.APIKey {
+	filteredKeys := []*panel_models.APIKey{}
 	for _, key := range keys {
 		if key.Expired() {
 			DeleteAPIKey(0, key.ApiKey)
@@ -30,7 +30,7 @@ func filterKeys(keys []panel_models.APIKey) *[]panel_models.APIKey {
 			filteredKeys = append(filteredKeys, key)
 		}
 	}
-	return &filteredKeys
+	return filteredKeys
 }
 
 func GetAPIKey(key string) *panel_models.APIKey {
@@ -53,14 +53,15 @@ func GetAPIKeyForUser(key string, userId uint) *panel_models.APIKey {
 	return &entry
 }
 
-func GetAPIKeys(userId uint) *[]panel_models.APIKey {
-	keys := []panel_models.APIKey{}
+func GetAPIKeys(userId uint) []*panel_models.APIKey {
+	keys := []*panel_models.APIKey{}
 	db.MariaDB.Client.Preload("User").Where("user_id = ?", userId).Find(&keys)
 	return filterKeys(keys)
 }
 
-func GetAllAPIKeys() *[]panel_models.APIKey {
-	keys := []panel_models.APIKey{}
+// TODO: Test if gorm can read into slice of pointers
+func GetAllAPIKeys() []*panel_models.APIKey {
+	keys := []*panel_models.APIKey{}
 	db.MariaDB.Client.Preload("User").Find(&keys)
 	return filterKeys(keys)
 }
@@ -78,12 +79,12 @@ func CreateAPIKey(userId uint, comment string, duration time.Duration) (string, 
 	return id, err
 }
 
-func DeleteAPIKey(userId uint, apiKey string) error {
+func DeleteAPIKey(userId uint, apiKey string) {
 	graylogger.Log("apikeys:delete", fmt.Sprintf("user %d deleted the an API key", userId), "key", apiKey)
-	return db.MariaDB.Client.Where("api_key = ?", apiKey).Delete(&panel_models.APIKey{}).Error
+	db.MariaDB.Client.Where("api_key = ?", apiKey).Delete(&panel_models.APIKey{})
 }
 
-func DeleteAPIKeys(userId uint, apiKeys []string) error {
+func DeleteAPIKeys(userId uint, apiKeys []string) {
 	graylogger.Log("apikeys:batch_delete", fmt.Sprintf("user %d deleted multiple API keys", userId), "keys", apiKeys)
-	return db.MariaDB.Client.Where("api_key IN ?", apiKeys).Delete(&panel_models.APIKey{}).Error
+	db.MariaDB.Client.Where("api_key IN ?", apiKeys).Delete(&panel_models.APIKey{})
 }

@@ -58,8 +58,7 @@ func GetCfxPlayerInfo(steamId string) (*cfx_models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	newPlys := append(cache.Players.Data, info)
-	cache.Players.Data = newPlys
+	cache.Players.Data = append(cache.Players.Data, info)
 	cache.Mutex.Unlock()
 	return &info, nil
 }

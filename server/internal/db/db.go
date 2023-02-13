@@ -11,9 +11,9 @@ var MariaDB *mariadb.Client
 var Redis *redis.Client
 var CfxMariaDB *mariadb.Client
 
-func InitDatabase(config *config.Config, logger *log.Logger) {
-	Redis = redis.InitRedisClient(config, logger)
-	MariaDB = mariadb.InitMariaDBClient(&config.MariaDB.Panel, logger)
-	CfxMariaDB = mariadb.InitMariaDBClient(&config.MariaDB.Cfx, logger)
+func InitDatabase(conf *config.Config, logger log.Logger) {
+	Redis = redis.InitRedisClient(conf, logger)
+	MariaDB = mariadb.InitMariaDBClient(&conf.MariaDB.Panel, logger)
+	CfxMariaDB = mariadb.InitMariaDBClient(&conf.MariaDB.Cfx, logger)
 	MariaDB.MariaDBMigrate()
 }

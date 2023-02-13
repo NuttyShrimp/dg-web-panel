@@ -15,11 +15,11 @@ type PlayerRouter struct {
 	routes.Router
 }
 
-func NewPlayerRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewPlayerRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &PlayerRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/player", role.New([]string{"staff"})),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 
@@ -34,6 +34,18 @@ func (PR *PlayerRouter) RegisterRoutes() {
 	PR.RouterGroup.POST("/:steamId/warn", PR.WarnPlayer)
 	PR.RouterGroup.POST("/:steamId/kick", PR.KickPlayer)
 	PR.RouterGroup.POST("/:steamId/ban", PR.BanPlayer)
+}
+
+func (PR *PlayerRouter) getSteamIdFromParam(ctx *gin.Context) (string, bool) {
+	steamId := ctx.Param("steamId")
+	if !utils.ValidateSteamId(steamId) {
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request error",
+			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
+		})
+		return "", false
+	}
+	return steamId, true
 }
 
 func (PR *PlayerRouter) FetchPlayerBanned(ctx *gin.Context) {
@@ -53,12 +65,8 @@ func (PR *PlayerRouter) FetchPlayerBanned(ctx *gin.Context) {
 }
 
 func (PR *PlayerRouter) FetchActiveCid(ctx *gin.Context) {
-	steamId := ctx.Param("steamId")
-	if !utils.ValidateSteamId(steamId) {
-		ctx.JSON(400, models.RouteErrorMessage{
-			Title:       "Request error",
-			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
-		})
+	steamId, ok := PR.getSteamIdFromParam(ctx)
+	if !ok {
 		return
 	}
 	actCid, err := GetActiveCharacter(steamId)
@@ -76,12 +84,8 @@ func (PR *PlayerRouter) FetchActiveCid(ctx *gin.Context) {
 }
 
 func (PR *PlayerRouter) FetchPenalties(ctx *gin.Context) {
-	steamId := ctx.Param("steamId")
-	if !utils.ValidateSteamId(steamId) {
-		ctx.JSON(400, models.RouteErrorMessage{
-			Title:       "Request error",
-			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
-		})
+	steamId, ok := PR.getSteamIdFromParam(ctx)
+	if !ok {
 		return
 	}
 	list, err := GetPlayerPenalties(steamId)
@@ -97,12 +101,8 @@ func (PR *PlayerRouter) FetchPenalties(ctx *gin.Context) {
 }
 
 func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
-	steamId := ctx.Param("steamId")
-	if !utils.ValidateSteamId(steamId) {
-		ctx.JSON(400, models.RouteErrorMessage{
-			Title:       "Request error",
-			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
-		})
+	steamId, ok := PR.getSteamIdFromParam(ctx)
+	if !ok {
 		return
 	}
 	body := WarnInfo{}
@@ -133,16 +133,11 @@ func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, gin.H{})
-
 }
 
 func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
-	steamId := ctx.Param("steamId")
-	if !utils.ValidateSteamId(steamId) {
-		ctx.JSON(400, models.RouteErrorMessage{
-			Title:       "Request error",
-			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
-		})
+	steamId, ok := PR.getSteamIdFromParam(ctx)
+	if !ok {
 		return
 	}
 	body := KickInfo{}
@@ -176,12 +171,8 @@ func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
 }
 
 func (PR *PlayerRouter) BanPlayer(ctx *gin.Context) {
-	steamId := ctx.Param("steamId")
-	if !utils.ValidateSteamId(steamId) {
-		ctx.JSON(400, models.RouteErrorMessage{
-			Title:       "Request error",
-			Description: "The steamid does not conform to the following format: steamid:\\d{15}",
-		})
+	steamId, ok := PR.getSteamIdFromParam(ctx)
+	if !ok {
 		return
 	}
 	body := BanInfo{}

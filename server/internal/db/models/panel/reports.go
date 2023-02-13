@@ -11,7 +11,7 @@ type MsgType string
 
 const (
 	Text  MsgType = "text"
-	Image         = "image"
+	Image MsgType = "image"
 )
 
 type Report struct {

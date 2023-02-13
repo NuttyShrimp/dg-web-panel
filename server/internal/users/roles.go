@@ -18,8 +18,8 @@ func getRoleIndex(name string) int {
 	return -1
 }
 
-func InitUserRoles(config *config.Config) {
-	roles = &config.Discord.Roles
+func InitUserRoles(conf *config.Config) {
+	roles = &conf.Discord.Roles
 }
 
 func HasRoleAccess(ctx *gin.Context, target string) (bool, error) {

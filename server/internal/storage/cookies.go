@@ -14,13 +14,13 @@ import (
 var cookieOptions CookieOptions
 var logger log.Logger
 
-func InitCookieStore(config *config.Config, logger2 *log.Logger) {
+func InitCookieStore(conf *config.Config, logger2 log.Logger) {
 	cookieOptions = CookieOptions{
 		MaxAge: 86400 * 30,
-		Domain: config.Server.Host,
-		Codecs: securecookie.CodecsFromPairs([]byte(config.Server.SessionSecret)),
+		Domain: conf.Server.Host,
+		Codecs: securecookie.CodecsFromPairs([]byte(conf.Server.SessionSecret)),
 	}
-	logger = (*logger2).With("module", "cookies")
+	logger = logger2.With("module", "cookies")
 }
 
 type CookieOptions struct {
@@ -78,8 +78,8 @@ func GetHiddenCookie(c *gin.Context, key string, dst any) error {
 	if err != nil {
 		return err
 	}
-	// Check if pointer is nil
-	if &uuid == nil {
+	// uuid is empty
+	if uuid == "" {
 		return nil
 	}
 	return db.Redis.Get(uuid, dst)

@@ -17,25 +17,25 @@ type Client struct {
 	Repository *Repository
 }
 
-func InitMariaDBClient(config *config.ConfigMariaConn, logger *log.Logger) *Client {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", config.User, config.Password, config.Host, config.Port, config.Database)
+func InitMariaDBClient(conf *config.ConfigMariaConn, logger log.Logger) *Client {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", conf.User, conf.Password, conf.Host, conf.Port, conf.Database)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	retries := 0
 	for err != nil {
 		time.Sleep(5 * time.Second)
 		if retries < 10 {
-			(*logger).Errorf("Failed to connect to a mariadb instance(%s), try: %d, trying again...", config.Database, retries)
+			logger.Errorf("Failed to connect to a mariadb instance(%s), try: %d, trying again...", conf.Database, retries)
 			time.Sleep(5 * time.Second)
 			retries++
 			db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 			continue
 		}
-		(*logger).Fatalf("Failed to connect to a mariadb instance(%s) after %d tries: %s", retries, config.Database, err)
+		logger.Fatalf("Failed to connect to a mariadb instance(%s) after %d tries: %s", retries, conf.Database, err)
 	}
-	(*logger).Info("Connected to mariadb instance")
+	logger.Info("Connected to mariadb instance")
 	return &Client{
 		Client:     db,
-		logger:     *logger,
+		logger:     logger,
 		Repository: newRepository(db),
 	}
 }

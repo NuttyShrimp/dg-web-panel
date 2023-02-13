@@ -18,21 +18,21 @@ type Client struct {
 
 var Redis *Client
 
-func InitRedisClient(config *config.Config, logger *log.Logger) *Client {
+func InitRedisClient(conf *config.Config, logger log.Logger) *Client {
 	Redis = &Client{
 		client: redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%d", config.Redis.Host, config.Redis.Port),
-			Password: config.Redis.Password,
+			Addr:     fmt.Sprintf("%s:%d", conf.Redis.Host, conf.Redis.Port),
+			Password: conf.Redis.Password,
 			DB:       0,
 		}),
 		ctx: context.Background(),
 	}
 	err := Redis.client.Ping(Redis.ctx).Err()
 	if err != nil {
-		(*logger).Fatalf("Failed to connect to redis: %s", err)
+		logger.Fatalf("Failed to connect to redis: %s", err)
 	}
 
-	(*logger).Info("Connected to redis")
+	logger.Info("Connected to redis")
 	return Redis
 }
 

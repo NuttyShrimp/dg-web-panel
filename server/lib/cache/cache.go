@@ -13,7 +13,7 @@ type CacheEntry[T interface{}] struct {
 }
 
 func InitCache[T interface{}, K string | int | uint](ttl time.Duration) Cache[T, K] {
-	cache := *&Cache[T, K]{
+	cache := Cache[T, K]{
 		data: map[K]CacheEntry[T]{},
 		ttl:  ttl,
 	}

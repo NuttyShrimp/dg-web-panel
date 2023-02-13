@@ -113,7 +113,7 @@ func TestValidateConfigFile(t *testing.T) {
 }
 
 func TestGetConfigPath(t *testing.T) {
-	//Change the config path
+	// Change the config path
 	lookupFlag := flag.Lookup("config")
 	if lookupFlag == nil {
 		var configFlag string
@@ -128,5 +128,4 @@ func TestGetConfigPath(t *testing.T) {
 	if path := GetConfigPath(); path != goodConfigPath {
 		t.Errorf("Config path should have been %s but was %s", goodConfigPath, path)
 	}
-	// _ = GetConfigPath()
 }

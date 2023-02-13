@@ -12,11 +12,11 @@ type UserRouter struct {
 	routes.Router
 }
 
-func NewUserRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewUserRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &UserRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/user"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()

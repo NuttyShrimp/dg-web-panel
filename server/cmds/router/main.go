@@ -16,11 +16,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(config *config.Config, logger *log.Logger) *gin.Engine {
+func SetupRouter(conf *config.Config, logger log.Logger) *gin.Engine {
 	// Create a new gin Router
 	r := gin.New()
 	// TODO: set proxy when deploying
-	r.SetTrustedProxies(nil)
+	err := r.SetTrustedProxies(nil)
+	if err != nil {
+		logger.Fatal("Failed to set the trusted proxies", "error", err)
+	}
 
 	// Middlewares
 	r.Use(
@@ -29,14 +32,14 @@ func SetupRouter(config *config.Config, logger *log.Logger) *gin.Engine {
 			WaitForDelivery: false,
 		}),
 		cors.New(cors.Config{
-			AllowOrigins:     config.Server.Cors.Origins,
+			AllowOrigins:     conf.Server.Cors.Origins,
 			AllowCredentials: true,
 			AllowWebSockets:  true,
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
 			AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "sentry-trace", "baggage", "X-Api-Key"},
 			MaxAge:           12 * time.Hour,
 		}),
-		ratelimiter.RateLimit(config.Server.ReqPerSeq),
+		ratelimiter.RateLimit(conf.Server.ReqPerSeq),
 		gin.Logger(),
 		gin.Recovery(),
 	)

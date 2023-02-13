@@ -5,6 +5,7 @@ import (
 	panel_models "degrens/panel/internal/db/models/panel"
 	"degrens/panel/lib/graylogger"
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -30,9 +31,9 @@ func CreateNote(userId uint, note string) error {
 	return err
 }
 
-func UpdateNote(userId uint, noteId uint, note string) error {
+func UpdateNote(userId, noteId uint, note string) error {
 	dbNote := panel_models.Notes{}
-	orgNote := string(dbNote.Note)
+	orgNote := strings.Clone(dbNote.Note)
 	err := db.MariaDB.Client.First(&dbNote, noteId).Error
 	if err != nil {
 		return err
@@ -45,7 +46,7 @@ func UpdateNote(userId uint, noteId uint, note string) error {
 	return err
 }
 
-func DeleteNote(userId uint, noteId uint) error {
+func DeleteNote(userId, noteId uint) error {
 	dbNote := panel_models.Notes{}
 	err := db.MariaDB.Client.First(&dbNote, noteId).Error
 	if err != nil {
