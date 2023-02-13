@@ -17,19 +17,17 @@ func InitStateTokenStorage() {
 	}
 }
 
-func GetStateTokenStorage() *Storage {
-	return &stateTokenStorage
+func GetStateTokenStorage() Storage {
+	return stateTokenStorage
 }
 
 func (s *StateTokenStorage) Add(key string, value interface{}) error {
 	s.values[key] = value
-	// TODO: Maybe do something usefull with error, eg. check if the key is valid te be added (32 > length)
 	return nil
 }
 
 func (s *StateTokenStorage) Get(key string) (interface{}, error) {
 	if value, ok := s.values[key]; ok {
-
 		return value, nil
 	}
 	return nil, errors.New("key not found")
@@ -43,7 +41,7 @@ func (s *StateTokenStorage) Remove(key string) error {
 	return errors.New("key not found")
 }
 
-func (s *StateTokenStorage) Move(key string, newKey string) error {
+func (s *StateTokenStorage) Move(key, newKey string) error {
 	if value, ok := s.values[key]; ok {
 		s.values[newKey] = value
 		delete(s.values, key)

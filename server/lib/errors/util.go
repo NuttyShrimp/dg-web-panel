@@ -26,8 +26,7 @@ func HandleJsonError(err error, logger log.Logger) {
 	// is an open issue regarding this at
 	// https://github.com/golang/go/issues/25956.
 	case errors.Is(err, io.ErrUnexpectedEOF):
-		msg := fmt.Sprintf("Request body contains badly-formed JSON")
-		logger.Error(msg)
+		logger.Error("Request body contains badly-formed JSON")
 
 	// Catch any type errors, like trying to assign a string in the
 	// JSON request body to a int field in our Person struct. We can
@@ -65,5 +64,4 @@ func HandleJsonError(err error, logger log.Logger) {
 	default:
 		logger.Error("Error while unmarshalling member info", "error", err.Error())
 	}
-	return
 }

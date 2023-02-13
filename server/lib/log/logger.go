@@ -54,14 +54,14 @@ func (l *logger) With(args ...interface{}) Logger {
 }
 
 func (l logger) Debug(msg string, kvpPair ...interface{}) {
-	logger.Debugw(l, msg, kvpPair...)
+	l.SugaredLogger.Debugw(msg, kvpPair...)
 }
 func (l logger) Info(msg string, kvpPair ...interface{}) {
-	logger.Infow(l, msg, kvpPair...)
+	l.SugaredLogger.Infow(msg, kvpPair...)
 }
 func (l logger) Error(msg string, kvpPair ...interface{}) {
-	logger.Errorw(l, msg, kvpPair...)
+	l.SugaredLogger.Errorw(msg, kvpPair...)
 }
 func (l logger) Fatal(msg string, kvpPair ...interface{}) {
-	logger.Fatalw(l, msg, kvpPair...)
+	l.SugaredLogger.Fatalw(msg, kvpPair...)
 }

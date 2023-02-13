@@ -18,11 +18,11 @@ type graylogApi struct {
 
 var GraylogApi graylogApi
 
-func CreateGraylogApi(c *config.ConfigGraylog, logger *log.Logger) {
-	regexp, _ := regexp.Compile(`/$`)
+func CreateGraylogApi(c *config.ConfigGraylog, logger log.Logger) {
+	regex := regexp.MustCompile(`/$`)
 	baseApi := api{
-		Logger:  (*logger).With("api", "Graylog"),
-		baseURL: regexp.ReplaceAllString(c.URL, "") + "/api",
+		Logger:  logger.With("api", "Graylog"),
+		baseURL: regex.ReplaceAllString(c.URL, "") + "/api",
 	}
 	GraylogApi = graylogApi{
 		api:    baseApi,
@@ -43,7 +43,7 @@ func ValidateGraylogApi() bool {
 		GraylogApi.Logger.Error("Failed to fetch the stream", "error", err.Error())
 		return false
 	}
-	GraylogApi.Logger.Info("Did a successfull request to graylog")
+	GraylogApi.Logger.Info("Did a successful request to graylog")
 	return true
 }
 
@@ -82,7 +82,7 @@ func (ga *graylogApi) doAuthentication(req *http.Request) {
 }
 
 // should only fetch: source, message, logtype, full_message and timestamp fields
-func FetchQuery(query string, limit int, timeRange int) (*[]models.ResultMessage, error) {
+func FetchQuery(query string, limit, timeRange int) (*[]models.ResultMessage, error) {
 	options := models.QueryRequestInput{
 		Fields: "source,message,logtype,full_message,timestamp",
 		Filter: fmt.Sprint("streams:", GraylogApi.Config.StreamId),

@@ -14,7 +14,7 @@ import (
 func New(roles []string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctxUserInfo, exists := ctx.Get("userInfo")
-		if exists == false {
+		if !exists {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Failed to retrieve userinfo",
 			})

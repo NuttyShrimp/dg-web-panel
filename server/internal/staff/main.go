@@ -7,8 +7,8 @@ import (
 
 var logger log.Logger
 
-func InitStaffService(pLogger *log.Logger) {
-	logger = *pLogger
+func InitStaffService(pLogger log.Logger) {
+	logger = pLogger
 	go func() {
 		_, err := cfx.GetCfxPlayers()
 		if err != nil {

@@ -6,7 +6,7 @@ import (
 
 var BodyParsingFailed models.RouteErrorMessage = models.RouteErrorMessage{
 	Title:       "Server error",
-	Description: "An error occured while reading your incoming request",
+	Description: "An error occurred while reading your incoming request",
 }
 
 var Unauthorized models.RouteErrorMessage = models.RouteErrorMessage{
