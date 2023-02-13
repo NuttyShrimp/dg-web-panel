@@ -4,7 +4,6 @@ import (
 	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/cfx/bank"
 	"degrens/panel/internal/cfx/vehicles"
-	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/log"
 	"degrens/panel/lib/utils"
@@ -20,11 +19,11 @@ type CharacterRouter struct {
 	routes.Router
 }
 
-func NewCharacterRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewCharacterRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &CharacterRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/character"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -37,8 +36,8 @@ func (CR *CharacterRouter) RegisterRoutes() {
 	CR.RouterGroup.GET("/active", CR.FetchActiveCharacters)
 	CR.RouterGroup.GET("/:cid/info", CR.FetchCharInfo)
 	CR.RouterGroup.GET("/:cid/reputation", CR.FetchCharRep)
-	bank.NewBankRouter(CR.RouterGroup, &CR.Logger)
-	vehicles.NewVehicleRouter(CR.RouterGroup, &CR.Logger)
+	bank.NewBankRouter(CR.RouterGroup, CR.Logger)
+	vehicles.NewVehicleRouter(CR.RouterGroup, CR.Logger)
 }
 
 func (CR *CharacterRouter) ValidateCID(ctx *gin.Context) {
@@ -82,13 +81,12 @@ func (CR *CharacterRouter) FetchCharInfo(ctx *gin.Context) {
 		})
 		return
 	}
-	char := cfx_models.Character{}
-	char, err = GetCharacterInfo(uint(cid))
+	char, err := GetCharacterInfo(uint(cid))
 	if err != nil {
 		CR.Logger.Error("Failed to fetch character info", "error", err, "cid", cid)
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
-			Description: fmt.Sprint("We encountered an error while trying to fetch the info for the character with cid %d", cid),
+			Description: fmt.Sprint("We encountered an error while trying to fetch the info for the character with cid %i", cid),
 		})
 		return
 	}
@@ -105,8 +103,7 @@ func (CR *CharacterRouter) FetchCharRep(ctx *gin.Context) {
 		})
 		return
 	}
-	rep := &cfx_models.CharacterReputation{}
-	rep, err = GetCharacterReputation(uint(cid))
+	rep, err := GetCharacterReputation(uint(cid))
 
 	if err != nil {
 		CR.Logger.Error("Failed to fetch character reputation", "error", err, "cid", ctx.Param("cid"))

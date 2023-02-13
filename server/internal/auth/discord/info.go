@@ -36,7 +36,6 @@ func GetRegisterdRolesForIdentity(identity DiscordIdentity) []string {
 	registerdRoles := []string{}
 	for _, userRole := range identity.Roles {
 		for _, srvRole := range info.Roles {
-
 			if userRole == srvRole.Id {
 				registerdRoles = append(registerdRoles, srvRole.Name)
 			}
@@ -63,8 +62,11 @@ func RemoveUserTokens(userId uint) {
 	}
 	oldTokens := []panel_models.DiscordTokens{}
 	db.MariaDB.Client.Where(&Token).Find(&oldTokens)
-	for _, row := range oldTokens {
-		RevokeAuthToken(row.Token)
+	for i := range oldTokens {
+		err := RevokeAuthToken(oldTokens[i].Token)
+		if err != nil {
+			logger.Error("Failed to remove user token", "error", err)
+		}
 	}
 	db.MariaDB.Client.Delete(&panel_models.DiscordTokens{}, "user_id = ?", userId)
 }

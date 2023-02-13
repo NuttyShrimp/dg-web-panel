@@ -37,22 +37,22 @@ func main() {
 	// Create logger
 	logger := log.New(conf.Server.Env == "development")
 
-	db.InitDatabase(conf, &logger)
-	graylog.InitGrayLogger(&conf.Graylog, &logger)
-	api.CreateGraylogApi(&conf.Graylog, &logger)
-	api.CreateCfxApi(&conf.Cfx, &logger)
+	db.InitDatabase(conf, logger)
+	graylog.InitGrayLogger(&conf.Graylog, logger)
+	api.CreateGraylogApi(&conf.Graylog, logger)
+	api.CreateCfxApi(&conf.Cfx, logger)
 	isValid := api.ValidateGraylogApi()
 	if !isValid {
 		os.Exit(1)
 	}
 
 	// Create discord auth config
-	discord.InitDiscordConf(conf, &logger)
+	discord.InitDiscordConf(conf, logger)
 	users.InitUserRoles(conf)
-	storage.InitStorages(conf, &logger)
+	storage.InitStorages(conf, logger)
 
-	router := router.SetupRouter(conf, &logger)
-	err = router.Run(fmt.Sprintf("%s:%d", conf.Server.Host, conf.Server.Port))
+	r := router.SetupRouter(conf, logger)
+	err = r.Run(fmt.Sprintf("%s:%d", conf.Server.Host, conf.Server.Port))
 	if err != nil {
 		logger.Errorf("Could not start server: %s", err)
 		return

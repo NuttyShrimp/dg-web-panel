@@ -17,8 +17,8 @@ func SeedReportMessageMember(msg *panel_models.ReportMessage) error {
 	if msg.MemberID != nil {
 		var member panel_models.ReportMember
 		db.MariaDB.Client.Where("id = ? AND report_id = ?", msg.MemberID, msg.ID).First(&member)
-		if &member == nil || member.ID == 0 {
-			return errors.New(fmt.Sprintf("could not find a member for %d in report %d", msg.MemberID, msg.ID))
+		if member.ID == 0 {
+			return fmt.Errorf("could not find a member for %d in report %d", msg.MemberID, msg.ID)
 		}
 		memberInfo, err := cfx.GetCfxUserInfo(member.SteamID)
 		if err != nil {
@@ -31,7 +31,7 @@ func SeedReportMessageMember(msg *panel_models.ReportMessage) error {
 	} else if msg.UserID != nil {
 		user := db.MariaDB.Repository.GetUserById(*msg.UserID)
 		if user.ID == 0 {
-			return errors.New(fmt.Sprintf("failed to retrieve user with id %d", msg.UserID))
+			return fmt.Errorf("failed to retrieve user with id %d", msg.UserID)
 		}
 		steamId := cfx.GetSteamIdFromDiscordId(user.DiscordID)
 		messageSender = &panel_models.ReportMessageSender{
@@ -43,7 +43,7 @@ func SeedReportMessageMember(msg *panel_models.ReportMessage) error {
 			SteamId: steamId,
 		}
 	} else {
-		return errors.New(fmt.Sprintf("could not find a valid member for report message with id %d", msg.ID))
+		return fmt.Errorf("could not find a valid member for report message with id %d", msg.ID)
 	}
 	msg.Sender = *messageSender
 	return nil

@@ -43,11 +43,7 @@ var (
 		CheckOrigin: func(r *http.Request) bool {
 			// Code is mostly stolen from gin-contrib/cors
 			origin := r.Header.Get("Origin")
-			if len(origin) == 0 {
-				// request is not a CORS request
-				return false
-			}
-			return true
+			return origin != ""
 		},
 	}
 	rooms = make(map[uint]*Room)
@@ -74,32 +70,26 @@ func (r *Room) run() {
 	for {
 		select {
 		case client := <-r.register:
-			{
-				r.clients[client] = true
-				r.sendMessages(client, 0)
-				r.logger.Debug("registered new client")
-			}
+			r.clients[client] = true
+			r.sendMessages(client, 0)
+			r.logger.Debug("registered new client")
 		case client := <-r.unregister:
-			{
-				if _, ok := r.clients[client]; ok {
-					delete(r.clients, client)
-					close(client.send)
-				}
+			if _, ok := r.clients[client]; ok {
+				delete(r.clients, client)
+				close(client.send)
 			}
 		// Client messages == a new message to the report
 		case clientMessage := <-r.broadcast:
-			{
-				message, err := r.parseIncomingMessage(clientMessage.Message)
-				if err != nil {
-					clientMessage.Client.send <- r.generateError(err.Error())
-					return
-				}
-				r.logger.Debug("received a new message", "message", message)
-				err = r.handleIncomingMessage(*message, clientMessage.Client)
-				if err != nil {
-					clientMessage.Client.send <- r.generateError(err.Error())
-					return
-				}
+			message, err := r.parseIncomingMessage(clientMessage.Message)
+			if err != nil {
+				clientMessage.Client.send <- r.generateError(err.Error())
+				return
+			}
+			r.logger.Debug("received a new message", "message", message)
+			err = r.handleIncomingMessage(*message, clientMessage.Client)
+			if err != nil {
+				clientMessage.Client.send <- r.generateError(err.Error())
+				return
 			}
 		}
 	}
@@ -151,17 +141,16 @@ func (r *Room) sendMessages(c *Client, offset int) {
 	}
 
 	for i := range msgs {
-		// seed messages to seperate array
+		// seed messages to separate array
 		// If error happens the mesasge is replaced with a placeholder
 		// indicating that there is an issue with
 		// that message
-		err := SeedReportMessageMember(&msgs[i])
+		err = SeedReportMessageMember(&msgs[i])
 		if err != nil {
 			r.logger.Error("Failed to seed reportmessage", "messageId", msgs[i].ID)
 		}
 	}
 
-	// TODO replace imageId with link to minio
 	response := WebsocketMessage{
 		Type: "addMessages",
 		Data: msgs,

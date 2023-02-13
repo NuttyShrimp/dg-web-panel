@@ -15,11 +15,11 @@ type VehiclesRouter struct {
 	routes.Router
 }
 
-func NewVehicleRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewVehicleRouter(rg *gin.RouterGroup, logger log.Logger) {
 	vr := VehiclesRouter{
 		Router: routes.Router{
 			RouterGroup: rg.Group("/vehicles"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	vr.RegisterRoutes()

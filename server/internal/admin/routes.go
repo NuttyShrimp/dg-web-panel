@@ -10,15 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var logger log.Logger
+
 type DevRouter struct {
 	routes.Router
 }
 
-func NewDevRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewDevRouter(rg *gin.RouterGroup, logger2 log.Logger) {
+	logger = logger2
 	router := &DevRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/dev", role.New([]string{"developer"})),
-			Logger:      *logger,
+			Logger:      logger2,
 		},
 	}
 	router.RegisterRoutes()

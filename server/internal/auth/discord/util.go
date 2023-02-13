@@ -16,9 +16,13 @@ func fetchFromDiscordAPI(token *oauth2.Token, path string) (*json.Decoder, error
 		return nil, errors.New("error while getting user info")
 	}
 
-	// defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 
 	dec := json.NewDecoder(res.Body)
-	// dec.DisallowUnknownFields()
 	return dec, nil
 }

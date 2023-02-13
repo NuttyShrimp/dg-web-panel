@@ -6,7 +6,7 @@ import (
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -19,11 +19,11 @@ type cfxApi struct {
 
 var CfxApi cfxApi
 
-func CreateCfxApi(c *config.ConfigCfx, logger *log.Logger) {
-	regexp, _ := regexp.Compile(`/$`)
+func CreateCfxApi(c *config.ConfigCfx, logger log.Logger) {
+	regex := regexp.MustCompile(`/$`)
 	baseApi := api{
-		baseURL: regexp.ReplaceAllString(c.Server, "") + "/dg-api",
-		Logger:  (*logger).With("api", "Cfx"),
+		baseURL: regex.ReplaceAllString(c.Server, "") + "/dg-api",
+		Logger:  logger.With("api", "Cfx"),
 	}
 	CfxApi = cfxApi{
 		api:    baseApi,
@@ -46,14 +46,13 @@ func (ca *cfxApi) DoRequest(method, endpoint string, input, output interface{}) 
 }
 
 func (ca *cfxApi) addInput(req *http.Request, input interface{}) {
-	var buf *bytes.Buffer
-	buf = new(bytes.Buffer)
+	buf := new(bytes.Buffer)
 	encoder := json.NewEncoder(buf)
 	if err := encoder.Encode(input); err != nil {
 		ca.Logger.Error("Failed to encode input to JSON for Cfx request", "error", err.Error())
 		return
 	}
-	req.Body = ioutil.NopCloser(buf)
+	req.Body = io.NopCloser(buf)
 }
 
 func (ca *cfxApi) doAuthentication(req *http.Request) {

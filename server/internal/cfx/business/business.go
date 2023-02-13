@@ -43,10 +43,10 @@ func FetchBusinesses(filter *Filters) ([]cfx_models.Business, error) {
 	return businesses, err
 }
 
-func DeleteBusiness(userId uint, businessId uint) error {
+func DeleteBusiness(userId, businessId uint) error {
 	business, exists := businessCache.GetEntry(businessId)
 	if !exists {
-		return errors.New(fmt.Sprintf("Business with id: %d does not exist", businessId))
+		return fmt.Errorf("Business with id: %d does not exist", businessId)
 	}
 	ei, err := api.CfxApi.DoRequest("DELETE", fmt.Sprintf("/business/%d", businessId), nil, nil)
 	if err != nil {
@@ -80,14 +80,13 @@ func FetchLogCount(businessId uint) (int64, error) {
 func FetchEmployees(businessId uint) ([]cfx_models.BusinessEmployee, error) {
 	employees := []cfx_models.BusinessEmployee{}
 	err := db.CfxMariaDB.Client.Preload("Role").Preload("Char").Preload("Char.User").Preload("Char.Info").Where("business_id = ?", businessId).Find(&employees).Error
-	for i, employee := range employees {
-		employee.Role.Permissions = bitToPermList(employee.Role.PermMask)
-		employees[i] = employee
+	for i := range employees {
+		employees[i].Role.Permissions = bitToPermList(employees[i].Role.PermMask)
 	}
 	return employees, err
 }
 
-func ChangeOwner(userId uint, businessId uint, newOwner uint) error {
+func ChangeOwner(userId, businessId, newOwner uint) error {
 	oldOwner := cfx_models.BusinessEmployee{}
 	employee := cfx_models.BusinessEmployee{}
 	err := db.CfxMariaDB.Client.First(&oldOwner, cfx_models.BusinessEmployee{BusinessId: businessId, IsOwner: true}).Error

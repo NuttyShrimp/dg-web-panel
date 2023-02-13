@@ -14,11 +14,11 @@ type ReportRouter struct {
 	routes.Router
 }
 
-func NewReportRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewReportRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &ReportRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/reports"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()

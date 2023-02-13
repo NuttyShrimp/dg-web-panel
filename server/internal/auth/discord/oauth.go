@@ -49,14 +49,14 @@ type DiscordToken struct {
 var info *discordInfo
 var logger log.Logger
 
-func InitDiscordConf(config *config.Config, pLogger *log.Logger) {
+func InitDiscordConf(conf *config.Config, pLogger log.Logger) {
 	info = &discordInfo{
 
 		Conf: &oauth2.Config{
-			RedirectURL: config.Discord.RedirectURL,
+			RedirectURL: conf.Discord.RedirectURL,
 			// This next 2 lines must be edited before running this.
-			ClientID:     config.Discord.ClientID,
-			ClientSecret: config.Discord.ClientSecret,
+			ClientID:     conf.Discord.ClientID,
+			ClientSecret: conf.Discord.ClientSecret,
 			Scopes: []string{
 				"identify",
 				"guilds.members.read",
@@ -67,10 +67,10 @@ func InitDiscordConf(config *config.Config, pLogger *log.Logger) {
 				AuthStyle: oauth2.AuthStyleInParams,
 			},
 		},
-		GuildId: config.Discord.Guild,
-		Roles:   config.Discord.Roles,
+		GuildId: conf.Discord.Guild,
+		Roles:   conf.Discord.Roles,
 	}
-	logger = (*pLogger).With("module", "discord")
+	logger = pLogger.With("module", "discord")
 }
 
 func GetOAuthConf() *oauth2.Config {
@@ -124,6 +124,9 @@ func GetUserInfoViaToken(token *oauth2.Token) (*DiscordIdentity, error) {
 		return nil, err
 	}
 	guildMember, err := fetchGuildInfo(token)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, role := range guildMember.Roles {
 		number, _ := strconv.ParseUint(role, 10, 64)
@@ -136,7 +139,12 @@ func GetUserInfoViaToken(token *oauth2.Token) (*DiscordIdentity, error) {
 func RevokeAuthToken(token string) error {
 	params := url.Values{}
 	params.Add("token", token)
-	_, err := http.PostForm("https://discord.com/api/oauth2/token/revoke", params)
+	resp, err := http.PostForm("https://discord.com/api/oauth2/token/revoke", params)
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 	return err
 }
 
@@ -149,6 +157,11 @@ func RefreshToken(userId uint) {
 	params.Set("grant_type", "refresh_token")
 	params.Set("refresh_token", DBToken.RefreshToken)
 	res, err := http.PostForm(info.Conf.Endpoint.TokenURL, params)
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			logger.Error(err.Error())
+		}
+	}()
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to refresh token for user %d", userId), "error", err.Error())
 		return

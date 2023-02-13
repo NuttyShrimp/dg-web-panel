@@ -14,11 +14,11 @@ type BankRouter struct {
 	routes.Router
 }
 
-func NewBankRouter(rg *gin.RouterGroup, logger *log.Logger) {
+func NewBankRouter(rg *gin.RouterGroup, logger log.Logger) {
 	br := BankRouter{
 		Router: routes.Router{
 			RouterGroup: rg.Group("/bank"),
-			Logger:      *logger,
+			Logger:      logger,
 		},
 	}
 	br.RegisterRoutes()

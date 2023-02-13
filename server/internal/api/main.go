@@ -4,7 +4,7 @@ import (
 	"degrens/panel/lib/log"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -30,7 +30,7 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 	)
 	endpoint = fmt.Sprint(a.baseURL, endpoint)
 
-	req, err = http.NewRequest(method, endpoint, nil)
+	req, err = http.NewRequest(method, endpoint, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to call http.NewRequest: %s %s: %w", method, endpoint, err)
@@ -57,11 +57,14 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 			"failed to call API: %s %s: %w", method, endpoint, err)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		a.Logger.Error("Failed to close API request body", "error", err)
+	}()
 	ei.Response = resp
 
 	if resp.StatusCode >= 400 {
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return ei, fmt.Errorf(
 				"API error: failed to read the response body: %s %s %d",
