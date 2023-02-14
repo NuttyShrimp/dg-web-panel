@@ -6,6 +6,7 @@ import (
 	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
+	"degrens/panel/internal/users"
 	"degrens/panel/lib/graylogger"
 	"errors"
 	"fmt"
@@ -78,7 +79,10 @@ func FetchReports(titleFilter string, offset int, tags []string, includeOpen, in
 			Joins("inner join report_tags t on t.name = rtl.report_tag_name").
 			Where("t.name IN ?", tags)
 	}
-	if authInfo != nil && authInfo.AuthMethod == authinfo.CFXToken {
+	if authInfo == nil {
+		return nil, errors.New("Failed to get authentication info")
+	}
+	if authInfo.AuthMethod == authinfo.CFXToken && !users.DoesUserHaveRole(authInfo.Roles, "staff") {
 		tokenInfo := cfxtoken.GetInfoForToken(authInfo.ID)
 		if tokenInfo == nil {
 			return nil, errors.New("Failed to get info bound to cfx token")
