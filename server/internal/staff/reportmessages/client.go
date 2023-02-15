@@ -111,7 +111,8 @@ func (c *Client) writeRoutine() {
 			c.logger.Error("Failed to properly close report WS", "error", err)
 		}
 	}()
-	for {
+	doRoutine := false
+	for !doRoutine {
 		select {
 		case message, ok := <-c.send:
 			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
@@ -124,7 +125,7 @@ func (c *Client) writeRoutine() {
 				if err != nil {
 					c.logger.Error("Failed to close a report WS", "error", err)
 				}
-				break
+				doRoutine = true
 			}
 
 			c.sendQueuedMsg(message)
