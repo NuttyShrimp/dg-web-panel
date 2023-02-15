@@ -3,6 +3,7 @@ package auth
 import (
 	"degrens/panel/internal/auth/apikeys"
 	"degrens/panel/internal/auth/authinfo"
+	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/storage"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/log"
@@ -29,7 +30,8 @@ func NewMiddleWare(logger log.Logger) gin.HandlerFunc {
 		} else {
 			// get sessionID
 			userInfo, err = authinfo.GetUserInfo(c)
-			if err != nil {
+			if err != nil || (userInfo.AuthMethod == authinfo.CFXToken && !cfxtoken.IsTokenValid(userInfo.ID)) {
+				storage.RemoveCookie(c, "userInfo")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 					"error": "Could not get user info",
 				})

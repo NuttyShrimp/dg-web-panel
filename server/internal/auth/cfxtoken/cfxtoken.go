@@ -2,11 +2,8 @@ package cfxtoken
 
 import (
 	"degrens/panel/internal/api"
-	"degrens/panel/internal/auth/authinfo"
 	"errors"
 	"fmt"
-
-	"github.com/gin-gonic/gin"
 )
 
 var tokenIds map[uint]string = make(map[uint]string)
@@ -19,29 +16,20 @@ type TokenInfo struct {
 	Roles     []string `json:"roles"`
 }
 
-func AuthorizeToken(ctx *gin.Context, token string) error {
-	id := len(tokenIds)
-	tokenIds[uint(id)] = token
-	tokenInfo := TokenInfo{}
-	ai, err := api.CfxApi.DoRequest("GET", fmt.Sprintf("/tokens/info/%s", token), nil, &tokenInfo)
-	if err != nil {
-		return err
-	}
-	if ai.Message != "" {
-		return fmt.Errorf("Token error: %s", ai.Message)
-	}
-	tokenInfoStore[token] = &tokenInfo
+func GetNewToken() uint {
+	id := uint(len(tokenIds))
+	tokenIds[id] = ""
+	return id
+}
 
-	authInfo := authinfo.AuthInfo{
-		ID:         uint(id),
-		Roles:      append(tokenInfo.Roles, "player"),
-		AuthMethod: "cfxtoken",
-	}
-	cookieSet := authInfo.Assign(ctx)
-	if cookieSet != nil {
-		return cookieSet
-	}
-	return nil
+func IsTokenValid(id uint) bool {
+	_, ok := tokenIds[id]
+	return ok
+}
+
+func RegisterToken(id uint, token string, info *TokenInfo) {
+	tokenIds[id] = token
+	tokenInfoStore[token] = info
 }
 
 func RemoveToken(id uint) error {
@@ -51,6 +39,9 @@ func RemoveToken(id uint) error {
 	}
 	delete(tokenIds, id)
 	delete(tokenInfoStore, token)
+	if token == "" {
+		return nil
+	}
 	ai, err := api.CfxApi.DoRequest("DELETE", fmt.Sprintf("/token/%s", token), nil, nil)
 	if err != nil {
 		return err
