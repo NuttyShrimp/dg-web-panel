@@ -61,6 +61,7 @@ func GetRoom(report *reports.Report, logger log.Logger) *Room {
 			logger:     logger.With("roomId", report.Data.ID),
 			report:     report,
 		}
+		rooms[report.Data.ID] = room
 		go room.run()
 	}
 	return room
@@ -85,7 +86,6 @@ func (r *Room) run() {
 				clientMessage.Client.send <- r.generateError(err.Error())
 				return
 			}
-			r.logger.Debug("received a new message", "message", message)
 			err = r.handleIncomingMessage(*message, clientMessage.Client)
 			if err != nil {
 				clientMessage.Client.send <- r.generateError(err.Error())
@@ -171,7 +171,6 @@ func (r *Room) sendMessages(c *Client, offset int) {
 func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error {
 	switch msg.Type {
 	case "addMessage":
-		// TODO data should be marshaled to str not
 		reportMsg, err := saveMessage(r.report.Data.ID, msg.Data, origin.authInfo)
 		if err != nil {
 			r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)
