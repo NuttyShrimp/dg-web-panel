@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var tokenIds map[uint]string
-var tokenInfoStore map[string]*TokenInfo
+var tokenIds map[uint]string = make(map[uint]string)
+var tokenInfoStore map[string]*TokenInfo = make(map[string]*TokenInfo)
 
 type TokenInfo struct {
 	SteamId   string   `json:"steamId"`
@@ -23,7 +23,7 @@ func AuthorizeToken(ctx *gin.Context, token string) error {
 	id := len(tokenIds)
 	tokenIds[uint(id)] = token
 	tokenInfo := TokenInfo{}
-	ai, err := api.CfxApi.DoRequest("GET", fmt.Sprintf("/token/info/%s", token), nil, &tokenInfo)
+	ai, err := api.CfxApi.DoRequest("GET", fmt.Sprintf("/tokens/info/%s", token), nil, &tokenInfo)
 	if err != nil {
 		return err
 	}
