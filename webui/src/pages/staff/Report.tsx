@@ -14,7 +14,7 @@ import {
 import { showNotification } from "@mantine/notifications";
 import { reportState } from "@src/stores/reports/state";
 import dayjs from "dayjs";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import useWebSocket from "react-use-websocket";
@@ -46,6 +46,7 @@ export const StaffReport = () => {
     refetchOnWindowFocus: false,
   });
   const [reportMessages, setReportMessages] = useRecoilState<ReportState.Message[]>(reportState.reportMessages);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const handleWSMessage = useCallback(
     (message: any) => {
@@ -57,10 +58,29 @@ export const StaffReport = () => {
               return dayjs(m1.createdAt).isBefore(dayjs(m2.createdAt)) ? -1 : 1;
             })
           );
+          setTimeout(() => {
+            scrollRef.current?.scrollTo({
+              top: scrollRef.current?.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 10);
           break;
         }
         case "addMessage": {
+          const shouldScroll =
+            0 ===
+            (scrollRef.current?.scrollHeight ?? 0) -
+              (scrollRef.current?.scrollTop ?? 0) -
+              (scrollRef.current?.offsetHeight ?? 0);
           setReportMessages([...reportMessages, message.data]);
+          if (!scrollRef || !shouldScroll) return;
+          setTimeout(() => {
+            scrollRef.current?.scrollTo({
+              top: scrollRef.current?.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 10);
+
           break;
         }
         case "setMembers": {
@@ -83,7 +103,7 @@ export const StaffReport = () => {
         }
       }
     },
-    [reportMessages, setReportMessages]
+    [reportMessages, setReportMessages, scrollRef, id, report]
   );
 
   const { lastJsonMessage, sendJsonMessage, readyState } = useWebSocket(
@@ -181,7 +201,7 @@ export const StaffReport = () => {
             {report.tags && report.tags.map(t => <ReportTag key={t.name} {...t} />)}
           </Box>
           <div>
-            <ScrollArea h={"65vh"}>
+            <ScrollArea h={"65vh"} viewportRef={scrollRef}>
               {reportMessages.map(r => (
                 <ReportMessage key={r.id} message={r} />
               ))}
