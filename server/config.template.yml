@@ -6,6 +6,7 @@ server:
   cors:
     origins:
       - localhost:*
+      - https://cfx-nui-dg-auth
   sessionSecret: ***REMOVED***
 
 discord:
