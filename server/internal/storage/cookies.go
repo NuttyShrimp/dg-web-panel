@@ -98,7 +98,7 @@ func setCookie(c *gin.Context, name string, value interface{}) bool {
 		return false
 	}
 	// Maybe change to strict mode but should add param then to manage this for eg. state
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(name, encoded, cookieOptions.MaxAge, "/", cookieOptions.Domain, false, false)
+	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetCookie(name, encoded, cookieOptions.MaxAge, "/", cookieOptions.Domain, true, false)
 	return true
 }
