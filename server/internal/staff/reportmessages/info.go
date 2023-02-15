@@ -16,9 +16,9 @@ func SeedReportMessageMember(msg *panel_models.ReportMessage) error {
 	var messageSender *panel_models.ReportMessageSender
 	if msg.MemberID != nil {
 		var member panel_models.ReportMember
-		db.MariaDB.Client.Where("id = ? AND report_id = ?", msg.MemberID, msg.ID).First(&member)
+		db.MariaDB.Client.Where("id = ? AND report_id = ?", msg.MemberID, msg.ReportID).First(&member)
 		if member.ID == 0 {
-			return fmt.Errorf("could not find a member for %d in report %d", msg.MemberID, msg.ID)
+			return fmt.Errorf("could not find a member for %d in report %d", msg.MemberID, msg.ReportID)
 		}
 		memberInfo, err := cfx.GetCfxUserInfo(member.SteamID)
 		if err != nil {
