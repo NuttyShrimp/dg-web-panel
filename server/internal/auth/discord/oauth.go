@@ -87,34 +87,26 @@ func GenerateOAuthState(c *gin.Context) (string, error) {
 }
 
 func fetchUserIdentity(token *oauth2.Token) (*DiscordIdentity, error) {
-	dec, err := fetchFromDiscordAPI(token, "users/@me")
+	var user DiscordIdentity
+	err := fetchFromDiscordAPI(token, "users/@me", &user)
 
 	if err != nil {
 		logger.Error("Error while reading user info", "error", err)
 		return nil, errors.New("error while getting user info")
 	}
 
-	var user DiscordIdentity
-	if err := dec.Decode(&user); err != nil {
-		logger.Error("Error while unmarshalling user info", "error", err)
-		return nil, errors.New("error while getting user info")
-	}
 	return &user, nil
 }
 
 func fetchGuildInfo(token *oauth2.Token) (*discordGuildMember, error) {
-	dec, err := fetchFromDiscordAPI(token, fmt.Sprintf("users/@me/guilds/%s/member", info.GuildId))
+	var member discordGuildMember
+	err := fetchFromDiscordAPI(token, fmt.Sprintf("users/@me/guilds/%s/member", info.GuildId), &member)
 
 	if err != nil {
 		logger.Error("Error while reading member info", "error", err.Error())
 		return nil, errors.New("error while getting member info")
 	}
 
-	var member discordGuildMember
-	if err := dec.Decode(&member); err != nil {
-		dgerrors.HandleJsonError(err, logger)
-		return nil, errors.New("error while getting member info")
-	}
 	return &member, nil
 }
 
