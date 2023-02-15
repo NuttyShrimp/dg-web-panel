@@ -59,7 +59,9 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 
 	defer func() {
 		err := resp.Body.Close()
-		a.Logger.Error("Failed to close API request body", "error", err)
+		if err != nil {
+			a.Logger.Error("Failed to close API request body", "error", err)
+		}
 	}()
 	ei.Response = resp
 
