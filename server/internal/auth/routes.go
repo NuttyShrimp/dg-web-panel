@@ -4,6 +4,7 @@ import (
 	"context"
 	"degrens/panel/internal/auth/apikeys"
 	"degrens/panel/internal/auth/authinfo"
+	"degrens/panel/internal/auth/cfxauth"
 	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/auth/discord"
 	"degrens/panel/internal/routes"
@@ -129,7 +130,7 @@ func (AR *AuthRouter) loginHandler() gin.HandlerFunc {
 				return
 			}
 
-			err := cfxtoken.AuthorizeToken(c, authTokens[1])
+			err := cfxauth.AuthorizeToken(c, authTokens[1])
 			if err != nil {
 				AR.Logger.Error("Failed to authorize a cfx token", "token", tokenHeader, "err", err)
 				c.JSON(http.StatusUnauthorized, gin.H{
