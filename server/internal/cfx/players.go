@@ -65,7 +65,7 @@ func GetCfxPlayerInfo(steamId string) (*cfx_models.User, error) {
 
 func GetCfxRolesForSteamId(steamId string) ([]string, error) {
 	output := []string{}
-	ei, err := api.CfxApi.DoRequest("GET", "/info/player/roles/"+steamId, nil, nil)
+	ei, err := api.CfxApi.DoRequest("GET", "/info/player/roles/"+steamId, nil, &output)
 	if err != nil {
 		return nil, err
 	}
