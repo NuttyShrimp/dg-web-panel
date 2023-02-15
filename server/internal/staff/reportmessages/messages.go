@@ -2,10 +2,11 @@ package reportmessages
 
 import (
 	"degrens/panel/internal/auth/authinfo"
-	"degrens/panel/internal/cfx"
+	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
 	"encoding/json"
+	"errors"
 )
 
 func saveMessage(reportId uint, message interface{}, sender *authinfo.AuthInfo) (*panel_models.ReportMessage, error) {
@@ -20,11 +21,11 @@ func saveMessage(reportId uint, message interface{}, sender *authinfo.AuthInfo) 
 	}
 	if sender.AuthMethod == authinfo.CFXToken {
 		// Member
-		userInfo, err := cfx.GetCfxUserFromId(sender.ID)
-		if err != nil {
-			return nil, err
+		tokenInfo := cfxtoken.GetInfoForToken(sender.ID)
+		if tokenInfo == nil {
+			return nil, errors.New("Failed to get info bound to cfx token")
 		}
-		reportMember := db.MariaDB.Repository.GetReportMemberBySteamId(userInfo.SteamId, reportId)
+		reportMember := db.MariaDB.Repository.GetReportMemberBySteamId(tokenInfo.SteamId, reportId)
 		reportMessage.MemberID = &reportMember.ID
 	} else {
 		// User
