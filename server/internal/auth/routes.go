@@ -14,6 +14,7 @@ import (
 	"degrens/panel/models"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -110,22 +111,33 @@ func (AR *AuthRouter) loginHandler() gin.HandlerFunc {
 			})
 			return
 		case "cfxtoken":
-			token := c.GetHeader("Authorization")
-			if token == "" {
+			tokenHeader := c.GetHeader("Authorization")
+			if tokenHeader == "" {
 				// No header given, yeet req
 				c.JSON(http.StatusBadRequest, gin.H{
 					"error": "Failed to get a valid token from the request",
 				})
 				return
 			}
-			err := cfxtoken.AuthorizeToken(c, token)
+
+			authTokens := strings.Split(tokenHeader, " ")
+
+			if len(authTokens) != 2 || authTokens[0] != "Bearer" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": "Failed to get a valid token from the request",
+				})
+				return
+			}
+
+			err := cfxtoken.AuthorizeToken(c, authTokens[1])
 			if err != nil {
-				AR.Logger.Error("Failed to authorize a cfx token", "token", token, "err", err)
+				AR.Logger.Error("Failed to authorize a cfx token", "token", tokenHeader, "err", err)
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"error": "Failed to use cfx token to create session",
 				})
 				return
 			}
+			c.JSON(200, gin.H{})
 		}
 	}
 }
