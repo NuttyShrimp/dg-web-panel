@@ -107,7 +107,7 @@ export const StaffReport = () => {
   );
 
   const { lastJsonMessage, sendJsonMessage, readyState } = useWebSocket(
-    `${location.protocol === "https" ? "wss" : "ws"}://${getHostname()}/api/staff/reports/join/${Number(id)}`
+    `${location.protocol.includes("https") ? "wss" : "ws"}://${getHostname()}/api/staff/reports/join/${Number(id)}`
   );
 
   const sendNewMsg = (msg: any) => {
