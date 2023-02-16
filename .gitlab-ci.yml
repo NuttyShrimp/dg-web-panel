@@ -21,6 +21,9 @@ stages:
 compile server:
   image: golang:latest
   stage: build
+  only:
+    changes:
+        - server/**/*
   extends:
     - .go_setup
   script:
@@ -49,6 +52,9 @@ lint:
 compile webui:
   stage: build
   image: node:16
+  only:
+    changes:
+        - webui/**/*
   cache:
     key: '$CI_COMMIT_REF_NAME-node_modules'
     paths:
