@@ -22,7 +22,7 @@ func AuthorizeToken(ctx *gin.Context, token string) error {
 	cfxtoken.RegisterToken(id, token, &tokenInfo)
 
 	authInfo := authinfo.AuthInfo{
-		ID:         uint(id),
+		ID:         id,
 		Roles:      append(tokenInfo.Roles, "player"),
 		AuthMethod: "cfxtoken",
 	}
