@@ -6,6 +6,7 @@ import (
 	"degrens/panel/internal/cfx/characters"
 	"degrens/panel/internal/config"
 	"degrens/panel/internal/staff"
+	"degrens/panel/internal/state"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/log"
 	"degrens/panel/lib/ratelimiter"
@@ -55,6 +56,7 @@ func SetupRouter(conf *config.Config, logger log.Logger) *gin.Engine {
 	staff.NewStaffRouter(securedapiRG, logger)
 	admin.NewDevRouter(securedapiRG, logger)
 	characters.NewCharacterRouter(securedapiRG, logger)
+	state.NewStateRouter(securedapiRG, logger)
 
 	return r
 }

@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - publish
 
 .go_setup:
   variables:
@@ -16,6 +17,42 @@ stages:
     paths:
       - server/.cache/pkg/mod
       - server/.golangci-lint/
+
+build server image:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  only:
+    refs:
+        - master
+    changes:
+        - server/**/*
+  script:
+    - cd server
+    - cp "$CONFIG_FILE" config.yml
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/server:latest -t $CI_REGISTRY_IMAGE/server:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE/server:latest
+    - docker push $CI_REGISTRY_IMAGE/server:$CI_COMMIT_SHA
+
+build webui image:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  only:
+    refs:
+        - master
+    changes:
+        - webui/**/*
+  script:
+    - cd server
+    - cp "$CONFIG_FILE" config.yml
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/webui:latest -t $CI_REGISTRY_IMAGE/webui:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE/webui:latest
+    - docker push $CI_REGISTRY_IMAGE/webui:$CI_COMMIT_SHA
 
 compile:
   image: golang:latest
