@@ -18,6 +18,51 @@ stages:
       - server/.cache/pkg/mod
       - server/.golangci-lint/
 
+compile server:
+  image: golang:latest
+  stage: build
+  extends:
+    - .go_setup
+  script:
+    - mkdir -p builded-binaries
+    - go build -o builded-binaries ./...
+  artifacts:
+    paths:
+      - server/builded-binaries
+        
+lint:
+  extends: 
+    - .go_setup
+  image: golangci/golangci-lint:v1.50-alpine
+  stage: test
+  script:
+    - golangci-lint --version
+    # Write the code coverage report to gl-code-quality-report.json
+    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+    - golangci-lint run --out-format colored-line-number:stdout,code-climate:gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: server/gl-code-quality-report.json
+    paths:
+      - server/gl-code-quality-report.json
+
+compile webui:
+  stage: build
+  image: node:16
+  cache:
+    key: '$CI_COMMIT_REF_NAME-node_modules'
+    paths:
+      - webui/node_modules
+  before_script:
+    - cd webui
+    - npm config set @degrens-21:registry https://gitlab.pieter557.dscloud.me/api/v4/packages/npm/
+    - npm config set -- '//gitlab.pieter557.dscloud.me/api/v4/packages/npm/:_authToken' "${CI_JOB_TOKEN}"
+    - npm config set always-auth true
+    - yarn config set network-timeout 600000 -g
+    - yarn --pure-lockfile
+  script:
+    - yarn build
+
 build server image:
   stage: publish
   image: docker:latest
@@ -52,31 +97,3 @@ build webui image:
     - docker build -t $CI_REGISTRY_IMAGE/webui:latest -t $CI_REGISTRY_IMAGE/webui:$CI_COMMIT_SHA .
     - docker push $CI_REGISTRY_IMAGE/webui:latest
     - docker push $CI_REGISTRY_IMAGE/webui:$CI_COMMIT_SHA
-
-compile:
-  image: golang:latest
-  stage: build
-  extends:
-    - .go_setup
-  script:
-    - mkdir -p builded-binaries
-    - go build -o builded-binaries ./...
-  artifacts:
-    paths:
-      - server/builded-binaries
-        
-lint:
-  extends: 
-    - .go_setup
-  image: golangci/golangci-lint:v1.50-alpine
-  stage: test
-  script:
-    - golangci-lint --version
-    # Write the code coverage report to gl-code-quality-report.json
-    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
-    - golangci-lint run --out-format colored-line-number:stdout,code-climate:gl-code-quality-report.json
-  artifacts:
-    reports:
-      codequality: server/gl-code-quality-report.json
-    paths:
-      - server/gl-code-quality-report.json
