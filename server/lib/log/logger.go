@@ -1,10 +1,7 @@
 package log
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/getsentry/sentry-go"
+	"github.com/TheZeroSlave/zapsentry"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -28,21 +25,39 @@ type logger struct {
 	*zap.SugaredLogger
 }
 
-func New(isDevEnv bool) Logger {
-	var l *zap.Logger
-	hooks := zap.Hooks(func(entry zapcore.Entry) error {
-		if entry.Level == zapcore.ErrorLevel {
-			defer sentry.Flush(2 * time.Second)
-			sentry.CaptureMessage(fmt.Sprintf("%s, Line No: %d :: %s", entry.Caller.File, entry.Caller.Line, entry.Message))
-		}
-		return nil
-	})
-	if isDevEnv {
-		l, _ = zap.NewDevelopment(hooks)
-	} else {
-		l, _ = zap.NewProduction(hooks)
+func modifyToSentryLogger(log *zap.Logger, sentryDSN string) *zap.Logger {
+	cfg := zapsentry.Configuration{
+		Level:             zapcore.ErrorLevel, //when to send message to sentry
+		EnableBreadcrumbs: true,               // enable sending breadcrumbs to Sentry
+		BreadcrumbLevel:   zapcore.InfoLevel,  // at what level should we sent breadcrumbs to sentry
+		Tags: map[string]string{
+			"component": "system",
+		},
 	}
-	loggerInstance := &logger{l.Sugar()}
+	core, err := zapsentry.NewCore(cfg, zapsentry.NewSentryClientFromDSN(sentryDSN))
+
+	//in case of err it will return noop core. so we can safely attach it
+	if err != nil {
+		log.Warn("failed to init zap", zap.Error(err))
+	}
+
+	log = zapsentry.AttachCoreToLogger(core, log)
+
+	// to use breadcrumbs feature - create new scope explicitly
+	// and attach after attaching the core
+	return log.With(zapsentry.NewScope())
+}
+
+func New(isDevEnv bool, sentryDSN string) Logger {
+	var l *zap.Logger
+	if isDevEnv {
+		l, _ = zap.NewDevelopment()
+	} else {
+		l, _ = zap.NewProduction()
+	}
+	sl := modifyToSentryLogger(l, sentryDSN)
+	loggerInstance := &logger{sl.Sugar()}
+
 	return loggerInstance
 }
 

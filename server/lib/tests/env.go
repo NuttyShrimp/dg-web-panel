@@ -29,7 +29,7 @@ func LoadBareEnv() *Env {
 		panic(err)
 	}
 	env := Env{
-		Logger: log.New(true),
+		Logger: log.New(true, "https://16ccf13e3a274fb9bcb6f827bd8f57d0@sentry.nuttyshrimp.me/11"),
 		Config: testConfig,
 	}
 

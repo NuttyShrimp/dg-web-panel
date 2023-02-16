@@ -12,6 +12,7 @@ import (
 	"degrens/panel/lib/log"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 )
@@ -34,8 +35,10 @@ func main() {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
 
+	defer sentry.Flush(2 * time.Second)
+
 	// Create logger
-	logger := log.New(conf.Server.Env == "development")
+	logger := log.New(conf.Server.Env == "development", "https://16ccf13e3a274fb9bcb6f827bd8f57d0@sentry.nuttyshrimp.me/11")
 
 	db.InitDatabase(conf, logger)
 	graylog.InitGrayLogger(&conf.Graylog, logger)
