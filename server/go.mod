@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/didip/tollbooth/v6 v6.1.2
-	github.com/getsentry/sentry-go v0.15.0
+	github.com/getsentry/sentry-go v0.17.0
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis/v8 v8.11.5
@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/stretchr/testify v1.8.0
-	go.uber.org/zap v1.21.0
+	go.uber.org/zap v1.24.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.3.3
@@ -20,6 +20,7 @@ require (
 )
 
 require (
+	github.com/TheZeroSlave/zapsentry v1.14.0 // indirect
 	github.com/aidenwallis/go-utils v0.0.15 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
