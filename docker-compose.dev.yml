@@ -27,17 +27,22 @@ services:
       - mariadb-data:/var/lib/mysql
   
   backend:
-    image: registry-gitlab.pieter557.dscloud.me/degrens-21/panel/backend:latest
-    container_name: dg-panel-server
+    image: dg-panel/backend
+    container_name: dg-panel-gin
     restart: unless-stopped
+    build:
+      context: "server/."
+      args:
+        - config=config.docker.yml
     depends_on:
       - mariadb
       - redis
   
   web:
-    image: registry-gitlab.pieter557.dscloud.me/degrens-21/panel/frontend:latest
+    image: dg-panel/frontend
     container_name: dg-panel-web
     restart: unless-stopped
+    build: "webui/."
     ports:
       - 80:80
     depends_on:
