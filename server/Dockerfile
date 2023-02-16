@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN GOOS=linux go build -o panel-server cmds/panel/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./panel-server cmds/panel/main.go
 
 FROM alpine:latest
 
