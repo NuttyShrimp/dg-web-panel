@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useRef } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import useWebSocket from "react-use-websocket";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 import "@src/styles/pages/staffReport.scss";
 import { ReportMessage } from "./components/ReportMessage";
@@ -110,6 +110,14 @@ export const StaffReport = () => {
     `${location.protocol.includes("https") ? "wss" : "ws"}://${getHostname()}/api/staff/reports/join/${Number(id)}`
   );
 
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+
   const sendNewMsg = (msg: any) => {
     sendJsonMessage({
       type: "addMessage",
@@ -185,6 +193,7 @@ export const StaffReport = () => {
       <Stack justify={"center"} align="center" pt={"lg"}>
         <Loader color="gray" />
         <Text>Connecting to report socket</Text>
+        <Text>Current status: {connectionStatus}</Text>
       </Stack>
     );
   }
