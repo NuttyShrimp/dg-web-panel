@@ -35,8 +35,6 @@ func main() {
 		fmt.Printf("Sentry initialization failed: %v\n", err)
 	}
 
-	defer sentry.Flush(2 * time.Second)
-
 	// Create logger
 	logger := log.New(conf.Server.Env == "development", "https://16ccf13e3a274fb9bcb6f827bd8f57d0@sentry.nuttyshrimp.me/11")
 
@@ -53,6 +51,8 @@ func main() {
 	discord.InitDiscordConf(conf, logger)
 	users.InitUserRoles(conf)
 	storage.InitStorages(conf, logger)
+
+	defer sentry.Flush(2 * time.Second)
 
 	r := router.SetupRouter(conf, logger)
 	err = r.Run(fmt.Sprintf("%s:%d", conf.Server.Host, conf.Server.Port))

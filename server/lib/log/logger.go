@@ -27,7 +27,7 @@ type logger struct {
 
 func modifyToSentryLogger(log *zap.Logger, sentryDSN string) *zap.Logger {
 	cfg := zapsentry.Configuration{
-		Level:             zapcore.ErrorLevel, //when to send message to sentry
+		Level:             zapcore.ErrorLevel, // when to send message to sentry
 		EnableBreadcrumbs: true,               // enable sending breadcrumbs to Sentry
 		BreadcrumbLevel:   zapcore.InfoLevel,  // at what level should we sent breadcrumbs to sentry
 		Tags: map[string]string{
@@ -36,7 +36,7 @@ func modifyToSentryLogger(log *zap.Logger, sentryDSN string) *zap.Logger {
 	}
 	core, err := zapsentry.NewCore(cfg, zapsentry.NewSentryClientFromDSN(sentryDSN))
 
-	//in case of err it will return noop core. so we can safely attach it
+	// in case of err it will return noop core. so we can safely attach it
 	if err != nil {
 		log.Warn("failed to init zap", zap.Error(err))
 	}
