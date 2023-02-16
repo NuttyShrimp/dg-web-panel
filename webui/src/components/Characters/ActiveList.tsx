@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { List } from "../List";
 import { useCharacterActions } from "@src/stores/character/useCharacterActions";
 import { LoadingSpinner } from "../LoadingSpinner";
+import { Link } from "../Router/Link";
 
 export const ActiveCharacterList = () => {
   const { fetchActiveCharacters } = useCharacterActions();
@@ -29,9 +30,14 @@ export const ActiveCharacterList = () => {
       <List>
         {data.map(c => (
           <List.Entry key={c.citizenid}>
-            <Text>
-              {c.info.firstname} {c.info.lastname}
-            </Text>
+            <Link noColor to={`/staff/characters/${c.citizenid}`}>
+              <Text weight={"bolder"}>
+                {c.info.firstname} {c.info.lastname} | {c.citizenid}
+              </Text>
+              <Text>
+                {c.user.name}
+              </Text>
+            </Link>
           </List.Entry>
         ))}
       </List>
