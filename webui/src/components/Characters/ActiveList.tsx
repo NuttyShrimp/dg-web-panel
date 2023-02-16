@@ -34,9 +34,7 @@ export const ActiveCharacterList = () => {
               <Text weight={"bolder"}>
                 {c.info.firstname} {c.info.lastname} | {c.citizenid}
               </Text>
-              <Text>
-                {c.user.name}
-              </Text>
+              <Text>{c.user.name}</Text>
             </Link>
           </List.Entry>
         ))}
