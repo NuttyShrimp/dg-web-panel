@@ -17,7 +17,7 @@ var logger log.Logger
 func InitCookieStore(conf *config.Config, logger2 log.Logger) {
 	cookieOptions = CookieOptions{
 		MaxAge: 86400 * 30,
-		Domain: conf.Server.Host,
+		Domain: conf.Server.GetCookieHost(),
 		Codecs: securecookie.CodecsFromPairs([]byte(conf.Server.SessionSecret)),
 	}
 	logger = logger2.With("module", "cookies")
@@ -86,7 +86,7 @@ func GetHiddenCookie(c *gin.Context, key string, dst any) error {
 }
 
 func RemoveCookie(c *gin.Context, key string) {
-	c.SetCookie(key, "", -1, "/", cookieOptions.Domain, false, false)
+	c.SetCookie(key, "", -1, "/", cookieOptions.Domain, true, false)
 }
 
 // Helpers
