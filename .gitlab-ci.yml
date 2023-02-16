@@ -47,8 +47,7 @@ build webui image:
     changes:
         - webui/**/*
   script:
-    - cd server
-    - cp "$CONFIG_FILE" config.yml
+    - cd webui 
     - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build -t $CI_REGISTRY_IMAGE/webui:latest -t $CI_REGISTRY_IMAGE/webui:$CI_COMMIT_SHA .
     - docker push $CI_REGISTRY_IMAGE/webui:latest
