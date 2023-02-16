@@ -27,7 +27,7 @@ services:
       - mariadb-data:/var/lib/mysql
   
   backend:
-    image: registry-gitlab.pieter557.dscloud.me/degrens-21/panel/backend:latest
+    image: registry-gitlab.pieter557.dscloud.me/degrens-21/panel/server:latest
     container_name: dg-panel-server
     restart: unless-stopped
     depends_on:
@@ -35,7 +35,7 @@ services:
       - redis
   
   web:
-    image: registry-gitlab.pieter557.dscloud.me/degrens-21/panel/frontend:latest
+    image: registry-gitlab.pieter557.dscloud.me/degrens-21/panel/webui:latest
     container_name: dg-panel-web
     restart: unless-stopped
     ports:
