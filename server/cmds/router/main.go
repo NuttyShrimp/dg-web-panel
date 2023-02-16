@@ -37,7 +37,7 @@ func SetupRouter(conf *config.Config, logger log.Logger) *gin.Engine {
 			AllowCredentials: true,
 			AllowWebSockets:  true,
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
-			AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "sentry-trace", "baggage", "X-Api-Key"},
+			AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization", "sentry-trace", "baggage", "X-Api-Key", "Upgrade"},
 			MaxAge:           12 * time.Hour,
 		}),
 		ratelimiter.RateLimit(conf.Server.ReqPerSeq),
