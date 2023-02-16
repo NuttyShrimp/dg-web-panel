@@ -28,6 +28,7 @@ type ConfigServer struct {
 		Origins []string `yaml:"origins"`
 	} `yaml:"cors"`
 	SessionSecret string `yaml:"sessionSecret"`
+	CookiesHost   string `yaml:"cookiesHost,omitempty"`
 }
 
 type ConfigDiscord struct {
@@ -136,4 +137,11 @@ func GetConfigPath() string {
 		panic(err)
 	}
 	return configPath
+}
+
+func (CS *ConfigServer) GetCookieHost() string {
+	if CS.CookiesHost == "" {
+		return CS.Host
+	}
+	return CS.CookiesHost
 }

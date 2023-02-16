@@ -8,6 +8,7 @@ server:
       - localhost:*
       - https://cfx-nui-dg-auth
   sessionSecret: ***REMOVED***
+  cookiesHost: localhost
 
 discord:
   redirectURL: http://localhost:3000/api/auth/callback
