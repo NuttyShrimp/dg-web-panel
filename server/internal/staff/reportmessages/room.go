@@ -147,7 +147,7 @@ func (r *Room) sendMessages(c *Client, offset int) {
 		// that message
 		err = SeedReportMessageMember(&msgs[i])
 		if err != nil {
-			r.logger.Error("Failed to seed reportmessage", "messageId", msgs[i].ID)
+			r.logger.Error("Failed to seed reportmessage", "messageId", msgs[i].ID, "error", err)
 		}
 	}
 
