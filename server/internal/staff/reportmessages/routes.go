@@ -7,6 +7,7 @@ import (
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -61,7 +62,7 @@ func (RR *ReportRouter) AddMessage(ctx *gin.Context) {
 		Message  interface{} `json:"message"`
 		ReportId uint        `json:"reportId"`
 	}{}
-	err := ctx.ShouldBind(&body)
+	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
 		RR.Logger.Error("Failed to get the bind the body to the designated struct", "error", err)
 		ctx.JSON(500, models.RouteErrorMessage{
