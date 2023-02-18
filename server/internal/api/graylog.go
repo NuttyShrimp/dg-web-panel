@@ -5,7 +5,6 @@ import (
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -52,7 +51,7 @@ func (ga *graylogApi) DoRequest(method, endpoint string, input, output interface
 	return ga.doInternalRequest(method, endpoint, input, output, ga.addInput, ga.doAuthentication)
 }
 
-func (ga *graylogApi) addInput(req *http.Request, input interface{}) io.Reader {
+func (ga *graylogApi) addInput(req *http.Request, input interface{}) {
 	// This generates Query parameters based on the josn tags from input
 	// TODO: Check if works for POST requests
 	inputVal := reflect.ValueOf(input)
@@ -76,7 +75,6 @@ func (ga *graylogApi) addInput(req *http.Request, input interface{}) io.Reader {
 		}
 	}
 	req.URL.RawQuery = q.Encode()
-	return http.NoBody
 }
 
 func (ga *graylogApi) doAuthentication(req *http.Request) {
