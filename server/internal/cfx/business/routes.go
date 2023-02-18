@@ -1,6 +1,7 @@
 package business
 
 import (
+	"degrens/panel/internal/api"
 	"degrens/panel/internal/auth/authinfo"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/errors"
@@ -33,6 +34,9 @@ func (BR *BusinessRouter) RegisterRoutes() {
 	BR.RouterGroup.GET("/:id/logs", BR.FetchLogs)
 	BR.RouterGroup.GET("/:id/employees", BR.FetchEmployees)
 	BR.RouterGroup.POST("/:id/owner", BR.ChangeOwner)
+
+	// TODO: secure with role authenitction
+	BR.RouterGroup.POST("/new", BR.CreateBusiness)
 }
 
 func (BR *BusinessRouter) FetchAll(ctx *gin.Context) {
@@ -208,6 +212,42 @@ func (BR *BusinessRouter) ChangeOwner(ctx *gin.Context) {
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to update the business owner",
+		})
+		return
+	}
+	ctx.JSON(200, gin.H{})
+}
+
+func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
+	body := struct {
+		Label  string `json:"label"`
+		Name   string `json:"name"`
+		TypeId uint   `json:"typeId"`
+		Owner  uint   `json:"owner"`
+	}{}
+	err := ctx.BindJSON(&body)
+	if err != nil {
+		BR.Logger.Error("Failed to bind body to struct when createing business", "error", err)
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request error",
+			Description: "We encountered an issue while reading the info from your request",
+		})
+		return
+	}
+	ai, err := api.CfxApi.DoRequest("POST", "/business/actions/new", &body, nil)
+	if err != nil {
+		BR.Logger.Error("Failed to create business on cfx", "error", err)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an issue while trying to create a business",
+		})
+		return
+	}
+	if ai.Message != "" {
+		BR.Logger.Error("Failed to create business on cfx", "error", ai.Message)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an issue while trying to create a business",
 		})
 		return
 	}

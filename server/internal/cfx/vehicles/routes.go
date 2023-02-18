@@ -1,6 +1,7 @@
 package vehicles
 
 import (
+	"degrens/panel/internal/api"
 	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/log"
@@ -27,6 +28,7 @@ func NewVehicleRouter(rg *gin.RouterGroup, logger log.Logger) {
 
 func (VR *VehiclesRouter) RegisterRoutes() {
 	VR.RouterGroup.GET("/cid/:cid", VR.FetchAccounts)
+	VR.RouterGroup.POST("/give", VR.GiveNewVehicle)
 }
 
 func (VR *VehiclesRouter) FetchAccounts(ctx *gin.Context) {
@@ -49,4 +51,37 @@ func (VR *VehiclesRouter) FetchAccounts(ctx *gin.Context) {
 		})
 	}
 	ctx.JSON(200, vehs)
+}
+
+func (VR *VehiclesRouter) GiveNewVehicle(ctx *gin.Context) {
+	body := struct {
+		Model string `json:"model"`
+		Owner uint   `json:"owner"`
+	}{}
+	err := ctx.BindJSON(&body)
+	if err != nil {
+		VR.Logger.Error("Failed to bind body to struct when createing business", "error", err)
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request error",
+			Description: "We encountered an issue while reading the info from your request",
+		})
+		return
+	}
+	ai, err := api.CfxApi.DoRequest("POST", "/vehicles/give", &body, nil)
+	if err != nil {
+		VR.Logger.Error("Failed to give vehicle to player", "error", err)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an issue while trying to give the vehicle to the player",
+		})
+		return
+	}
+	if ai.Message != "" {
+		VR.Logger.Error("Failed to give vehicle to player", "error", ai.Message)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an issue while trying to give the vehicle to the player",
+		})
+		return
+	}
 }
