@@ -27,6 +27,8 @@ discord:
       id: 711197025600798810
     - name: ambulance
       id: 711197065463463976
+    - name: player
+      id: 1
 
 redis:
   host: redis-13581.c250.eu-central-1-1.ec2.cloud.redislabs.com

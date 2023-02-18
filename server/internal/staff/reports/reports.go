@@ -73,9 +73,9 @@ func AddMemberToReport(userId string, reportId uint, steamId string) error {
 }
 
 func FetchReports(titleFilter string, offset int, tags []string, includeOpen, includeClosed bool, authInfo *authinfo.AuthInfo) (*[]panel_models.Report, error) {
-	dbQuery := db.MariaDB.Client.Preload("Tags")
+	dbQuery := db.MariaDB.Client.Preload("Tags").Model(&panel_models.Report{})
 	if len(tags) > 0 {
-		dbQuery.Joins("inner join report_tags_link rtl on rtl.report_id = reports.id ").
+		dbQuery = dbQuery.Joins("inner join report_tags_link rtl on rtl.report_id = reports.id ").
 			Joins("inner join report_tags t on t.name = rtl.report_tag_name").
 			Where("t.name IN ?", tags)
 	}
@@ -87,11 +87,11 @@ func FetchReports(titleFilter string, offset int, tags []string, includeOpen, in
 		if tokenInfo == nil {
 			return nil, errors.New("Failed to get info bound to cfx token")
 		}
-		dbQuery.Joins("Members", db.MariaDB.Client.Where(&panel_models.ReportMember{SteamID: tokenInfo.SteamId}))
+		dbQuery = dbQuery.Joins("JOIN report_members ON reports.id = report_members.report_id AND report_members.steam_id = ?", tokenInfo.SteamId)
 	} else {
-		dbQuery.Preload("Members")
+		dbQuery = dbQuery.Preload("Members")
 	}
-	dbQuery.Offset(offset*25).Limit(25).Order("id desc").Where("title LIKE ?", "%"+titleFilter+"%")
+	dbQuery = dbQuery.Offset(offset*25).Limit(25).Order("id desc").Where("title LIKE ?", "%"+titleFilter+"%")
 	if includeOpen && !includeClosed {
 		dbQuery = dbQuery.Where("open = ?", true)
 	} else if includeClosed && !includeOpen {
