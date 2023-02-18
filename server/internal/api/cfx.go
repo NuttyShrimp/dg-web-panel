@@ -45,14 +45,13 @@ func (ca *cfxApi) DoRequest(method, endpoint string, input, output interface{}) 
 	return ei, err
 }
 
-func (ca *cfxApi) addInput(req *http.Request, input interface{}) {
-	buf := new(bytes.Buffer)
-	encoder := json.NewEncoder(buf)
-	if err := encoder.Encode(input); err != nil {
+func (ca *cfxApi) addInput(req *http.Request, input interface{}) io.Reader {
+	body, err := json.Marshal(input)
+	if err != nil {
 		ca.Logger.Error("Failed to encode input to JSON for Cfx request", "error", err.Error())
-		return
+		return http.NoBody
 	}
-	req.Body = io.NopCloser(buf)
+	return bytes.NewBuffer(body)
 }
 
 func (ca *cfxApi) doAuthentication(req *http.Request) {
