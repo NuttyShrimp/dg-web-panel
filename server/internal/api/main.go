@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type AddInput func(req *http.Request, input interface{}) io.Reader
+type AddInput func(req *http.Request, input interface{})
 type DoAuthentication func(req *http.Request)
 
 type Api interface {
@@ -30,15 +30,13 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 	)
 	endpoint = fmt.Sprint(a.baseURL, endpoint)
 
-	var body io.Reader = http.NoBody
-	if input != nil {
-		body = inputHandler(req, input)
-	}
-
-	req, err = http.NewRequest(method, endpoint, body)
+	req, err = http.NewRequest(method, endpoint, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to call http.NewRequest: %s %s: %w", method, endpoint, err)
+	}
+	if input != nil {
+		inputHandler(req, input)
 	}
 
 	req.Header.Set("User-Agent", "go-degrens-panel/1.0")
