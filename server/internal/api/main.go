@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type AddInput func(req *http.Request, input interface{})
+type AddInput func(req *http.Request, input interface{}) io.Reader
 type DoAuthentication func(req *http.Request)
 
 type Api interface {
@@ -30,7 +30,12 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 	)
 	endpoint = fmt.Sprint(a.baseURL, endpoint)
 
-	req, err = http.NewRequest(method, endpoint, http.NoBody)
+	var body io.Reader = http.NoBody
+	if input != nil {
+		body = inputHandler(req, input)
+	}
+
+	req, err = http.NewRequest(method, endpoint, body)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"failed to call http.NewRequest: %s %s: %w", method, endpoint, err)
@@ -41,9 +46,6 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Requested-By", "go-graylog")
 
-	if input != nil {
-		inputHandler(req, input)
-	}
 	ei := &ErrorInfo{Request: req}
 
 	authHandler(req)
