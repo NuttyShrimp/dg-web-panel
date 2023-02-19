@@ -1,9 +1,10 @@
-package players
+package penalties
 
 import (
 	"degrens/panel/internal/api"
 	"degrens/panel/internal/db"
 	cfx_models "degrens/panel/internal/db/models/cfx"
+	"degrens/panel/lib/graylogger"
 	"errors"
 	"time"
 
@@ -33,6 +34,12 @@ func GetPlayerPenalties(steamId string) ([]cfx_models.Penalties, error) {
 	}
 
 	return penalties, nil
+}
+
+func GetBanList() ([]*cfx_models.Penalties, error) {
+	list := []*cfx_models.Penalties{}
+	err := db.CfxMariaDB.Client.Order("date DESC").Find(&list).Error
+	return list, err
 }
 
 func IsPlayerBanned(steamId string) (*time.Time, error) {
@@ -75,4 +82,34 @@ func KickPlayer(steamId string, info *KickInfo) (bool, error) {
 	}
 
 	return output.Result, nil
+}
+
+func UpdateBan(userId string, banId, points uint, length int, reason string) error {
+	ban := cfx_models.Penalties{}
+	err := db.CfxMariaDB.Client.First(&ban, banId).Error
+	if err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil
+		}
+		return err
+	}
+	ban.Points = points
+	ban.Reason = reason
+	ban.Length = length
+	err = db.CfxMariaDB.Client.Save(&ban).Error
+	return err
+}
+
+func RemoveBan(userId string, banId uint) error {
+	ban := cfx_models.Penalties{}
+	err := db.CfxMariaDB.Client.First(&ban, banId).Error
+	if err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil
+		}
+		return err
+	}
+	err = db.CfxMariaDB.Client.Where("penalty = ?", cfx_models.BanPenalty).Delete(&cfx_models.Penalties{}, banId).Error
+	graylogger.Log("staff:bans:unban", "userId", userId, "banInfo", ban)
+	return err
 }
