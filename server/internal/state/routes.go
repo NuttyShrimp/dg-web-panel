@@ -1,7 +1,6 @@
 package state
 
 import (
-	"degrens/panel/internal/auth/middlewares/role"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/log"
 
@@ -15,7 +14,7 @@ type StateRouter struct {
 func NewStateRouter(rg *gin.RouterGroup, logger log.Logger) {
 	router := &StateRouter{
 		routes.Router{
-			RouterGroup: rg.Group("/staff", role.New([]string{"developer"})),
+			RouterGroup: rg.Group("/state"),
 			Logger:      logger,
 		},
 	}
