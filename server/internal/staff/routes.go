@@ -5,10 +5,12 @@ import (
 	"degrens/panel/internal/auth/middlewares/role"
 	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/cfx/business"
+	"degrens/panel/internal/cfx/penalties"
 	"degrens/panel/internal/cfx/players"
 	"degrens/panel/internal/routes"
 	"degrens/panel/internal/staff/reportmessages"
 	"degrens/panel/internal/staff/reports"
+	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
@@ -44,6 +46,10 @@ func (SR *StaffRouter) RegisterRoutes() {
 	SR.RouterGroup.POST("/notes", SR.createStaffNote)
 	SR.RouterGroup.POST("/notes/:id", SR.updateStaffNote)
 	SR.RouterGroup.DELETE("/notes/:id", SR.deleteStaffNote)
+
+	SR.RouterGroup.GET("/ban/list", SR.FetchBanList)
+	SR.RouterGroup.POST("/ban/:id", SR.updateBan)
+	SR.RouterGroup.DELETE("/ban/:id", SR.removeBan)
 
 	business.NewBusinessRouter(SR.RouterGroup, SR.Logger)
 	players.NewPlayerRouter(SR.RouterGroup, SR.Logger)
@@ -216,6 +222,116 @@ func (SR *StaffRouter) deleteStaffNote(ctx *gin.Context) {
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
 			Description: "Failed to delete the staff note",
+		})
+		return
+	}
+	ctx.JSON(200, gin.H{})
+}
+
+func (SR *StaffRouter) FetchBanList(ctx *gin.Context) {
+	list, err := penalties.GetBanList()
+	if err != nil {
+		SR.Logger.Error("Failed to fetch the cfx ban list", "error", err)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server Error",
+			Description: "Failed to fetch the banlist",
+		})
+		return
+	}
+	ctx.JSON(200, list)
+}
+
+func (SR *StaffRouter) updateBan(ctx *gin.Context) {
+	banIdStr := ctx.Param("id")
+	if banIdStr == "" {
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request Error",
+			Description: "No ban id given to update",
+		})
+	}
+	banId, err := strconv.ParseUint(banIdStr, 10, 64)
+	if err != nil {
+		SR.Logger.Error("Failed to convert the banId string to a uint", "error", err, "banId", banIdStr)
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request Error",
+			Description: "Could not transform your banId to a valid number",
+		})
+		return
+	}
+
+	body := struct {
+		Reason string `json:"reason"`
+		Length int    `json:"length"`
+		Points uint   `json:"points"`
+	}{}
+	err = ctx.ShouldBindJSON(&body)
+	if err != nil {
+		SR.Logger.Error("Failed to bind the body of an update ban request", "error", err, "banId", banIdStr)
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request Error",
+			Description: "Could get all the needed info from your request",
+		})
+		return
+	}
+
+	userId, err := users.GetUserIdentifier(ctx)
+	if err != nil {
+		SR.Logger.Error("Failed to get a user identifier string", "error", err, "banId", banIdStr)
+		ctx.JSON(403, models.RouteErrorMessage{
+			Title:       "Authentication Error",
+			Description: "Could get valid identification for your request",
+		})
+		return
+	}
+
+	err = penalties.UpdateBan(userId, uint(banId), body.Points, body.Length, body.Reason)
+	if err != nil {
+		SR.Logger.Error("Failed to delete a cfx ban", "error", err)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server Error",
+			Description: "Failed to delete the requested ban",
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{})
+}
+
+func (SR *StaffRouter) removeBan(ctx *gin.Context) {
+	banIdStr := ctx.Param("id")
+	if banIdStr == "" {
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request Error",
+			Description: "No ban id given to delete",
+		})
+	}
+
+	banId, err := strconv.ParseUint(banIdStr, 10, 64)
+	if err != nil {
+		SR.Logger.Error("Failed to convert the banId string to a uint", "error", err, "banId", banIdStr)
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Request Error",
+			Description: "Could not transform your banId to a valid number",
+		})
+		return
+	}
+
+	userId, err := users.GetUserIdentifier(ctx)
+	if err != nil {
+		SR.Logger.Error("Failed to get a user identifier string", "error", err, "banId", banIdStr)
+		ctx.JSON(403, models.RouteErrorMessage{
+			Title:       "Authentication Error",
+			Description: "Could get valid identification for your request",
+		})
+		return
+	}
+
+	err = penalties.RemoveBan(userId, uint(banId))
+	if err != nil {
+		SR.Logger.Error("Failed to delete a cfx ban", "error", err)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server Error",
+			Description: "Failed to delete the requested ban",
 		})
 		return
 	}

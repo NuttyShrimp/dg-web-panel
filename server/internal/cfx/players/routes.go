@@ -3,6 +3,7 @@ package players
 import (
 	"degrens/panel/internal/api"
 	"degrens/panel/internal/auth/middlewares/role"
+	"degrens/panel/internal/cfx/penalties"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/log"
 	"degrens/panel/lib/utils"
@@ -50,7 +51,7 @@ func (PR *PlayerRouter) getSteamIdFromParam(ctx *gin.Context) (string, bool) {
 
 func (PR *PlayerRouter) FetchPlayerBanned(ctx *gin.Context) {
 	steamId := ctx.Param("steamId")
-	until, err := IsPlayerBanned(steamId)
+	until, err := penalties.IsPlayerBanned(steamId)
 	if err != nil {
 		PR.Logger.Error("Failed to fetch player ban status", "error", err, "steamId", steamId)
 		ctx.JSON(500, models.RouteErrorMessage{
@@ -88,7 +89,7 @@ func (PR *PlayerRouter) FetchPenalties(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	list, err := GetPlayerPenalties(steamId)
+	list, err := penalties.GetPlayerPenalties(steamId)
 	if err != nil {
 		PR.Logger.Error("Failed to fetch penalties for steamid", "error", err, "steamid", steamId)
 		ctx.JSON(500, models.RouteErrorMessage{
@@ -105,7 +106,7 @@ func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	body := WarnInfo{}
+	body := penalties.WarnInfo{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
 		PR.Logger.Error("Failed to bind body for warn action", "error", err, "target", steamId)
@@ -140,7 +141,7 @@ func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	body := KickInfo{}
+	body := penalties.KickInfo{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
 		PR.Logger.Error("Failed to bind body for kick action", "error", err, "target", steamId)
@@ -175,7 +176,7 @@ func (PR *PlayerRouter) BanPlayer(ctx *gin.Context) {
 	if !ok {
 		return
 	}
-	body := BanInfo{}
+	body := penalties.BanInfo{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
 		PR.Logger.Error("Failed to bind body for ban action", "error", err, "target", steamId)
