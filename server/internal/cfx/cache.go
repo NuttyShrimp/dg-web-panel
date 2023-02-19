@@ -26,3 +26,8 @@ func init() {
 func getCache() *Cache {
 	return &cache
 }
+
+func UnlockCache() {
+	cache.Mutex.TryLock()
+	cache.Mutex.Unlock()
+}
