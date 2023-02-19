@@ -35,12 +35,12 @@ func pushLog(msg *GraylogMessage[interface{}]) {
 	}
 	resp, err := http.Post(gelfURL, "application/json", bytes.NewBuffer(msgStr))
 	if err != nil {
-		logger.Error("Failed to send graylogger message", "message", &msg)
+		logger.Error("Failed to send graylogger message", "message", &msg, "error", err)
 		return
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		logger.Error("Failed to close graylogger request", "message", &msg)
+		logger.Error("Failed to close graylogger request", "message", &msg, "error", err)
 	}
 }
 
