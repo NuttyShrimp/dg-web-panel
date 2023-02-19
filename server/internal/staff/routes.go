@@ -16,6 +16,7 @@ import (
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,22 +72,19 @@ func (SR *StaffRouter) DashboardHandler() gin.HandlerFunc {
 
 func (SR *StaffRouter) FetchCfxPlayersHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		result := make(chan interface{})
-		statusCode := make(chan int)
-		go func() {
-			plys, err := cfx.GetCfxPlayers()
-			if err != nil {
-				SR.Logger.Error("Failed to fetch information about cfx players", "error", err.Error())
-				statusCode <- 500
-				result <- models.RouteErrorMessage{
-					Title:       "Server Error",
-					Description: "We encountered an error while trying to fetch information about the players on the fiveM server",
-				}
-			}
-			statusCode <- 200
-			result <- &plys
-		}()
-		ctx.JSON(<-statusCode, <-result)
+		// If the request takes long than 20s it is automatically yeeted, we force reset the mutex lock to prevent poising
+		resetTimer := time.AfterFunc(20*time.Second, cfx.UnlockCache)
+		plys, err := cfx.GetCfxPlayers()
+		resetTimer.Stop()
+		if err != nil {
+			SR.Logger.Error("Failed to fetch information about cfx players", "error", err.Error())
+			ctx.JSON(500, models.RouteErrorMessage{
+				Title:       "Server Error",
+				Description: "We encountered an error while trying to fetch information about the players on the fiveM server",
+			})
+			return
+		}
+		ctx.JSON(200, plys)
 	}
 }
 
