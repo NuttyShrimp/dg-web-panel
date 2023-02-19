@@ -3,6 +3,7 @@ package state
 import (
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +28,9 @@ func (ST *StateRouter) RegisterRoutes() {
 }
 
 func (ST *StateRouter) ScheduleUpdate(ctx *gin.Context) {
+	wasSchedule := strconv.FormatBool(incomingUpdate)
 	scheduleUpdate()
-	ctx.JSON(200, gin.H{})
+	ctx.String(200, wasSchedule)
 }
 
 func (ST *StateRouter) FetchScheduledUpdate(ctx *gin.Context) {
