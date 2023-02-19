@@ -8,6 +8,7 @@ import { AuthProvider } from "@stores/auth/provider";
 import { ModalsProvider } from "@mantine/modals";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./helpers/queryClient";
+import { UpdateAnnounceProvider } from "./components/UpdateAnnouncer";
 
 export const MainProviders: FC<PropsWithChildren<{}>> = ({ children }) => (
   <BrowserRouter>
@@ -16,7 +17,9 @@ export const MainProviders: FC<PropsWithChildren<{}>> = ({ children }) => (
         <MantineProvider theme={theme} withGlobalStyles withNormalizeCSS>
           <NotificationsProvider>
             <ModalsProvider>
-              <AuthProvider>{children}</AuthProvider>
+              <UpdateAnnounceProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </UpdateAnnounceProvider>
             </ModalsProvider>
           </NotificationsProvider>
         </MantineProvider>
