@@ -55,8 +55,12 @@ export const UserPage = () => {
               <Text>{player.name}</Text>
             </Flex>
             <Flex>
-              <Text weight={"bolder"}>SteamId:&nbsp;</Text>
+              <Text weight={"bolder"}>DiscordId:&nbsp;</Text>
               <Text>{player.steamId}</Text>
+            </Flex>
+            <Flex>
+              <Text weight={"bolder"}>SteamId:&nbsp;</Text>
+              <Text>{player.discord}</Text>
             </Flex>
             <Flex>
               <Text weight={"bolder"}>First Joined:&nbsp;</Text>
