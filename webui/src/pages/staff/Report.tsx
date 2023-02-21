@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Box,
+  Button,
   Card,
   Container,
   Divider,
@@ -88,6 +89,10 @@ export const StaffReport = () => {
           queryClient.invalidateQueries(["report", id]);
           break;
         }
+        case "toggleState":
+          if (!report) return;
+          queryClient.invalidateQueries(["report", id]);
+          break;
         case "error": {
           showNotification({
             title: message?.data?.title ?? "Websocket error",
@@ -129,6 +134,13 @@ export const StaffReport = () => {
     sendJsonMessage({
       type: "removeMember",
       data: steamId,
+    });
+  };
+
+  const toggleReportState = () => {
+    sendJsonMessage({
+      type: "toggleReportState",
+      data: !report?.open,
     });
   };
 
@@ -220,6 +232,10 @@ export const StaffReport = () => {
           </div>
         </Stack>
         <Stack w={"25%"} spacing={4}>
+          <Button onClick={toggleReportState} color={report.open ? "dg-prim" : "red"}>
+            {report.open ? "Close" : "Reopen"}
+          </Button>
+          <Divider />
           <Group position="apart">
             <Title order={4}>Members</Title>
             <ActionIcon onClick={openAddMemberModal}>
