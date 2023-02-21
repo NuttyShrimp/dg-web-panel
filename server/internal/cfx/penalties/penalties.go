@@ -6,6 +6,7 @@ import (
 	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/lib/graylogger"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -110,6 +111,6 @@ func RemoveBan(userId string, banId uint) error {
 		return err
 	}
 	err = db.CfxMariaDB.Client.Where("penalty = ?", cfx_models.BanPenalty).Delete(&cfx_models.Penalties{}, banId).Error
-	graylogger.Log("staff:bans:unban", "userId", userId, "banInfo", ban)
+	graylogger.Log("staff:bans:unban", fmt.Sprintf("%s has unbanned %s", userId, ban.SteamId), "userId", userId, "banInfo", ban)
 	return err
 }
