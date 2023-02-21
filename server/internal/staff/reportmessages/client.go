@@ -3,9 +3,11 @@ package reportmessages
 import (
 	"bytes"
 	"degrens/panel/internal/auth/authinfo"
-	"degrens/panel/lib/errors"
+	dgerrors "degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
+	"errors"
+	"net"
 	"net/http"
 	"time"
 
@@ -45,7 +47,7 @@ func JoinReportRoom(ctx *gin.Context, room *Room) {
 	clientInfo := clientInfoPtr.(*authinfo.AuthInfo)
 	if !exists {
 		room.logger.Error("Failed to retrieve userinfo when joining report room")
-		ctx.JSON(http.StatusForbidden, errors.Unauthorized)
+		ctx.JSON(http.StatusForbidden, dgerrors.Unauthorized)
 		return
 	}
 	conn, err := wsupgrades.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -107,7 +109,7 @@ func (c *Client) writeRoutine() {
 	defer func() {
 		ticker.Stop()
 		err := c.conn.Close()
-		if err != nil {
+		if err != nil && !errors.Is(net.ErrClosed, err) {
 			c.logger.Error("Failed to properly close report WS", "error", err)
 		}
 	}()
