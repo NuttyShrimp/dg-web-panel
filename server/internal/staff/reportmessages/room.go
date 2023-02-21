@@ -240,6 +240,28 @@ func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error
 		}
 		r.sendToClients(responseStr)
 		return nil
+	case "toggleReportState":
+		toggle, ok := msg.Data.(bool)
+		if !ok {
+			return errors.New("Failed to convert data to a boolean")
+		}
+		err := r.report.ToggleState(toggle)
+		if err != nil {
+			r.logger.Error("Failed to toggle report state", "state", toggle)
+			return errors.New("Failed to change report state")
+		}
+
+		response := WebsocketMessage{
+			Type: "toggleState",
+			Data: toggle,
+		}
+		responseStr, err := json.Marshal(response)
+		if err != nil {
+			r.logger.Error("Failed to encode websocket message while chaning state", "error", err)
+			return errors.New("Failed to announce report state change")
+		}
+		r.sendToClients(responseStr)
+		return nil
 	default:
 		return errors.New("Invalid action")
 	}

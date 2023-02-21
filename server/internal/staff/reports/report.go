@@ -18,6 +18,10 @@ func CreateReport(report *panel_models.Report) Report {
 	}
 }
 
+func (r *Report) saveToDB() error {
+	return db.MariaDB.Client.Save(&r.Data).Error
+}
+
 func (r *Report) AddMember(memberSteamId string) error {
 	_, ok := utils.SliceFind(r.Data.Members, func(mem panel_models.ReportMember) bool {
 		return mem.SteamID == memberSteamId
@@ -57,4 +61,9 @@ func (r *Report) RemoveMember(memberSteamId string) error {
 		return mem.SteamID != memberSteamId
 	})
 	return nil
+}
+
+func (r *Report) ToggleState(open bool) error {
+	r.Data.Open = open
+	return r.saveToDB()
 }
