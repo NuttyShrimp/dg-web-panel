@@ -31,7 +31,7 @@ export const BanListPage = () => {
             <List.Entry key={b.id}>
               <Flex justify={"space-between"} w={"100%"}>
                 <Stack spacing={4}>
-                  <Link to={`/staff/players/${b.steamId}`} style={{ width: "100%" }}>
+                  <Link to={`/staff/users/${b.steamId}`} style={{ width: "100%" }}>
                     <Text weight={"bolder"}>{b.steamId}</Text>
                   </Link>
                   <Flex>
