@@ -76,7 +76,7 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
       target: steamId,
       points,
       reason,
-      length: perma ? -1 : Math.round(length.getTime() / 1000),
+      length: perma ? -1 : Math.round((length.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     });
     showNotification({
       title: "Banned player",
