@@ -5,6 +5,10 @@ declare namespace CfxState {
     created_at: string;
     discord: string;
     last_updated: string;
+    points: {
+      points: number;
+      updated_at: string;
+    }
   }
   interface Character {
     citizenid: number;

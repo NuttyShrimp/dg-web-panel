@@ -6,8 +6,9 @@ import { UserActionMenu } from "@src/components/Users/ActionMenu";
 import { UserBanStatus } from "@src/components/Users/BanStatus";
 import { UserCharList } from "@src/components/Users/CharList";
 import { UserPenaltyList } from "@src/components/Users/PenaltyList";
-import { displayDate } from "@src/helpers/time";
+import { displayDate, displayTimeDate } from "@src/helpers/time";
 import { cfxState } from "@src/stores/cfx/state";
+import dayjs from "dayjs";
 import { useMemo } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
@@ -70,6 +71,18 @@ export const UserPage = () => {
               <Text weight={"bolder"}>Last Update:&nbsp;</Text>
               <Text>{displayDate(player.last_updated)}</Text>
             </Flex>
+            <Flex>
+              <Text weight={"bolder"}>Points:&nbsp;</Text>
+              <Text>{player.points.points}</Text>
+            </Flex>
+            {player.points.points > 0 && (
+              <Flex>
+                <Text weight={"bolder"}>Points reset-day:&nbsp;</Text>
+                <Text>
+                  {displayTimeDate(dayjs(player.points.updated_at).add(player.points.points, "d").toString())}
+                </Text>
+              </Flex>
+            )}
           </div>
         </Tabs.Panel>
         <Tabs.Panel value="chars">
