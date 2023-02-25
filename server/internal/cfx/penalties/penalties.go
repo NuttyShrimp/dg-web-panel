@@ -1,7 +1,6 @@
 package penalties
 
 import (
-	"degrens/panel/internal/api"
 	"degrens/panel/internal/db"
 	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/lib/graylogger"
@@ -13,15 +12,19 @@ import (
 )
 
 type WarnInfo struct {
+	Target string `json:"target,omitempty"`
+	Points int    `json:"points"`
 	Reason string `json:"reason"`
 }
 
 type KickInfo struct {
+	Target string `json:"target,omitempty"`
 	Points int    `json:"points"`
 	Reason string `json:"reason"`
 }
 
 type BanInfo struct {
+	Target string `json:"target,omitempty"`
 	Points int    `json:"points"`
 	Reason string `json:"reason"`
 	Length int    `json:"length"`
@@ -58,31 +61,6 @@ func IsPlayerBanned(steamId string) (*time.Time, error) {
 	}
 	until := penalty.Date.Add(time.Duration(penalty.Length) * time.Second)
 	return &until, nil
-}
-
-func KickPlayer(steamId string, info *KickInfo) (bool, error) {
-	input := struct {
-		KickInfo
-		Target string `json:"target"`
-	}{
-		KickInfo: *info,
-		Target:   steamId,
-	}
-	output := struct {
-		Result bool `json:"result"`
-	}{
-		Result: false,
-	}
-
-	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/kick", &input, &output)
-	if err != nil {
-		return false, err
-	}
-	if ai.Message != "" {
-		return false, errors.New(ai.Message)
-	}
-
-	return output.Result, nil
 }
 
 func UpdateBan(userId string, banId, points uint, length int, reason string) error {
