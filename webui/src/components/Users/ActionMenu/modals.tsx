@@ -75,6 +75,7 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
     await axiosInstance.post(`/staff/player/${steamId}/ban`, {
       target: steamId,
       points,
+      reason,
       length: perma ? -1 : Math.round(length.getTime() / 1000),
     });
     showNotification({
@@ -101,7 +102,7 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
         <Checkbox label="Permanent" checked={perma} onChange={e => setPerma(e.currentTarget.checked)} />
       </Group>
       <Button onClick={doBan} mt="xs">
-        Kick
+        Ban
       </Button>
     </>
   );
