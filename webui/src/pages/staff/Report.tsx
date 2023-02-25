@@ -213,7 +213,7 @@ export const StaffReport = () => {
   return (
     <Container size="md">
       <Group align={"top"}>
-        <Stack style={{ flexGrow: 1 }} spacing={0}>
+        <Stack style={{ flexGrow: 1 }} spacing={0} w={"65%"}>
           <Box mb="xs">
             <Title className="report-title" order={3}>
               {report.title}
