@@ -42,7 +42,7 @@ func GetPlayerPenalties(steamId string) ([]cfx_models.Penalties, error) {
 
 func GetBanList() ([]*cfx_models.Penalties, error) {
 	list := []*cfx_models.Penalties{}
-	err := db.CfxMariaDB.Client.Order("date DESC").Find(&list).Error
+	err := db.CfxMariaDB.Client.Order("date DESC").Where("penalty = 'ban'").Find(&list).Error
 	return list, err
 }
 
