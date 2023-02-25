@@ -116,7 +116,8 @@ func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	ai, err := api.CfxApi.DoRequest("POST", "admin/actions/warn", &body, nil)
+	body.Target = steamId
+	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/warn", &body, nil)
 	if err != nil {
 		PR.Logger.Error("Failed to warn the player on fivem server", "error", err, "target", steamId)
 		ctx.JSON(500, models.RouteErrorMessage{
@@ -151,7 +152,8 @@ func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	ai, err := api.CfxApi.DoRequest("POST", "admin/actions/kick", &body, nil)
+	body.Target = steamId
+	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/kick", &body, nil)
 	if err != nil {
 		PR.Logger.Error("Failed to kick player on fivem server", "error", err, "target", steamId)
 		ctx.JSON(500, models.RouteErrorMessage{
@@ -186,7 +188,8 @@ func (PR *PlayerRouter) BanPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	ai, err := api.CfxApi.DoRequest("POST", "admin/actions/ban", &body, nil)
+	body.Target = steamId
+	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/ban", &body, nil)
 	if err != nil {
 		PR.Logger.Error("Failed to ban player on fivem server", "error", err, "target", steamId)
 		ctx.JSON(500, models.RouteErrorMessage{

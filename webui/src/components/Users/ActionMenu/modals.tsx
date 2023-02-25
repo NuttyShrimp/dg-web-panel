@@ -7,10 +7,12 @@ import { useState } from "react";
 
 export const WarnUserModal = ({ steamId }: { steamId: string }) => {
   const [reason, setReason] = useState("");
+  const [points, setPoints] = useState(0);
 
   const doWarn = async () => {
     await axiosInstance.post(`/staff/player/${steamId}/warn`, {
       reason,
+      points,
     });
     showNotification({
       title: "Warned player",
@@ -21,6 +23,7 @@ export const WarnUserModal = ({ steamId }: { steamId: string }) => {
   return (
     <>
       <TextInput label={"reason"} value={reason} onChange={e => setReason(e.currentTarget.value)} />
+      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
       <Button onClick={doWarn} mt="xs">
         Warn
       </Button>
