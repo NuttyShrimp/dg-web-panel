@@ -26,14 +26,14 @@ func GetCfxPlayers() (*[]cfx_models.User, error) {
 	cache.Mutex.Lock()
 	// Fetch updated players
 	updatedPly := []cfx_models.User{}
-	err := db.CfxMariaDB.Client.Where("(last_updated BETWEEN ? AND ?) AND created_at < ?", cache.Players.UpdatedAt, time.Now(), cache.Players.UpdatedAt).Find(&updatedPly).Error
+	err := db.CfxMariaDB.Client.Preload("Points").Where("(last_updated BETWEEN ? AND ?) AND created_at < ?", cache.Players.UpdatedAt, time.Now(), cache.Players.UpdatedAt).Find(&updatedPly).Error
 	if err != nil {
 		return nil, err
 	}
 
 	// Fetch New players
 	newPlys := []cfx_models.User{}
-	err = db.CfxMariaDB.Client.Where("created_at BETWEEN ? AND ?", cache.Players.UpdatedAt, time.Now()).Find(&newPlys).Error
+	err = db.CfxMariaDB.Client.Preload("Points").Where("created_at BETWEEN ? AND ?", cache.Players.UpdatedAt, time.Now()).Find(&newPlys).Error
 	if err != nil {
 		return nil, err
 	}
