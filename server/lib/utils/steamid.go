@@ -3,5 +3,5 @@ package utils
 import "strings"
 
 func ValidateSteamId(steamid string) bool {
-	return strings.HasPrefix(steamid, "steam:") && len(steamid) == 21
+	return strings.HasPrefix(steamid, "steam:")
 }
