@@ -47,9 +47,9 @@ func GetCfxPlayers() (*[]cfx_models.User, error) {
 
 func GetCfxPlayerInfo(steamId string) (*cfx_models.User, error) {
 	cache := getCache()
-	for _, ply := range cache.Players.Data {
-		if ply.SteamId == steamId {
-			return &ply, nil
+	for i := range cache.Players.Data {
+		if cache.Players.Data[i].SteamId == steamId {
+			return &cache.Players.Data[i], nil
 		}
 	}
 	cache.Mutex.Lock()
@@ -111,14 +111,15 @@ func GetCfxUserFromId(id uint) (*cfx_models.User, error) {
 }
 
 func GetSteamIdFromDiscordId(discordId string) string {
-	players, err := GetCfxPlayers()
+	playersRef, err := GetCfxPlayers()
 	if err != nil {
 		return ""
 	}
 	idToSearch := "discord:" + discordId
-	for _, ply := range *players {
-		if ply.Discord == idToSearch {
-			return ply.SteamId
+	players := *playersRef
+	for i := range players {
+		if players[i].Discord == idToSearch {
+			return players[i].SteamId
 		}
 	}
 	return ""
