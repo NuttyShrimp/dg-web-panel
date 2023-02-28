@@ -52,7 +52,7 @@ func (RR *ReportRouter) ReportWS(ctx *gin.Context) {
 		return
 	}
 	report := reports.CreateReport(reportData)
-	room := GetRoom(&report, RR.Logger)
+	room := GetRoom(report, RR.Logger)
 	JoinReportRoom(ctx, room)
 }
 
@@ -77,12 +77,32 @@ func (RR *ReportRouter) AddMessage(ctx *gin.Context) {
 		ctx.JSON(http.StatusForbidden, errors.Unauthorized)
 		return
 	}
-	reportMsg, err := saveMessage(body.ReportId, body.Message, clientInfo)
+
+	report, err := reports.GetReport(body.ReportId)
+	if err != nil {
+		RR.Logger.Error("Failed to get report data", "error", err, "message", body.Message, "reportId", body.ReportId)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "Failed to save the new report message, failed struct",
+		})
+		return
+	}
+
+	reportMsg, err := report.AddMessage(body.ReportId, body.Message, clientInfo)
 	if err != nil {
 		RR.Logger.Error("Failed to save a new report message", "error", err, "message", body.Message, "reportId", body.ReportId)
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "Failed to save the new report message",
+		})
+		return
+	}
+	err = SeedReportMessageMember(reportMsg)
+	if err != nil {
+		RR.Logger.Error("Failed to seed report message sender", "error", err, "message", body.Message, "reportId", body.ReportId)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "Failed to seed the new report message",
 		})
 		return
 	}

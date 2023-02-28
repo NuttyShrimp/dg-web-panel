@@ -120,7 +120,7 @@ func (RR *ReportRouter) NewReportHandler() gin.HandlerFunc {
 			c.JSON(404, errors.Unauthorized)
 			return
 		}
-		token, err := CreateNewReport(userInfo.Username, body.Title, body.Members, body.Tags)
+		token, err := CreateNewReport(userInfo.Username, body.Title, body.Members, body.Tags, RR.Logger)
 		if err != nil {
 			RR.Logger.Error("Failed to create new report", "error", err)
 			c.JSON(500, models.RouteErrorMessage{
@@ -190,7 +190,7 @@ func (RR *ReportRouter) HandleNewReportMember() gin.HandlerFunc {
 			})
 			return
 		}
-		userId, err := users.GetUserIdentifier(ctx)
+		userId, err := users.GetUserIdentifierForCtx(ctx)
 		if err != nil {
 			RR.Logger.Error("Failed to parse user info to a identifier", "error", err, "id", ctx.Param("id"))
 			ctx.JSON(500, models.RouteErrorMessage{

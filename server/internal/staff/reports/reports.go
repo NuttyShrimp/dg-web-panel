@@ -1,6 +1,7 @@
 package reports
 
 import (
+	"degrens/panel/internal/api"
 	"degrens/panel/internal/auth/authinfo"
 	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/cfx"
@@ -8,11 +9,15 @@ import (
 	panel_models "degrens/panel/internal/db/models/panel"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/graylogger"
+	"degrens/panel/lib/log"
+	"degrens/panel/models"
 	"errors"
 	"fmt"
+
+	"github.com/aidenwallis/go-utils/utils"
 )
 
-func CreateNewReport(creator, title string, memberIds, tagNames []string) (uint, error) {
+func CreateNewReport(creator, title string, memberIds, tagNames []string, logger log.Logger) (uint, error) {
 	members := []panel_models.ReportMember{}
 	for _, v := range memberIds {
 		plyInfo, err := cfx.GetCfxPlayerInfo(v)
@@ -46,6 +51,21 @@ func CreateNewReport(creator, title string, memberIds, tagNames []string) (uint,
 	for i := range members {
 		members[i].ReportID = report.ID
 		db.MariaDB.Client.Save(members[i])
+	}
+	cfxInput := models.CfxReportAnnouncement{
+		ID: report.ID,
+		Recvs: utils.SliceMap(members, func(member panel_models.ReportMember) string {
+			return member.SteamID
+		}),
+	}
+	ai, err := api.CfxApi.DoRequest("POST", "/admin/report/announce", &cfxInput, nil)
+	if err != nil {
+		graylogger.Log("reports:announce:error", "Failed to announce a new report to the cfx server", "reportId", report.ID, "title", report.Title)
+		logger.Error("Failed to announce new report", "error", err, "type", "error")
+	}
+	if ai.Message != "" {
+		graylogger.Log("reports:announce:error", "Failed to announce a new report to the cfx server", "reportId", report.ID, "title", report.Title)
+		logger.Error("Failed to announce new report", "error", ai.Message, "type", "message")
 	}
 	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", creator, title), "members", memberIds, "tags", tagNames)
 	return report.ID, nil

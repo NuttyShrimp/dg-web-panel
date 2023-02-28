@@ -272,7 +272,7 @@ func (SR *StaffRouter) updateBan(ctx *gin.Context) {
 		return
 	}
 
-	userId, err := users.GetUserIdentifier(ctx)
+	userId, err := users.GetUserIdentifierForCtx(ctx)
 	if err != nil {
 		SR.Logger.Error("Failed to get a user identifier string", "error", err, "banId", banIdStr)
 		ctx.JSON(403, models.RouteErrorMessage{
@@ -314,7 +314,7 @@ func (SR *StaffRouter) removeBan(ctx *gin.Context) {
 		return
 	}
 
-	userId, err := users.GetUserIdentifier(ctx)
+	userId, err := users.GetUserIdentifierForCtx(ctx)
 	if err != nil {
 		SR.Logger.Error("Failed to get a user identifier string", "error", err, "banId", banIdStr)
 		ctx.JSON(403, models.RouteErrorMessage{

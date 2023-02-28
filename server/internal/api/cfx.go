@@ -6,6 +6,7 @@ import (
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"regexp"
@@ -58,4 +59,15 @@ func (ca *cfxApi) addInput(req *http.Request, input interface{}) {
 
 func (ca *cfxApi) doAuthentication(req *http.Request) {
 	req.Header.Add("Authorization", "Bearer "+ca.apiKey)
+}
+
+func (ca *cfxApi) Post(endpoint string, input, output interface{}) error {
+	ai, err := ca.DoRequest("POST", endpoint, input, output)
+	if err != nil {
+		return err
+	}
+	if ai.Message != "" {
+		return errors.New(ai.Message)
+	}
+	return nil
 }
