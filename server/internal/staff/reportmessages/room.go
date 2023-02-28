@@ -171,10 +171,15 @@ func (r *Room) sendMessages(c *Client, offset int) {
 func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error {
 	switch msg.Type {
 	case "addMessage":
-		reportMsg, err := saveMessage(r.report.Data.ID, msg.Data, origin.authInfo)
+		reportMsg, err := r.report.AddMessage(r.report.Data.ID, msg.Data, origin.authInfo)
 		if err != nil {
 			r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)
 			return errors.New("Failed to save message")
+		}
+		err = SeedReportMessageMember(reportMsg)
+		if err != nil {
+			r.logger.Error("Failed to seed new report message", "error", err, "message", msg.Data)
+			return errors.New("Failed to seed message")
 		}
 		// announce new message for all clients
 		response := WebsocketMessage{

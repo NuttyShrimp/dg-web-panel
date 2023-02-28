@@ -50,20 +50,24 @@ func GetApiTokenAuthInfo(userId uint) authinfo.AuthInfo {
 	}
 }
 
-func GetUserIdentifier(ctx *gin.Context) (string, error) {
+func GetUserIdentifier(info *authinfo.AuthInfo) (string, error) {
+	switch info.AuthMethod {
+	case "discord":
+		return strconv.Itoa(int(info.ID)) + " (db)", nil
+	case "apitoken":
+		return strconv.Itoa(int(info.ID)) + " (token)", nil
+	case "cfxtoken":
+		tokenInfo := cfxtoken.GetInfoForToken(info.ID)
+		return fmt.Sprintf("%s - %s (cfx)", tokenInfo.Username, tokenInfo.SteamId), nil
+	}
+	return "", fmt.Errorf("failed to interpret authinfo for a valid user identifier: %+v", info)
+}
+
+func GetUserIdentifierForCtx(ctx *gin.Context) (string, error) {
 	authInfoPtr, exists := ctx.Get("userInfo")
 	if !exists {
 		return "", errors.New("Failed to retrieve auth info for user from context")
 	}
 	authInfo := authInfoPtr.(*authinfo.AuthInfo)
-	switch authInfo.AuthMethod {
-	case "discord":
-		return strconv.Itoa(int(authInfo.ID)) + " (db)", nil
-	case "apitoken":
-		return strconv.Itoa(int(authInfo.ID)) + " (token)", nil
-	case "cfxtoken":
-		tokenInfo := cfxtoken.GetInfoForToken(authInfo.ID)
-		return fmt.Sprintf("%s - %s (cfx)", tokenInfo.Username, tokenInfo.SteamId), nil
-	}
-	return "", fmt.Errorf("failed to interpret authinfo for a valid user identifier: %+v", authInfo)
+	return GetUserIdentifier(authInfo)
 }

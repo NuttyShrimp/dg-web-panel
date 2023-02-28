@@ -20,3 +20,8 @@ type CfxBankPermissions struct {
 	Transfer     bool `json:"transfer"`
 	Transactions bool `json:"transactions"`
 }
+
+type CfxReportAnnouncement struct {
+	ID    uint     `json:"id"`
+	Recvs []string `json:"receivers"`
+}
