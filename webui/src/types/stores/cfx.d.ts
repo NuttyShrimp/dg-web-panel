@@ -8,7 +8,7 @@ declare namespace CfxState {
     points: {
       points: number;
       updated_at: string;
-    }
+    };
   }
   interface Character {
     citizenid: number;
