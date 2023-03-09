@@ -36,7 +36,7 @@ export const KickUserModal = ({ steamId }: { steamId: string }) => {
   const [points, setPoints] = useState(0);
 
   const doKick = async () => {
-    await axiosInstance.post(`/staff/players/${steamId}/kick`, {
+    await axiosInstance.post(`/staff/player/${steamId}/kick`, {
       reason,
       points,
     });
