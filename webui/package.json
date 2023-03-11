@@ -6,7 +6,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "format": "prettier --write './src/**/*.{js,jsx,ts,tsx,(s)css,md,json}' --ignore-path ./.prettierignore ",
-    "lint": "eslint ./src --ext .jsx,.js,.ts,.tsx --fix --ignore-path ./.eslintignore -c ./.eslintrc",
+    "lint": "eslint ./src --ext .jsx,.js,.ts,.tsx --ignore-path ./.eslintignore -c ./.eslintrc",
+    "lint:fix": "yarn lint -- --fix",
     "preview": "vite preview"
   },
   "dependencies": {
