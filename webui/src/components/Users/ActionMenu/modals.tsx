@@ -1,17 +1,36 @@
-import { Button, Checkbox, Group, NumberInput, TextInput } from "@mantine/core";
+import { Button, Checkbox, Group, NumberInput } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { showNotification } from "@mantine/notifications";
+import { PenaltyReasonSelector } from "@src/components/Inputs/PenaltyReasonSelector";
+import { classInfo, reasons as penaltyReasons } from "@src/data/PenaltyReasons";
 import { axiosInstance } from "@src/helpers/axiosInstance";
 import { displayUnixDate } from "@src/helpers/time";
+import dayjs from "dayjs";
 import { useState } from "react";
 
+const updateReasons = (newReasons: string[]) => {
+  const newData = {
+    points: 0,
+    length: 0,
+  };
+  newReasons.forEach(r => {
+    if (penaltyReasons[r]) {
+      const reasonInfo = classInfo[penaltyReasons[r]];
+      if (!classInfo) return;
+      newData.points += reasonInfo.points;
+      newData.length += reasonInfo.length;
+    }
+  });
+  return newData;
+};
+
 export const WarnUserModal = ({ steamId }: { steamId: string }) => {
-  const [reason, setReason] = useState("");
+  const [reasons, setReasons] = useState<string[]>([]);
   const [points, setPoints] = useState(0);
 
   const doWarn = async () => {
     await axiosInstance.post(`/staff/player/${steamId}/warn`, {
-      reason,
+      reason: reasons.join(", "),
       points,
     });
     showNotification({
@@ -22,7 +41,14 @@ export const WarnUserModal = ({ steamId }: { steamId: string }) => {
 
   return (
     <>
-      <TextInput label={"reason"} value={reason} onChange={e => setReason(e.currentTarget.value)} />
+      <PenaltyReasonSelector
+        reasons={reasons}
+        setReasons={r => {
+          const info = updateReasons(r);
+          setPoints(info.points);
+          setReasons(r);
+        }}
+      />
       <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
       <Button onClick={doWarn} mt="xs">
         Warn
@@ -32,12 +58,12 @@ export const WarnUserModal = ({ steamId }: { steamId: string }) => {
 };
 
 export const KickUserModal = ({ steamId }: { steamId: string }) => {
-  const [reason, setReason] = useState("");
+  const [reasons, setReasons] = useState<string[]>([]);
   const [points, setPoints] = useState(0);
 
   const doKick = async () => {
     await axiosInstance.post(`/staff/player/${steamId}/kick`, {
-      reason,
+      reason: reasons.join(", "),
       points,
     });
     showNotification({
@@ -48,7 +74,14 @@ export const KickUserModal = ({ steamId }: { steamId: string }) => {
 
   return (
     <>
-      <TextInput label={"reason"} value={reason} onChange={e => setReason(e.currentTarget.value)} />
+      <PenaltyReasonSelector
+        reasons={reasons}
+        setReasons={r => {
+          const info = updateReasons(r);
+          setPoints(info.points);
+          setReasons(r);
+        }}
+      />
       <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
       <Button onClick={doKick} mt="xs">
         Kick
@@ -58,7 +91,7 @@ export const KickUserModal = ({ steamId }: { steamId: string }) => {
 };
 
 export const BanUserModal = ({ steamId }: { steamId: string }) => {
-  const [reason, setReason] = useState("");
+  const [reasons, setReasons] = useState<string[]>([]);
   const [points, setPoints] = useState(0);
   const [length, setLength] = useState<Date | null>(new Date());
   const [perma, setPerma] = useState(false);
@@ -75,7 +108,7 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
     await axiosInstance.post(`/staff/player/${steamId}/ban`, {
       target: steamId,
       points,
-      reason,
+      reason: reasons.join(", "),
       length: perma ? -1 : Math.round((length.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     });
     showNotification({
@@ -89,7 +122,15 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
 
   return (
     <>
-      <TextInput label={"reason"} value={reason} onChange={e => setReason(e.currentTarget.value)} />
+      <PenaltyReasonSelector
+        reasons={reasons}
+        setReasons={r => {
+          const info = updateReasons(r);
+          setPoints(info.points);
+          setLength(dayjs().add(info.length, "d").toDate());
+          setReasons(r);
+        }}
+      />
       <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
       <Group spacing={5} align="flex-end">
         <DatePicker
