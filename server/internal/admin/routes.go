@@ -32,28 +32,32 @@ func (DV *DevRouter) RegisterRoutes() {
 }
 
 func (DV *DevRouter) fetchPanelLogs(ctx *gin.Context) {
-	offsetStr, ok := ctx.Params.Get("offset")
-	offset := uint64(0)
-	if ok {
+	pageStr := ctx.DefaultQuery("page", "0")
+	page := uint64(0)
+	if pageStr != "" {
 		var err error
-		offset, err = strconv.ParseUint(offsetStr, 10, 64)
+		page, err = strconv.ParseUint(pageStr, 10, 64)
 		if err != nil {
-			DV.Logger.Error("Failed to convert fetch offset to uint", "error", err, "offset", ctx.Param("offset"))
+			DV.Logger.Error("Failed to convert page to uint", "error", err, "page", pageStr)
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
-				Description: "We encountered an error while trying to parse the fetch offset",
+				Description: "We encountered an error while trying to parse the current page number",
 			})
 			return
 		}
 	}
-	logs, err := FetchPanelLogs(int(offset), "*")
+
+	logs, total, err := FetchPanelLogs(int(page), "*")
 	if err != nil {
-		DV.Logger.Error("Failed to fetch panel logs from graylog", "error", err, "offset", offset)
+		DV.Logger.Error("Failed to fetch panel logs from graylog", "error", err, "page", page)
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch the panel logs",
 		})
 		return
 	}
-	ctx.JSON(200, logs)
+	ctx.JSON(200, gin.H{
+		"logs":  logs,
+		"total": total,
+	})
 }

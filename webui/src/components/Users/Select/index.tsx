@@ -34,9 +34,9 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
 
   return (
     <Select
-      placeholder="Search a character"
+      placeholder="Search a user"
       searchable
-      nothingFound="No character found"
+      nothingFound="No user found"
       itemComponent={SelectItem}
       maxDropdownHeight={300}
       defaultValue={steamId}
