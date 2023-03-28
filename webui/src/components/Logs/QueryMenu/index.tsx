@@ -13,7 +13,7 @@ export const QueryMenu = ({ setQuery }: { setQuery: (q: string) => void }) => {
     });
     query = query.replace(/^ OR /, "");
     if (data.inputs) {
-      query += " AND ";
+      query = `(${query}) AND `;
       openModal({
         title: "Query parameters",
         children: (
