@@ -86,12 +86,12 @@ export const StaffReport = () => {
         }
         case "setMembers": {
           if (!report) return;
-          queryClient.invalidateQueries(["report", id]);
+          queryClient.invalidateQueries({ queryKey: ["report", id] });
           break;
         }
         case "toggleState":
           if (!report) return;
-          queryClient.invalidateQueries(["report", id]);
+          queryClient.invalidateQueries({ queryKey: ["report", id] });
           break;
         case "error": {
           showNotification({

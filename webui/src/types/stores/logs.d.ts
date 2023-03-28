@@ -1,4 +1,8 @@
 declare namespace Logs {
+  interface Response {
+    logs: Log[];
+    total: number;
+  }
   interface Log {
     short_message: string;
     _id: string;

@@ -47,6 +47,7 @@ func (SR *StaffRouter) RegisterRoutes() {
 	SR.RouterGroup.POST("/notes", SR.createStaffNote)
 	SR.RouterGroup.POST("/notes/:id", SR.updateStaffNote)
 	SR.RouterGroup.DELETE("/notes/:id", SR.deleteStaffNote)
+	SR.RouterGroup.GET("/logs", SR.fetchCxLogs)
 
 	SR.RouterGroup.GET("/ban/list", SR.FetchBanList)
 	SR.RouterGroup.POST("/ban/:id", SR.updateBan)
@@ -334,4 +335,36 @@ func (SR *StaffRouter) removeBan(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, gin.H{})
+}
+
+func (SR *StaffRouter) fetchCxLogs(ctx *gin.Context) {
+	pageStr := ctx.DefaultQuery("page", "0")
+	query := ctx.DefaultQuery("query", "*")
+	page := uint64(0)
+	if pageStr != "" {
+		var err error
+		page, err = strconv.ParseUint(pageStr, 10, 64)
+		if err != nil {
+			SR.Logger.Error("Failed to convert page to uint", "error", err, "page", pageStr)
+			ctx.JSON(500, models.RouteErrorMessage{
+				Title:       "Parsing error",
+				Description: "We encountered an error while trying to parse the current page number",
+			})
+			return
+		}
+	}
+
+	logs, total, err := FetchCfxLogs(int(page), query)
+	if err != nil {
+		SR.Logger.Error("Failed to fetch panel logs from graylog", "error", err, "page", page)
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an error while trying to fetch the panel logs",
+		})
+		return
+	}
+	ctx.JSON(200, gin.H{
+		"logs":  logs,
+		"total": total,
+	})
 }

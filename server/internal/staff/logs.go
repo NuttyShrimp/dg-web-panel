@@ -1,4 +1,4 @@
-package admin
+package staff
 
 import (
 	"degrens/panel/internal/api"
@@ -13,15 +13,15 @@ import (
 	"github.com/aidenwallis/go-utils/utils"
 )
 
-func FetchPanelLogs(page int, query string) ([]*graylogger.GraylogMessage[string], int, error) {
+func FetchCfxLogs(page int, query string) ([]*graylogger.GraylogMessage[string], int, error) {
 	options := models.QueryRequestInput{
 		Fields: "message,logtype,full_message,timestamp",
-		Filter: fmt.Sprint("streams:", api.GraylogApi.Config.PanelStreamId),
+		Filter: fmt.Sprint("streams:", api.GraylogApi.Config.StreamId),
 		Sort:   "timestamp:desc",
 		Query:  query,
-		Limit:  150,
+		Limit:  100,
 		Range:  0,
-		Offset: page * 150,
+		Offset: page * 100,
 	}
 	messages := &models.Message{}
 	// TODO: refactor this to use the same fetching method as the graylog webui
