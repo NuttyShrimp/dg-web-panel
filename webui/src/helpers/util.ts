@@ -4,4 +4,4 @@ export const parsePotentialJSON = (str: string | number | Record<string, string>
   } catch (e) {
     return str;
   }
-}
+};
