@@ -1,4 +1,4 @@
-import { Button, NumberInput, TextInput } from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { SelectCharacter } from "@src/components/Characters/Select";
 import { axiosInstance } from "@src/helpers/axiosInstance";
@@ -7,14 +7,14 @@ import { useState } from "react";
 export const CreateBusinessModal = () => {
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
-  const [type, setType] = useState(0);
+  const [type, setType] = useState("");
   const [owner, setOwner] = useState(1000);
 
   const createBus = async () => {
     await axiosInstance.post(`/staff/business/new`, {
       name,
       label: title,
-      typeId: type,
+      typeName: type,
       owner,
     });
     showNotification({
@@ -27,7 +27,7 @@ export const CreateBusinessModal = () => {
     <>
       <TextInput label={"name"} value={name} onChange={e => setName(e.currentTarget.value)} />
       <TextInput label={"title"} value={title} onChange={e => setTitle(e.currentTarget.value)} />
-      <NumberInput label={"type"} value={type} onChange={e => setType(e ?? 1)} />
+      <TextInput label={"type"} value={type} onChange={e => setType(e.currentTarget.value)} />
       <SelectCharacter cid={String(owner)} onChange={setOwner} />
       <Button onClick={createBus}>Create</Button>
     </>
