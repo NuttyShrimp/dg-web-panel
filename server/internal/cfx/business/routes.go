@@ -220,10 +220,10 @@ func (BR *BusinessRouter) ChangeOwner(ctx *gin.Context) {
 
 func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 	body := struct {
-		Label  string `json:"label"`
-		Name   string `json:"name"`
-		TypeId uint   `json:"typeId"`
-		Owner  uint   `json:"owner"`
+		Label    string `json:"label"`
+		Name     string `json:"name"`
+		TypeName uint   `json:"typeName"`
+		Owner    uint   `json:"owner"`
 	}{}
 	err := ctx.BindJSON(&body)
 	if err != nil {
