@@ -222,7 +222,7 @@ func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 	body := struct {
 		Label    string `json:"label"`
 		Name     string `json:"name"`
-		TypeName uint   `json:"typeName"`
+		TypeName string `json:"typeName"`
 		Owner    uint   `json:"owner"`
 	}{}
 	err := ctx.BindJSON(&body)
