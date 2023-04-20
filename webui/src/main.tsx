@@ -17,7 +17,7 @@ import { useRecoilValue } from "recoil";
 
 if (!import.meta.env.DEV) {
   Sentry.init({
-    dsn: "https://b75857b005154a9e80b44f55fb86fd07@sentry.nuttyshrimp.me/12",
+    dsn: "https://e301572934fe49f98ad4cf042fe1658c@sentry.nuttyshrimp.me/5",
     integrations: [
       new BrowserTracing({
         tracingOrigins: [getHostname()],
