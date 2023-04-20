@@ -27,7 +27,7 @@ func main() {
 
 	// Setup Sentry
 	if err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "https://16ccf13e3a274fb9bcb6f827bd8f57d0@sentry.nuttyshrimp.me/11",
+		Dsn:              "https://52914b9b7d394dc8962680061a942328@sentry.nuttyshrimp.me/4",
 		Environment:      conf.Server.Env,
 		AttachStacktrace: true,
 		TracesSampleRate: 1.0,
@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Create logger
-	logger := log.New(conf.Server.Env == "development", "https://16ccf13e3a274fb9bcb6f827bd8f57d0@sentry.nuttyshrimp.me/11")
+	logger := log.New(conf.Server.Env == "development", "https://52914b9b7d394dc8962680061a942328@sentry.nuttyshrimp.me/4")
 
 	db.InitDatabase(conf, logger)
 	graylog.InitGrayLogger(&conf.Graylog, logger)
