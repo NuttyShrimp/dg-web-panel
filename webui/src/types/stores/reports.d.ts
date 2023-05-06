@@ -4,10 +4,6 @@ declare namespace ReportState {
     closed: boolean;
     search: string;
   };
-  type Tag = {
-    name: string;
-    color: string;
-  };
   type Member = {
     steamId: string;
     name: string;
@@ -25,7 +21,6 @@ declare namespace ReportState {
      */
     updatedAt: string;
     members?: Member[];
-    tags?: Tag[];
   };
   type Message = {
     id: number;

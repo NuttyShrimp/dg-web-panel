@@ -41,7 +41,7 @@ func InitMariaDBClient(conf *config.ConfigMariaConn, logger log.Logger) *Client 
 }
 
 func (m *Client) MariaDBMigrate() {
-	err := m.Client.AutoMigrate(&panel_models.User{}, &panel_models.Role{}, &panel_models.DiscordTokens{}, &panel_models.Report{}, &panel_models.ReportMember{}, &panel_models.ReportMessage{}, &panel_models.ReportTag{}, &panel_models.APIKey{}, &panel_models.Notes{})
+	err := m.Client.AutoMigrate(&panel_models.User{}, &panel_models.Role{}, &panel_models.DiscordTokens{}, &panel_models.Report{}, &panel_models.ReportMember{}, &panel_models.ReportMessage{}, &panel_models.APIKey{}, &panel_models.Notes{})
 	if err != nil {
 		m.logger.Fatalf("Failed to migrate database: %s", err)
 		return

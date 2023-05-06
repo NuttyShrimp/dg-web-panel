@@ -19,7 +19,6 @@ type Report struct {
 	Title   string      `json:"title"`
 	Creator string      `json:"creator"`
 	Open    bool        `json:"open"`
-	Tags    []ReportTag `gorm:"many2many:report_tags_link" json:"tags"`
 	// Registered members, other than staff
 	Members  []ReportMember  `json:"members"`
 	Messages []ReportMessage `json:"messages"`
@@ -48,13 +47,6 @@ type ReportMember struct {
 	SteamID  string `json:"steamId"`
 	ReportID uint   `json:"-"`
 }
-
-type ReportTag struct {
-	Name    string   `gorm:"primaryKey" json:"name"`
-	Color   string   `json:"color"`
-	Reports []Report `gorm:"many2many:report_tags_link" json:"-"`
-}
-
 func (rm *ReportMessage) BeforeCreate(tx *gorm.DB) error {
 	if rm.UserID == nil && rm.MemberID == nil {
 		return errors.New("message should be assigned to a user or a report member")
