@@ -118,7 +118,7 @@ func GetSteamIdFromDiscordId(discordId string) string {
 	idToSearch := "discord:" + discordId
 	players := *playersRef
 	for i := range players {
-		if players[i].Discord == idToSearch {
+		if players[i].DiscordId == idToSearch {
 			return players[i].SteamId
 		}
 	}

@@ -3,7 +3,7 @@ declare namespace CfxState {
     name: string;
     steamId: string;
     created_at: string;
-    discord: string;
+    discordId: string;
     last_updated: string;
     points: {
       points: number;

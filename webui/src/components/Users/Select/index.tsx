@@ -45,7 +45,11 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
         value: String(p.steamId),
         label: p.name,
       }))}
-      filter={(value, item) => caseInsensitiveMatch(item.name, value) || caseInsensitiveMatch(item.steamId, value)}
+      filter={(value, item) =>
+        caseInsensitiveMatch(item.name, value) ||
+        caseInsensitiveMatch(item.steamId, value) ||
+        caseInsensitiveMatch(item.discordId, value)
+      }
       onChange={onChange}
     />
   );
