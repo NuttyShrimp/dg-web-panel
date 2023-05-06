@@ -1,8 +1,6 @@
 import { Button, Group, Modal, MultiSelect, TextInput } from "@mantine/core";
-import { ReportTag } from "@src/components/ReportTag";
 import { cfxState } from "@src/stores/cfx/state";
 import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
-import { reportState } from "@src/stores/reports/state";
 import { useReportActions } from "@src/stores/reports/useReportActions";
 import { FC, useEffect, useState } from "react";
 import { flushSync } from "react-dom";
@@ -11,20 +9,17 @@ import { useRecoilValue } from "recoil";
 interface ReportData {
   title: string;
   members: string[];
-  tags: string[];
 }
 
 export const NewReportModal: FC<{ open: boolean; onClose: () => void }> = props => {
   const [data, setData] = useState<ReportData>({
     title: "",
     members: [],
-    tags: [],
   });
   const [creatingReport, setCreatingReport] = useState(false);
   const { loadPlayers } = useCfxPlayer();
-  const { refreshTags, createReport } = useReportActions();
+  const { createReport } = useReportActions();
   const cfxPlayers = useRecoilValue(cfxState.selectPlayers);
-  const tags = useRecoilValue(reportState.tags);
 
   const changeDataEntry = <T extends keyof ReportData>(key: T, val: ReportData[T]) => {
     setData({
@@ -35,12 +30,11 @@ export const NewReportModal: FC<{ open: boolean; onClose: () => void }> = props 
 
   const addReport = () => {
     flushSync(() => setCreatingReport(false));
-    createReport(data.title, data.members, data.tags);
+    createReport(data.title, data.members);
   };
 
   useEffect(() => {
     loadPlayers();
-    refreshTags();
   }, []);
 
   return (
@@ -60,18 +54,6 @@ export const NewReportModal: FC<{ open: boolean; onClose: () => void }> = props 
         nothingFound="Nothing found"
         value={data.members}
         onChange={data => changeDataEntry("members", data)}
-      />
-      <MultiSelect
-        searchable
-        clearable
-        limit={20}
-        itemComponent={({ label, ...props }) => <ReportTag {...props} name={label} />}
-        valueComponent={({ label, ...props }) => <ReportTag {...props} name={label} />}
-        label={"Tags"}
-        data={tags.map(t => ({ value: t.name, label: t.name, color: t.color }))}
-        nothingFound="Nothing found"
-        value={data.tags}
-        onChange={data => changeDataEntry("tags", data)}
       />
       <Group position="right" pt={"md"}>
         <Button color={"dg-prim"} onClick={addReport} loading={creatingReport}>

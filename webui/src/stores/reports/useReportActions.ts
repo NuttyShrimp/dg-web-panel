@@ -9,27 +9,22 @@ let reportFetchId = 1;
 
 export const useReportActions = () => {
   const setReports = useSetRecoilState(reportState.list);
-  const setTags = useSetRecoilState(reportState.tags);
   const setLoadingReports = useSetRecoilState(reportState.loadingList);
-  const [selectedTags, setSelectedTags] = useRecoilState(reportState.selectedTags);
-  const [loadingTags, setLoadingTags] = useRecoilState(reportState.loadingTags);
   const [filter, setFilter] = useRecoilState(reportState.listFilter);
   const [pagination, setPagination] = useRecoilState(reportState.pagination);
   const navigate = useNavigate();
 
   const loadReports = useCallback(
-    async (pFilter?: ReportState.Filter, tags?: string[]) => {
+    async (pFilter?: ReportState.Filter) => {
       setLoadingReports(true);
       const fetchId = ++reportFetchId;
       pFilter = pFilter ?? filter;
-      tags = tags ?? selectedTags.map(t => t.name);
       try {
         const res = await axiosInstance.get<{ reports: ReportState.Report[]; total: number }>("/staff/reports/all", {
           params: {
             filter: pFilter.search,
             open: pFilter.open,
             closed: pFilter.closed,
-            tags,
             offset: pagination.current - 1,
           },
         });
@@ -56,79 +51,15 @@ export const useReportActions = () => {
         }
       }
     },
-    [selectedTags, filter, setReports, setLoadingReports, setPagination, pagination]
+    [filter, setReports, setLoadingReports, setPagination, pagination]
   );
-
-  const clearSelectedTags = useCallback(() => {
-    setSelectedTags([]);
-    loadReports(undefined, []);
-  }, [setSelectedTags, loadReports]);
-
-  const selectTag = useCallback(
-    (tag: ReportState.Tag) => {
-      if (selectedTags.includes(tag)) return;
-      setSelectedTags([...selectedTags, tag]);
-      loadReports(
-        undefined,
-        [...selectedTags, tag].map(t => t.name)
-      );
-    },
-    [selectedTags, setSelectedTags, loadReports]
-  );
-
-  const unSelectTag = useCallback(
-    (tag: ReportState.Tag) => {
-      if (!selectedTags.includes(tag)) return;
-      const newSelTags = selectedTags.filter(t => t.name !== tag.name);
-      setSelectedTags(newSelTags);
-      loadReports(
-        undefined,
-        newSelTags.map(t => t.name)
-      );
-    },
-    [selectedTags, setSelectedTags, loadReports]
-  );
-
-  const refreshTags = useCallback(async () => {
-    if (loadingTags) return;
-    setLoadingTags(true);
-    try {
-      const res = await axiosInstance.get<ReportState.Tag[]>("/staff/reports/tags");
-      if (res.status !== 200) {
-        return;
-      }
-      setTags(res.data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingTags(false);
-    }
-  }, [loadingTags, setLoadingTags, setTags]);
-
-  const createTag = useCallback(async (name: string, color: string) => {
-    try {
-      const res = await axiosInstance.put("/staff/reports/tags", {
-        name,
-        color,
-      });
-      if (res.status !== 200) {
-        showNotification({
-          title: "",
-          message: "",
-        });
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
 
   const createReport = useCallback(
-    async (title: string, members: string[], tags: string[]) => {
+    async (title: string, members: string[]) => {
       try {
         const res = await axiosInstance.post<{ token: string }>("/staff/reports/new", {
           title,
           members,
-          tags,
         });
         if (res.status !== 200) return;
         await loadReports();
@@ -158,11 +89,6 @@ export const useReportActions = () => {
   };
 
   return {
-    refreshTags,
-    selectTag,
-    unSelectTag,
-    clearSelectedTags,
-    createTag,
     createReport,
     loadReports,
     updateFilter,

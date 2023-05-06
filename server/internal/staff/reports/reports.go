@@ -17,7 +17,7 @@ import (
 	"github.com/aidenwallis/go-utils/utils"
 )
 
-func CreateNewReport(creator, title string, memberIds, tagNames []string, logger log.Logger) (uint, error) {
+func CreateNewReport(creator, title string, memberIds []string, logger log.Logger) (uint, error) {
 	members := []panel_models.ReportMember{}
 	for _, v := range memberIds {
 		plyInfo, err := cfx.GetCfxPlayerInfo(v)
@@ -29,17 +29,8 @@ func CreateNewReport(creator, title string, memberIds, tagNames []string, logger
 			Name:    plyInfo.Name,
 		})
 	}
-	tags := []panel_models.ReportTag{}
-	for _, tagName := range tagNames {
-		tag := panel_models.ReportTag{
-			Name: tagName,
-		}
-		db.MariaDB.Client.First(&tag)
-		tags = append(tags, tag)
-	}
 	report := panel_models.Report{
 		Title:   title,
-		Tags:    tags,
 		Members: members,
 		Creator: creator,
 		Open:    true,
@@ -67,7 +58,7 @@ func CreateNewReport(creator, title string, memberIds, tagNames []string, logger
 		graylogger.Log("reports:announce:error", "Failed to announce a new report to the cfx server", "reportId", report.ID, "title", report.Title)
 		logger.Error("Failed to announce new report", "error", ai.Message, "type", "message")
 	}
-	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", creator, title), "members", memberIds, "tags", tagNames)
+	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", creator, title), "members", memberIds)
 	return report.ID, nil
 }
 
@@ -92,13 +83,8 @@ func AddMemberToReport(userId string, reportId uint, steamId string) error {
 	return db.MariaDB.Client.Create(&member).Error
 }
 
-func FetchReports(titleFilter string, offset int, tags []string, includeOpen, includeClosed bool, authInfo *authinfo.AuthInfo) (*[]panel_models.Report, error) {
-	dbQuery := db.MariaDB.Client.Preload("Tags").Model(&panel_models.Report{})
-	if len(tags) > 0 {
-		dbQuery = dbQuery.Joins("inner join report_tags_link rtl on rtl.report_id = reports.id ").
-			Joins("inner join report_tags t on t.name = rtl.report_tag_name").
-			Where("t.name IN ?", tags)
-	}
+func FetchReports(titleFilter string, offset int, includeOpen, includeClosed bool, authInfo *authinfo.AuthInfo) (*[]panel_models.Report, error) {
+	dbQuery := db.MariaDB.Client.Model(&panel_models.Report{})
 	if authInfo == nil {
 		return nil, errors.New("Failed to get authentication info")
 	}
@@ -126,13 +112,13 @@ func FetchReports(titleFilter string, offset int, tags []string, includeOpen, in
 
 func FetchReport(reportId uint) (*panel_models.Report, error) {
 	report := panel_models.Report{}
-	err := db.MariaDB.Client.Preload("Tags").Preload("Members").First(&report, reportId).Error
+	err := db.MariaDB.Client.Preload("Members").First(&report, reportId).Error
 	return &report, err
 }
 
-func FetchReportCount(titleFilter string, offset int, tags []string, includeOpen, includeClosed bool) (int64, error) {
+func FetchReportCount(titleFilter string, offset int, includeOpen, includeClosed bool) (int64, error) {
 	var reportCount int64
-	dbQuery := db.MariaDB.Client.Raw("SELECT COUNT(id) FROM reports WHERE (SELECT COUNT(DISTINCT report_id) FROM report_tags_link WHERE report_tag_name IN ('cry-baby', 'bug-report') AND report_id = reports.id) > 0 AND reports.title LIKE ?", "%"+titleFilter+"%")
+	dbQuery := db.MariaDB.Client.Model(&panel_models.Report{}).Where("title LIKE ?", "%"+titleFilter+"%").Select("id")
 	if includeOpen && !includeClosed {
 		dbQuery = dbQuery.Where("open = ?", true)
 	} else if includeClosed && !includeOpen {

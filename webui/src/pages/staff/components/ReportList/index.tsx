@@ -1,6 +1,5 @@
 import { Center, Divider, Loader, Stack, Text, Title, useMantineTheme } from "@mantine/core";
 import { IssueClosedIcon, IssueOpenedIcon } from "@primer/octicons-react";
-import { ReportTag } from "@src/components/ReportTag";
 import { formatRelativeTime } from "@src/helpers/time";
 import { reportState } from "@src/stores/reports/state";
 import { useReportActions } from "@src/stores/reports/useReportActions";
@@ -41,9 +40,6 @@ const ReportEntry: FC<{ report: ReportState.Report }> = ({ report }) => {
                 <i className="fal fa-clock" /> updated {formatRelativeTime(new Date(report.updatedAt).getTime() / 1000)}
               </Text>
             )}
-          </div>
-          <div className="report-list-entry-tags">
-            {report.tags && report.tags.map(t => <ReportTag key={t.name} {...t} />)}
           </div>
         </div>
       </div>

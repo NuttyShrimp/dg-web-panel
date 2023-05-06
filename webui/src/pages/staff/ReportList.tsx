@@ -1,11 +1,9 @@
-import { Center, Container, Group, Pagination, Text } from "@mantine/core";
+import { Center, Container, Group, Pagination, Text, Tooltip } from "@mantine/core";
 import { SearchInput } from "@src/components/SearchInput";
-import { TagCreator } from "@src/components/TagCreator";
 import { reportState } from "@src/stores/reports/state";
 import { useCallback, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ReportList } from "./components/ReportList";
-import { TagsPopup } from "./components/TagsPopup";
 
 import "src/styles/pages/staffReports.scss";
 import { CheckIcon } from "@primer/octicons-react";
@@ -14,7 +12,6 @@ import { useReportActions } from "@src/stores/reports/useReportActions";
 
 export const StaffReports = () => {
   const [createReport, setCreateReport] = useState(false);
-  const [createTag, setCreateTag] = useState(false);
   const [pagination, setPagination] = useRecoilState(reportState.pagination);
   const filter = useRecoilValue(reportState.listFilter);
   const { updateFilter, loadReports } = useReportActions();
@@ -66,13 +63,13 @@ export const StaffReports = () => {
               </Group>
               <Group spacing="xs" className="reports-list-actions">
                 <SearchInput value={filter.search} onChange={updateSearchValue} />
-                <TagsPopup onCreateTag={() => setCreateTag(true)} />
-                <div onClick={() => setCreateReport(true)}>
-                  <i className="fas fa-plus" />
-                </div>
+                <Tooltip label={"Create new report"} position="bottom">
+                  <div onClick={() => setCreateReport(true)}>
+                    <i className="fas fa-plus" />
+                  </div>
+                </Tooltip>
               </Group>
             </div>
-            {createTag && <TagCreator onClose={() => setCreateTag(false)} />}
             <ReportList />
           </div>
         </div>

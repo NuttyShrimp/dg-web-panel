@@ -24,18 +24,6 @@ export const reportState = {
       search: "",
     },
   }),
-  loadingTags: atom<boolean>({
-    key: "reports-loading-tags",
-    default: false,
-  }),
-  tags: atom<ReportState.Tag[]>({
-    key: "reports-tags",
-    default: [],
-  }),
-  selectedTags: atom<ReportState.Tag[]>({
-    key: "reports-selected-tags",
-    default: [],
-  }),
   reportMessages: atom<ReportState.Message[]>({
     key: "report-current-messages",
     default: [],

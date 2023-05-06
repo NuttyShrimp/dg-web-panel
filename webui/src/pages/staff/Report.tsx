@@ -23,7 +23,6 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import "@src/styles/pages/staffReport.scss";
 import { ReportMessage } from "./components/ReportMessage";
 import { CommentEditor } from "@src/components/CommentEditor";
-import { ReportTag } from "@src/components/ReportTag";
 import { getHostname } from "@src/helpers/axiosInstance";
 import { PlusIcon, TrashIcon } from "@primer/octicons-react";
 import { openModal } from "@mantine/modals";
@@ -219,7 +218,6 @@ export const StaffReport = () => {
               {report.title}
               <span> #{report.id}</span>
             </Title>
-            {report.tags && report.tags.map(t => <ReportTag key={t.name} {...t} />)}
           </Box>
           <div>
             <ScrollArea h={"65vh"} viewportRef={scrollRef}>
