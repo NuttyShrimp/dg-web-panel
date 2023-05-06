@@ -11,7 +11,6 @@ import (
 	graylog "degrens/panel/lib/graylogger"
 	"degrens/panel/lib/log"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -42,10 +41,6 @@ func main() {
 	graylog.InitGrayLogger(&conf.Graylog, logger)
 	api.CreateGraylogApi(&conf.Graylog, logger)
 	api.CreateCfxApi(&conf.Cfx, logger)
-	isValid := api.ValidateGraylogApi()
-	if !isValid {
-		os.Exit(1)
-	}
 
 	// Create discord auth config
 	discord.InitDiscordConf(conf, logger)
