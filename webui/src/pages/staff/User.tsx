@@ -61,7 +61,7 @@ export const UserPage = () => {
             </Flex>
             <Flex>
               <Text weight={"bolder"}>DiscordId:&nbsp;</Text>
-              <Text>{player.discord}</Text>
+              <Text>{player.discordId}</Text>
             </Flex>
             <Flex>
               <Text weight={"bolder"}>First Joined:&nbsp;</Text>
