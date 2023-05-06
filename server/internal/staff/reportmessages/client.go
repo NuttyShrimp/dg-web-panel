@@ -109,7 +109,7 @@ func (c *Client) writeRoutine() {
 	defer func() {
 		ticker.Stop()
 		err := c.conn.Close()
-		if err != nil && !errors.Is(net.ErrClosed, err) {
+		if err != nil && !errors.Is(err, net.ErrClosed) {
 			c.logger.Error("Failed to properly close report WS", "error", err)
 		}
 	}()
@@ -124,7 +124,7 @@ func (c *Client) writeRoutine() {
 			if !ok {
 				// The hub closed the channel.
 				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				if err != nil {
+				if err != nil && !errors.Is(err, websocket.ErrCloseSent) {
 					c.logger.Error("Failed to close a report WS", "error", err)
 				}
 				doRoutine = true
