@@ -16,9 +16,9 @@ const (
 
 type Report struct {
 	BaseModel
-	Title   string      `json:"title"`
-	Creator string      `json:"creator"`
-	Open    bool        `json:"open"`
+	Title   string `json:"title"`
+	Creator string `json:"creator"`
+	Open    bool   `json:"open"`
 	// Registered members, other than staff
 	Members  []ReportMember  `json:"members"`
 	Messages []ReportMessage `json:"messages"`
@@ -47,6 +47,7 @@ type ReportMember struct {
 	SteamID  string `json:"steamId"`
 	ReportID uint   `json:"-"`
 }
+
 func (rm *ReportMessage) BeforeCreate(tx *gorm.DB) error {
 	if rm.UserID == nil && rm.MemberID == nil {
 		return errors.New("message should be assigned to a user or a report member")

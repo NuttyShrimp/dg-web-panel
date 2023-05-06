@@ -24,10 +24,10 @@ type NewReportBody struct {
 }
 
 type FetchReportsBody struct {
-	Offset int      `form:"offset"`
-	Filter string   `form:"filter"`
-	Open   bool     `form:"open"`
-	Closed bool     `form:"closed"`
+	Offset int    `form:"offset"`
+	Filter string `form:"filter"`
+	Open   bool   `form:"open"`
+	Closed bool   `form:"closed"`
 }
 
 type UpdateReportTokensBody struct {
