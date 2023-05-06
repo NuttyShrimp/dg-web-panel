@@ -9,6 +9,7 @@ Authentication:
 - [Gorm](https://github.com/go-gorm/gorm)
 - [zap](https://github.com/uber-go/zap)
 - [go-redis](https://github.com/go-redis/redis)
+- [pre-commit](https://pre-commit.com/) Highly recommend installing this
 
 ## Enviromnent
 
