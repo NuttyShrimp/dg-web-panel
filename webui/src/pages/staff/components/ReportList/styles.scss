@@ -5,7 +5,7 @@
     &-container {
       display: flex;
       align-items: flex-start;
-      padding: 1vh 1vw;
+      padding: 1.5vh 1vw 1vh;
       &:hover {
         background-color: variables.$primary-darker;
       }
@@ -17,9 +17,13 @@
     &-info {
       display: flex;
       flex-direction: column;
-      & > h5:hover {
-        cursor: pointer;
-        color: #539bf5;
+      & > h5 {
+        line-height: 85%;
+
+        &:hover {
+          cursor: pointer;
+          color: #539bf5;
+        }
       }
     }
     &-date {
