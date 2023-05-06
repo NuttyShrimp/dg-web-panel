@@ -2,6 +2,7 @@ package mariadb
 
 import (
 	panel_models "degrens/panel/internal/db/models/panel"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -20,6 +21,13 @@ func newRepository(db *gorm.DB) *Repository {
 func (r *Repository) GetUserById(id uint) panel_models.User {
 	var user panel_models.User
 	r.Client.Preload(clause.Associations).First(&user, id)
+	return user
+}
+
+func (r *Repository) GetUserByDiscordId(discordId string) panel_models.User {
+	var user panel_models.User
+	strippedDiscordId := strings.Replace(discordId, "discord:", "", 1)
+	r.Client.Preload(clause.Associations).Where("discord_id = ?", strippedDiscordId).First(&user)
 	return user
 }
 

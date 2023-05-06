@@ -221,12 +221,8 @@ func (AR *AuthRouter) discordCallbackHandler() gin.HandlerFunc {
 		discord.AssignTokenToUser(user.ID, token)
 
 		// Set cookie with userId and roles
-		authInfo := authinfo.AuthInfo{
-			ID:         user.ID,
-			Roles:      roles,
-			AuthMethod: authinfo.Discord,
-		}
-		err = authInfo.Assign(c)
+		new_authinfo := authinfo.GetAuthInfoFromUser(user)
+		err = new_authinfo.Assign(c)
 		if err != nil {
 			AR.Logger.Error(err.Error())
 			c.Redirect(http.StatusTemporaryRedirect, "/errors/500")
