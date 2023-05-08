@@ -38,7 +38,6 @@ declare namespace CfxState {
       gender: 0;
       nationality: string;
       phone: string;
-      cash: number;
       last_updated: string;
       created_at: string;
     };

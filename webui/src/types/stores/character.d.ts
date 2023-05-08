@@ -8,7 +8,6 @@ declare namespace CharacterState {
     gender: string;
     nationality: string;
     phone: string;
-    cash: int64;
     metadata: Record<string, any>;
     created_at: number;
     last_updated: number;
