@@ -14,11 +14,17 @@ type TimelineEvent struct {
 	Type  string `json:"type"`
 }
 
+type QueuedPlayer struct {
+	Name        string            `json:"name"`
+	ServerId    uint              `json:"source"`
+	Identifiers map[string]string `json:"identifiers"`
+}
+
 type DashboardInfo struct {
-	ActivePlayers  int                   `json:"activePlayers"`
-	PlayersQueue   []models.CfxCharacter `json:"queue"`
-	PlayersInQueue int                   `json:"queuedPlayers"`
-	JoinEvents     []TimelineEvent       `json:"joinEvents"`
+	ActivePlayers  int             `json:"activePlayers"`
+	PlayersQueue   []QueuedPlayer  `json:"queue"`
+	PlayersInQueue int             `json:"queuedPlayers"`
+	JoinEvents     []TimelineEvent `json:"joinEvents"`
 }
 
 var lastFetch time.Time

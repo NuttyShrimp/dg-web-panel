@@ -45,7 +45,12 @@ export const StaffDashboard = () => {
         <Grid.Col xs={4}>
           <Stack>
             <NumberCard title="Players in Queue" count={info.queuedPlayers} />
-            <DnDList title={"Queue"} elements={[]} maxWidth emptyListHolder="No players in queue" />
+            <DnDList
+              title={"Queue"}
+              elements={info.queue.map(ply => `${ply.name} (${ply.identifiers.steam})`)}
+              maxWidth
+              emptyListHolder="No players in queue"
+            />
           </Stack>
         </Grid.Col>
       </Grid>
