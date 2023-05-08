@@ -66,10 +66,6 @@ export const CharacterInfo: FC<{ cid: number }> = ({ cid }) => {
         <Text>{characterInfo?.info.gender ? "Woman" : "Man"}</Text>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Cash:&nbsp;</Text>
-        <Text>{characterInfo?.info.cash}</Text>
-      </Flex>
-      <Flex>
         <Text weight={"bolder"}>Created at:&nbsp;</Text>
         <Text>{displayDate(characterInfo.created_at)}</Text>
       </Flex>

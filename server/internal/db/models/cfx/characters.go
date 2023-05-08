@@ -20,7 +20,6 @@ type CharacterInfo struct {
 	Gender       int       `json:"gender"`
 	Nationality  string    `json:"nationality"`
 	Phone        string    `json:"phone"`
-	Cash         int       `json:"cash"`
 	Last_Updated time.Time `json:"last_updated"`
 	Created_At   time.Time `json:"created_at"`
 }
