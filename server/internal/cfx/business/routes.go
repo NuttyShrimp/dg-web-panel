@@ -4,9 +4,12 @@ import (
 	"degrens/panel/internal/api"
 	"degrens/panel/internal/auth/authinfo"
 	"degrens/panel/internal/routes"
+	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
+	"degrens/panel/lib/graylogger"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -234,6 +237,12 @@ func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 		})
 		return
 	}
+	userInfo, err := users.GetUserInfo(ctx)
+	if err != nil {
+		BR.Logger.Error("Failed to get userinfo while giving vehicle to player")
+		ctx.JSON(403, errors.Unauthorized)
+		return
+	}
 	ai, err := api.CfxApi.DoRequest("POST", "/business/actions/new", &body, nil)
 	if err != nil {
 		BR.Logger.Error("Failed to create business on cfx", "error", err)
@@ -251,5 +260,6 @@ func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 		})
 		return
 	}
+	graylogger.Log("dev:actions:createBusiness", fmt.Sprintf("%d (%s) heeft een bedrijf (%s) aangemaakt", userInfo.ID, userInfo.Username, body.Name), "info", body)
 	ctx.JSON(200, gin.H{})
 }
