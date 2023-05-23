@@ -20,6 +20,7 @@ func GetUserInfo(c *gin.Context) (*models.UserInfo, error) {
 	}
 	userAuthInfo := userInfoPtr.(*authinfo.AuthInfo)
 	userInfo := models.UserInfo{
+		ID:    userAuthInfo.ID,
 		Roles: userAuthInfo.Roles,
 	}
 	if userAuthInfo.AuthMethod == authinfo.Discord || userAuthInfo.AuthMethod == authinfo.APIToken {

@@ -4,6 +4,9 @@ import (
 	"degrens/panel/internal/api"
 	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/internal/routes"
+	"degrens/panel/internal/users"
+	"degrens/panel/lib/errors"
+	"degrens/panel/lib/graylogger"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
@@ -67,6 +70,12 @@ func (VR *VehiclesRouter) GiveNewVehicle(ctx *gin.Context) {
 		})
 		return
 	}
+	userInfo, err := users.GetUserInfo(ctx)
+	if err != nil {
+		VR.Logger.Error("Failed to get userinfo while giving vehicle to player")
+		ctx.JSON(403, errors.Unauthorized)
+		return
+	}
 	ai, err := api.CfxApi.DoRequest("POST", "/vehicles/give", &body, nil)
 	if err != nil {
 		VR.Logger.Error("Failed to give vehicle to player", "error", err)
@@ -84,4 +93,6 @@ func (VR *VehiclesRouter) GiveNewVehicle(ctx *gin.Context) {
 		})
 		return
 	}
+	graylogger.Log("dev:actions:giveVehicle", fmt.Sprintf("%d (%s) heeft een voertuig (%s) aan %d gegeven", userInfo.ID, userInfo.Username, body.Model, body.Owner), "model", body.Model, "owner", body.Owner)
+	ctx.JSON(200, gin.H{})
 }

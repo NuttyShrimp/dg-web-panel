@@ -86,9 +86,8 @@ func GetCfxUserInfo(steamId string) (*models.UserInfo, error) {
 		return nil, err
 	}
 	return &models.UserInfo{
-		Username:  info.Name,
-		Roles:     roles,
-		AvatarUrl: "",
+		Username: info.Name,
+		Roles:    roles,
 	}, nil
 }
 
