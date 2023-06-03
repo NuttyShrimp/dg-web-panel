@@ -65,7 +65,6 @@ func (BR *BankRouter) UpdateBalance(ctx *gin.Context) {
 		return
 	}
 
-
 	var body struct {
 		Balance float64 `json:"balance"`
 	}
@@ -73,7 +72,7 @@ func (BR *BankRouter) UpdateBalance(ctx *gin.Context) {
 		BR.Logger.Error("Failed to bind request body", "error", err, "id", id)
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
-			Description: fmt.Sprintf("We encountered an error while getting the request information"),
+			Description: "We encountered an error while getting the request information",
 		})
 		return
 	}

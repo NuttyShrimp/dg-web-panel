@@ -26,14 +26,14 @@ func GetBankAccount(accountId string) (*Bank, error) {
 	}, nil
 }
 
-func (b *Bank) ChangeBalance(userInfo *models.UserInfo,balance float64) error {
+func (b *Bank) ChangeBalance(userInfo *models.UserInfo, balance float64) error {
 	graylogger.Log("admin:bank:updateBalance", fmt.Sprintf("%s(%d) heeft het balans van bankaccount %s (%s) veranded %f -> %f", userInfo.Username, userInfo.ID, b.Name, b.AccountId, b.Balance, balance), "accountId", b.AccountId, "oldBalance", b.Balance, "newBalance", balance)
 	if err := db.CfxMariaDB.Client.Model(&cfx_models.BankAccount{}).Where(&cfx_models.BankAccount{AccountId: b.AccountId}).Update("balance", balance).Error; err != nil {
 		return err
 	}
 	ai, err := api.CfxApi.DoRequest("PATCH", "/financials/updateBalance", gin.H{
 		"accountId": b.AccountId,
-		"balance": balance,
+		"balance":   balance,
 	}, nil)
 	if ai.Message != "" && ai.Response.StatusCode != 401 {
 		return errors.New(ai.Message)
