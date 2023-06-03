@@ -20,9 +20,10 @@ type BankAccount struct {
 }
 
 type BankAccountAccess struct {
-	AccountId    string `gorm:"primaryKey" json:"accountId"`
-	CitizenId    int    `gorm:"primaryKey,column:cid" json:"citizenId"`
-	Access_Level int    `json:"access_level"`
+	AccountId    string      `gorm:"primaryKey" json:"accountId"`
+	CitizenId    int         `gorm:"primaryKey,column:cid" json:"citizenId"`
+	Access_Level int         `json:"access_level"`
+	Account      BankAccount `json:"account" gorm:"foreignKey:AccountId;references:account_id"`
 }
 
 type BankPermissions struct {
