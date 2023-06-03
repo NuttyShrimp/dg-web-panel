@@ -52,6 +52,7 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 
 	// request
 	resp, err := hc.Do(req)
+	ei.Response = resp
 	if err != nil {
 		return ei, fmt.Errorf(
 			"failed to call API: %s %s: %w", method, endpoint, err)
@@ -63,7 +64,6 @@ func (a *api) doInternalRequest(method, endpoint string, input, output interface
 			a.Logger.Error("Failed to close API request body", "error", err)
 		}
 	}()
-	ei.Response = resp
 
 	if resp.StatusCode >= 400 {
 		b, err := io.ReadAll(resp.Body)

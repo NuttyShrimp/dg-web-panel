@@ -1,10 +1,12 @@
-import { Center, Container, Group, Stack, Text, useMantineTheme } from "@mantine/core";
+import { Button, Center, Container, Group, Stack, Text, useMantineTheme } from "@mantine/core";
+import { openModal } from "@mantine/modals";
 import { CheckIcon, XIcon } from "@primer/octicons-react";
 import { List } from "@src/components/List";
 import { axiosInstance } from "@src/helpers/axiosInstance";
 import { characterState } from "@src/stores/character/state";
 import { FC, useEffect } from "react";
 import { useRecoilState } from "recoil";
+import { ChangeBalanceModal } from "./modals/changeBalanceModal";
 
 export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
   const [characterBankAccs, setCharacterBankAccs] = useRecoilState(characterState.bank);
@@ -17,6 +19,13 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const openBalanceProfile = (accId: string, balance: number) => {
+    openModal({
+      title: "Update Bank Balance",
+      children: <ChangeBalanceModal balance={balance} accountId={accId} />,
+    });
   };
 
   useEffect(() => {
@@ -48,9 +57,12 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
     <Center>
       <List>
         {characterBankAccs.map(acc => (
-          <List.Entry key={acc.account_id}>
+          <List.Entry key={acc.accountId}>
             <Stack w={"100%"} spacing="xs">
-              <Text weight={"bolder"}>{acc.name}</Text>
+              <Group position="apart">
+                <Text weight={"bolder"}>{acc.name}</Text>
+                <Button onClick={() => openBalanceProfile(acc.accountId, acc.balance)}>Change Balance</Button>
+              </Group>
               <Text>€{acc.balance}</Text>
               <Group grow>
                 <Group spacing={"xs"}>

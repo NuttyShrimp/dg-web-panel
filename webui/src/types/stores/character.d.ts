@@ -13,7 +13,7 @@ declare namespace CharacterState {
     last_updated: number;
   }
   interface Bank {
-    account_id: string;
+    accountId: string;
     name: string;
     type: string;
     balance: number;
