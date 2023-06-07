@@ -171,6 +171,9 @@ func (r *Room) sendMessages(c *Client, offset int) {
 func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error {
 	switch msg.Type {
 	case "addMessage":
+		if msg.Data.(string) == "" {
+			return nil
+		}
 		reportMsg, err := r.report.AddMessage(r.report.Data.ID, msg.Data, origin.authInfo)
 		if err != nil {
 			r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)

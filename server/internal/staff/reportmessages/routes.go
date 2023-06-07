@@ -88,6 +88,13 @@ func (RR *ReportRouter) AddMessage(ctx *gin.Context) {
 		return
 	}
 
+	if body.Message.(string) == "" {
+		ctx.JSON(400, models.RouteErrorMessage{
+			Title:       "Bad request",
+			Description: "You cannot send an empty message",
+		})
+		return
+	}
 	reportMsg, err := report.AddMessage(body.ReportId, body.Message, clientInfo)
 	if err != nil {
 		RR.Logger.Error("Failed to save a new report message", "error", err, "message", body.Message, "reportId", body.ReportId)

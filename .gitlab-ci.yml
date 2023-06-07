@@ -128,6 +128,7 @@ Deploy:
 
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
+    - echo "$CI_REGISTRY"
     # Login to docker registry with CI credentials
     - ssh "$SERVER_USER@$SERVER_IP" "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     # The use of single ticks is as-expected, otherwise we don't have access to the API_TOKEN variable
