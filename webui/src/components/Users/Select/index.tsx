@@ -1,4 +1,4 @@
-import { Box, Select, Text } from "@mantine/core";
+import { Autocomplete, Box, Text } from "@mantine/core";
 import { cfxState } from "@src/stores/cfx/state";
 import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
 import { FC, forwardRef, useEffect } from "react";
@@ -33,12 +33,10 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
   }, []);
 
   return (
-    <Select
+    <Autocomplete
       placeholder="Search a user"
-      searchable
       nothingFound="No user found"
       itemComponent={SelectItem}
-      maxDropdownHeight={300}
       defaultValue={steamId}
       data={players.map(p => ({
         ...p,
@@ -50,7 +48,7 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
         caseInsensitiveMatch(item.steamId, value) ||
         caseInsensitiveMatch(item.discordId, value)
       }
-      onChange={onChange}
+      onItemSubmit={i => onChange?.(i.steamId)}
     />
   );
 };

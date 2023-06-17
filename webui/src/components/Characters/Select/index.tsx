@@ -1,4 +1,4 @@
-import { Box, Button, Center, Select, Text } from "@mantine/core";
+import { Autocomplete, Box, Button, Center, Text } from "@mantine/core";
 import { characterState } from "@src/stores/character/state";
 import { useCharacterActions } from "@src/stores/character/useCharacterActions";
 import { FC, forwardRef, useEffect, useState } from "react";
@@ -46,9 +46,8 @@ export const SelectCharacter: FC<{ cid?: string; onChange: (cid: number) => void
   }, []);
 
   return (
-    <Select
+    <Autocomplete
       placeholder="Search a character"
-      searchable
       nothingFound="No character found"
       itemComponent={SelectItem}
       maxDropdownHeight={300}
@@ -64,7 +63,7 @@ export const SelectCharacter: FC<{ cid?: string; onChange: (cid: number) => void
         caseInsensitiveMatch(`${item.info.firstname} ${item.info.lastname}`, value) ||
         caseInsensitiveMatch(String(item.citizenid), value)
       }
-      onChange={val => onChange(val ? Number(val) : 0)}
+      onItemSubmit={val => onChange?.(val.citizenid ?? 0)}
     />
   );
 };
