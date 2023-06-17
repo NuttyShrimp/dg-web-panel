@@ -163,6 +163,115 @@ func (r *Room) sendMessages(c *Client, offset int) {
 	c.send <- responseStr
 }
 
+func (r *Room) addReportMessage(msg WebsocketMessage, origin *Client) error {
+	// Prevent ghost messages from crashing the server
+	if msg.Data == nil || msg.Data.(string) == "" {
+		return nil
+	}
+	reportMsg, err := r.report.AddMessage(r.report.Data.ID, msg.Data, origin.authInfo)
+	if err != nil {
+		r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)
+		return errors.New("Failed to save message")
+	}
+	err = SeedReportMessageMember(reportMsg)
+	if err != nil {
+		r.logger.Error("Failed to seed new report message", "error", err, "message", msg.Data)
+		return errors.New("Failed to seed message")
+	}
+	// announce new message for all clients
+	response := WebsocketMessage{
+		Type: "addMessage",
+		Data: reportMsg,
+	}
+	responseStr, err := json.Marshal(response)
+	if err != nil {
+		r.logger.Error("Failed to encode websocket message while trying to announce new report message", "error", err)
+		return errors.New("Failed to spread new message")
+	}
+	r.sendToClients(responseStr)
+	return nil
+}
+
+func (r *Room) removeReportMember(msg WebsocketMessage, origin *Client) error {
+	if !users.DoesUserHaveRole(origin.authInfo.Roles, "staff") {
+		return errors.New("missing permissions to do this")
+	}
+	steamId, ok := msg.Data.(string)
+	if !ok {
+		return errors.New("Failed to convert data to a valid steamId")
+	}
+	err := r.report.RemoveMember(steamId)
+	if err != nil {
+		r.logger.Error("Failed to remove member from report", "error", err)
+		return errors.New("Failed to remove member")
+	}
+
+	response := WebsocketMessage{
+		Type: "setMembers",
+		Data: nil,
+	}
+	responseStr, err := json.Marshal(response)
+	if err != nil {
+		r.logger.Error("Failed to encode websocket message while removing a member", "error", err)
+		return errors.New("Failed to set new members")
+	}
+	r.sendToClients(responseStr)
+	return nil
+}
+
+func (r *Room) addReportMember(msg WebsocketMessage) error {
+	// Currently allow players to add others to reports, if this is getting to much fucked with
+	// we will add restrictions to it
+	// if !users.DoesUserHaveRole(origin.authInfo.Roles, "staff") {
+	// 	return errors.New("missing permissions to do this")
+	// }
+	steamId, ok := msg.Data.(string)
+	if !ok {
+		return errors.New("Failed to convert data to a valid steamId")
+	}
+	err := r.report.AddMember(steamId)
+	if err != nil {
+		r.logger.Error("Failed to add member", "error", err)
+		return errors.New("Failed to add member")
+	}
+
+	response := WebsocketMessage{
+		Type: "setMembers",
+		Data: nil,
+	}
+	responseStr, err := json.Marshal(response)
+	if err != nil {
+		r.logger.Error("Failed to encode websocket message while adding a member", "error", err)
+		return errors.New("Failed to set new members")
+	}
+	r.sendToClients(responseStr)
+	return nil
+}
+
+func (r *Room) toggleReportState(msg WebsocketMessage) error {
+	toggle, ok := msg.Data.(bool)
+	if !ok {
+		return errors.New("Failed to convert data to a boolean")
+	}
+	err := r.report.ToggleState(toggle)
+	if err != nil {
+		r.logger.Error("Failed to toggle report state", "state", toggle)
+		return errors.New("Failed to change report state")
+	}
+
+	response := WebsocketMessage{
+		Type: "toggleState",
+		Data: toggle,
+	}
+	responseStr, err := json.Marshal(response)
+	if err != nil {
+		r.logger.Error("Failed to encode websocket message while chaning state", "error", err)
+		return errors.New("Failed to announce report state change")
+	}
+	r.sendToClients(responseStr)
+	return nil
+}
+
 // TODO: accept uploading images
 // images will be stored in minio buckets
 // Each report will have its unique bucket
@@ -171,106 +280,13 @@ func (r *Room) sendMessages(c *Client, offset int) {
 func (r *Room) handleIncomingMessage(msg WebsocketMessage, origin *Client) error {
 	switch msg.Type {
 	case "addMessage":
-		// Prevent ghost messages from crashing the server
-		if msg.Data == nil || msg.Data.(string) == "" {
-			return nil
-		}
-		reportMsg, err := r.report.AddMessage(r.report.Data.ID, msg.Data, origin.authInfo)
-		if err != nil {
-			r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)
-			return errors.New("Failed to save message")
-		}
-		err = SeedReportMessageMember(reportMsg)
-		if err != nil {
-			r.logger.Error("Failed to seed new report message", "error", err, "message", msg.Data)
-			return errors.New("Failed to seed message")
-		}
-		// announce new message for all clients
-		response := WebsocketMessage{
-			Type: "addMessage",
-			Data: reportMsg,
-		}
-		responseStr, err := json.Marshal(response)
-		if err != nil {
-			r.logger.Error("Failed to encode websocket message while trying to announce new report message", "error", err)
-			return errors.New("Failed to spread new message")
-		}
-		r.sendToClients(responseStr)
-		return nil
+		return r.addReportMessage(msg, origin)
 	case "removeMember":
-		if !users.DoesUserHaveRole(origin.authInfo.Roles, "staff") {
-			return errors.New("missing permissions to do this")
-		}
-		steamId, ok := msg.Data.(string)
-		if !ok {
-			return errors.New("Failed to convert data to a valid steamId")
-		}
-		err := r.report.RemoveMember(steamId)
-		if err != nil {
-			r.logger.Error("Failed to remove member from report", "error", err)
-			return errors.New("Failed to remove member")
-		}
-
-		response := WebsocketMessage{
-			Type: "setMembers",
-			Data: nil,
-		}
-		responseStr, err := json.Marshal(response)
-		if err != nil {
-			r.logger.Error("Failed to encode websocket message while removing a member", "error", err)
-			return errors.New("Failed to set new members")
-		}
-		r.sendToClients(responseStr)
-		return nil
+		return r.removeReportMember(msg, origin)
 	case "addMember":
-		// Currently allow players to add others to reports, if this is getting to much fucked with
-		// we will add restrictions to it
-		// if !users.DoesUserHaveRole(origin.authInfo.Roles, "staff") {
-		// 	return errors.New("missing permissions to do this")
-		// }
-		steamId, ok := msg.Data.(string)
-		if !ok {
-			return errors.New("Failed to convert data to a valid steamId")
-		}
-		err := r.report.AddMember(steamId)
-		if err != nil {
-			r.logger.Error("Failed to add member", "error", err)
-			return errors.New("Failed to add member")
-		}
-
-		response := WebsocketMessage{
-			Type: "setMembers",
-			Data: nil,
-		}
-		responseStr, err := json.Marshal(response)
-		if err != nil {
-			r.logger.Error("Failed to encode websocket message while adding a member", "error", err)
-			return errors.New("Failed to set new members")
-		}
-		r.sendToClients(responseStr)
-		return nil
+		return r.addReportMember(msg)
 	case "toggleReportState":
-		toggle, ok := msg.Data.(bool)
-		if !ok {
-			return errors.New("Failed to convert data to a boolean")
-		}
-		err := r.report.ToggleState(toggle)
-		if err != nil {
-			r.logger.Error("Failed to toggle report state", "state", toggle)
-			return errors.New("Failed to change report state")
-		}
-
-		response := WebsocketMessage{
-			Type: "toggleState",
-			Data: toggle,
-		}
-		responseStr, err := json.Marshal(response)
-		if err != nil {
-			r.logger.Error("Failed to encode websocket message while chaning state", "error", err)
-			return errors.New("Failed to announce report state change")
-		}
-		r.sendToClients(responseStr)
-		return nil
+		return r.toggleReportState(msg)
 	default:
 		return errors.New("Invalid action")
 	}
