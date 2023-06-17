@@ -165,7 +165,7 @@ func (r *Room) sendMessages(c *Client, offset int) {
 
 func (r *Room) addReportMessage(msg WebsocketMessage, origin *Client) error {
 	// Prevent ghost messages from crashing the server
-	if msg.Data == nil || msg.Data.(string) == "" {
+	if msg.Data == nil {
 		return nil
 	}
 	reportMsg, err := r.report.AddMessage(r.report.Data.ID, msg.Data, origin.authInfo)
