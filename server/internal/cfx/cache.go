@@ -28,6 +28,5 @@ func getCache() *Cache {
 }
 
 func UnlockCache() {
-	cache.Mutex.TryLock()
 	cache.Mutex.Unlock()
 }
