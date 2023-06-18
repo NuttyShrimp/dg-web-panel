@@ -116,7 +116,16 @@ func (r *Report) AddMessage(reportId uint, message interface{}, sender *authinfo
 			// This will fix the report screen for admins to freeze IG
 			return r.AddMessage(reportId, message, authinfo.GetAuthInfoFromUser(&panelUser))
 		}
+		// NOTE: if user has support role we force add him to the report, should remove if we get to the point that they have access to panel
+		if users.DoesUserHaveRole(sender.Roles, "support") {
+			if err := r.AddMember(tokenInfo.SteamId); err != nil {
+				return nil, err
+			}
+		}
 		reportMember := db.MariaDB.Repository.GetReportMemberBySteamId(tokenInfo.SteamId, reportId)
+		if reportMember == nil {
+			return nil, errors.New("Tried to send a message to report you don't have access to")
+		}
 		reportMessage.MemberID = &reportMember.ID
 	} else {
 		// User
