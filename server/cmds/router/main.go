@@ -10,8 +10,10 @@ import (
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/log"
 	"degrens/panel/lib/ratelimiter"
+	"net/http"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -42,7 +44,11 @@ func SetupRouter(conf *config.Config, logger log.Logger) *gin.Engine {
 		}),
 		ratelimiter.RateLimit(conf.Server.ReqPerSeq),
 		gin.Logger(),
-		gin.Recovery(),
+		gin.CustomRecovery(func(c *gin.Context, err any) {
+			sentry.CurrentHub().Recover(err)
+			sentry.Flush(time.Second * 5)
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}),
 	)
 
 	apiRG := r.Group("/api")
