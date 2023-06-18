@@ -50,7 +50,6 @@ export const StaffReport = () => {
 
   const handleWSMessage = useCallback(
     (message: any) => {
-      console.log(message);
       switch (message.type) {
         case "addMessages": {
           setReportMessages(
@@ -111,7 +110,12 @@ export const StaffReport = () => {
   );
 
   const { lastJsonMessage, sendJsonMessage, readyState } = useWebSocket(
-    `${location.protocol.includes("https") ? "wss" : "ws"}://${getHostname()}/api/staff/reports/join/${Number(id)}`
+    `${location.protocol.includes("https") ? "wss" : "ws"}://${getHostname()}/api/staff/reports/join/${Number(id)}`,
+    {
+      shouldReconnect: () => true,
+      retryOnError: true,
+      reconnectInterval: 2000,
+    }
   );
 
   const connectionStatus = {
