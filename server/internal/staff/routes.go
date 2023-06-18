@@ -16,7 +16,6 @@ import (
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -74,9 +73,7 @@ func (SR *StaffRouter) DashboardHandler() gin.HandlerFunc {
 func (SR *StaffRouter) FetchCfxPlayersHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// If the request takes long than 20s it is automatically yeeted, we force reset the mutex lock to prevent poising
-		resetTimer := time.AfterFunc(20*time.Second, cfx.UnlockCache)
 		plys, err := cfx.GetCfxPlayers()
-		resetTimer.Stop()
 		if err != nil {
 			SR.Logger.Error("Failed to fetch information about cfx players", "error", err.Error())
 			ctx.JSON(500, models.RouteErrorMessage{

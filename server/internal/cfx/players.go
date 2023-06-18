@@ -22,6 +22,7 @@ type ActivePlayerInfo struct {
 }
 
 func GetCfxPlayers() (*[]cfx_models.User, error) {
+	resetTimer := time.AfterFunc(20*time.Second, UnlockCache)
 	cache := getCache()
 	cache.Mutex.Lock()
 	// Fetch updated players
@@ -42,6 +43,7 @@ func GetCfxPlayers() (*[]cfx_models.User, error) {
 	cache.Players.Data = append(cache.Players.Data, newPlys...)
 	cache.Players.UpdatedAt = time.Now()
 	cache.Mutex.Unlock()
+	resetTimer.Stop()
 	return &cache.Players.Data, nil
 }
 
