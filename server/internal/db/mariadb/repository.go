@@ -24,11 +24,11 @@ func (r *Repository) GetUserById(id uint) panel_models.User {
 	return user
 }
 
-func (r *Repository) GetUserByDiscordId(discordId string) panel_models.User {
+func (r *Repository) GetUserByDiscordId(discordId string) *panel_models.User {
 	var user panel_models.User
 	strippedDiscordId := strings.Replace(discordId, "discord:", "", 1)
 	r.Client.Preload(clause.Associations).Where("discord_id = ?", strippedDiscordId).First(&user)
-	return user
+	return &user
 }
 
 func (r *Repository) GetReportMemberBySteamId(steamId string, reportId uint) *panel_models.ReportMember {

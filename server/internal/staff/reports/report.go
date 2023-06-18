@@ -111,13 +111,14 @@ func (r *Report) AddMessage(reportId uint, message interface{}, sender *authinfo
 			return nil, errors.New("Failed to get info bound to cfx token")
 		}
 		panelUser := db.MariaDB.Repository.GetUserByDiscordId(tokenInfo.DiscordId)
-		if panelUser.ID == 0 && users.DoesUserHaveRole(panelUser.GetRoleNames(), "staff") {
+		isStaff := users.DoesUserHaveRole(panelUser.GetRoleNames(), "staff")
+		if panelUser != nil && isStaff {
 			// Recalling AddMessage as user
 			// This will fix the report screen for admins to freeze IG
-			return r.AddMessage(reportId, message, authinfo.GetAuthInfoFromUser(&panelUser))
+			return r.AddMessage(reportId, message, authinfo.GetAuthInfoFromUser(panelUser))
 		}
 		// NOTE: if user has support role we force add him to the report, should remove if we get to the point that they have access to panel
-		if users.DoesUserHaveRole(sender.Roles, "support") {
+		if isStaff {
 			if err := r.AddMember(tokenInfo.SteamId); err != nil {
 				return nil, err
 			}
