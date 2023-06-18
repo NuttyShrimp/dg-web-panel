@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aidenwallis/go-utils/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,8 +59,8 @@ func (RR *ReportRouter) ReportWS(ctx *gin.Context) {
 
 func (RR *ReportRouter) AddMessage(ctx *gin.Context) {
 	body := struct {
-		Message  interface{} `json:"message"`
-		ReportId uint        `json:"reportId"`
+		Message  map[string]interface{} `json:"message"`
+		ReportId uint                   `json:"reportId"`
 	}{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
@@ -88,7 +89,7 @@ func (RR *ReportRouter) AddMessage(ctx *gin.Context) {
 		return
 	}
 
-	if body.Message.(string) == "" {
+	if body.Message == nil || len(utils.MapKeys(body.Message)) == 0 {
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Bad request",
 			Description: "You cannot send an empty message",
