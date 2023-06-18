@@ -31,11 +31,11 @@ func (r *Repository) GetUserByDiscordId(discordId string) panel_models.User {
 	return user
 }
 
-func (r *Repository) GetReportMemberBySteamId(steamId string, reportId uint) panel_models.ReportMember {
+func (r *Repository) GetReportMemberBySteamId(steamId string, reportId uint) *panel_models.ReportMember {
 	member := panel_models.ReportMember{}
 	r.Client.Where(&panel_models.ReportMember{
 		ReportID: reportId,
 		SteamID:  steamId,
 	}).First(&member)
-	return member
+	return &member
 }
