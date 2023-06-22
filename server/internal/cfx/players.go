@@ -25,6 +25,10 @@ func GetCfxPlayers() (*[]cfx_models.User, error) {
 	resetTimer := time.AfterFunc(20*time.Second, UnlockCache)
 	cache := getCache()
 	cache.Mutex.Lock()
+	defer func() {
+		cache.Mutex.Unlock()
+		resetTimer.Stop()
+	}()
 	// Fetch updated players
 	updatedPly := []cfx_models.User{}
 	err := db.CfxMariaDB.Client.Preload("Points").Where("(last_updated BETWEEN ? AND ?) AND created_at < ?", cache.Players.UpdatedAt, time.Now(), cache.Players.UpdatedAt).Find(&updatedPly).Error
@@ -42,8 +46,6 @@ func GetCfxPlayers() (*[]cfx_models.User, error) {
 	cache.Players.Data = append(cache.Players.Data, updatedPly...)
 	cache.Players.Data = append(cache.Players.Data, newPlys...)
 	cache.Players.UpdatedAt = time.Now()
-	cache.Mutex.Unlock()
-	resetTimer.Stop()
 	return &cache.Players.Data, nil
 }
 
@@ -55,13 +57,15 @@ func GetCfxPlayerInfo(steamId string) (*cfx_models.User, error) {
 		}
 	}
 	cache.Mutex.Lock()
+	defer func() {
+		cache.Mutex.Unlock()
+	}()
 	info := cfx_models.User{}
 	err := db.CfxMariaDB.Client.Find(&info, steamId).Error
 	if err != nil {
 		return nil, err
 	}
 	cache.Players.Data = append(cache.Players.Data, info)
-	cache.Mutex.Unlock()
 	return &info, nil
 }
 
