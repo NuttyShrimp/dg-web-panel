@@ -38,10 +38,12 @@ export const useReportActions = () => {
           setReports([]);
           return;
         }
-        setPagination({
-          total: res.data?.total,
-          current: 1,
-        });
+        if (pagination.total !== (res.data?.total ?? 0)) {
+          setPagination({
+            total: res.data?.total,
+            current: Math.min(res.data?.total ?? 1, 1),
+          });
+        }
         setReports(res.data?.reports ?? []);
       } catch (e) {
         console.error(e);

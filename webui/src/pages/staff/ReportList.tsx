@@ -1,7 +1,7 @@
 import { Center, Container, Group, Pagination, Text, Tooltip } from "@mantine/core";
 import { SearchInput } from "@src/components/SearchInput";
 import { reportState } from "@src/stores/reports/state";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { ReportList } from "./components/ReportList";
 
@@ -41,8 +41,11 @@ export const StaffReports = () => {
       ...pagination,
       current: page,
     });
-    loadReports();
   };
+
+  useEffect(() => {
+    loadReports();
+  }, [pagination]);
 
   return (
     <>
