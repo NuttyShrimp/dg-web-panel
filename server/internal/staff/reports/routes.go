@@ -7,6 +7,7 @@ import (
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
+	"math"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -92,7 +93,7 @@ func (RR *ReportRouter) FetchReports(ctx *gin.Context) {
 	}
 	ctx.JSON(200, gin.H{
 		"reports": reportList,
-		"total":   reportTotal,
+		"total":   math.Ceil(float64(reportTotal) / 25),
 	})
 }
 
