@@ -12,6 +12,7 @@ import (
 	"degrens/panel/models"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/aidenwallis/go-utils/utils"
 )
@@ -110,12 +111,14 @@ func (r *Report) AddMessage(reportId uint, message interface{}, sender *authinfo
 		if tokenInfo == nil {
 			return nil, errors.New("Failed to get info bound to cfx token")
 		}
-		panelUser := db.MariaDB.Repository.GetUserByDiscordId(tokenInfo.DiscordId)
-		isStaff := users.DoesUserHaveRole(panelUser.GetRoleNames(), "staff")
-		if panelUser != nil && isStaff {
-			// Recalling AddMessage as user
-			// This will fix the report screen for admins to freeze IG
-			return r.AddMessage(reportId, message, authinfo.GetAuthInfoFromUser(panelUser))
+		isStaff := users.DoesUserHaveRole(tokenInfo.Roles, "staff")
+		if isStaff {
+			panelUser := db.MariaDB.Repository.GetUserByDiscordId(tokenInfo.DiscordId)
+			if panelUser != nil && users.DoesUserHaveRole(panelUser.GetRoleNames(), "staff") {
+				// Recalling AddMessage as user
+				// This will fix the report screen for admins to freeze IG
+				return r.AddMessage(reportId, message, authinfo.GetAuthInfoFromUser(panelUser))
+			}
 		}
 		// NOTE: if user has support role we force add him to the report, should remove if we get to the point that they have access to panel
 		if isStaff {
@@ -124,6 +127,7 @@ func (r *Report) AddMessage(reportId uint, message interface{}, sender *authinfo
 			}
 		}
 		reportMember := db.MariaDB.Repository.GetReportMemberBySteamId(tokenInfo.SteamId, reportId)
+		fmt.Printf("%+v\n", reportMember)
 		if reportMember == nil {
 			return nil, errors.New("Tried to send a message to report you don't have access to")
 		}
