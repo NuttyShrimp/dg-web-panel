@@ -28,6 +28,9 @@ func getClient(key string) (webhook.Client, error) {
 }
 
 func SendToReportWebHook(msg *disgo.WebhookMessageCreate) error {
+	if config.IsDev() {
+		return nil
+	}
 	client, err := getClient("reportlog")
 	if err != nil {
 		return err

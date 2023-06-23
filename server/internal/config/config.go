@@ -83,6 +83,10 @@ func GetConfig() *Config {
 	return config
 }
 
+func IsDev() bool {
+	return config.Server.Env != "production"
+}
+
 /*
 Load the config from the given path
 Path should start from the root of the project
