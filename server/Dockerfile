@@ -19,6 +19,8 @@ ENV GIN_MODE release
 
 COPY --from=builder /app/panel-server .
 COPY "$config" .
+# We do this to get a more advanced stacktrace in sentry
+COPY . ./app
 
 EXPOSE 3000
 
