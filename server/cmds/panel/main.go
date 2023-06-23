@@ -28,6 +28,7 @@ func main() {
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              "https://52914b9b7d394dc8962680061a942328@sentry.nuttyshrimp.me/4",
 		Environment:      conf.Server.Env,
+		EnableTracing:    true,
 		AttachStacktrace: true,
 		TracesSampleRate: 1.0,
 	}); err != nil {
