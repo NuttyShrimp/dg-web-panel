@@ -114,6 +114,12 @@ export const menus: MenuEntry[] = [
       weaponEquip: "(Un)equip,",
     },
   },
+  {
+    label: "LogList",
+    actions: {
+      loglist: "Used",
+    },
+  },
 ];
 
 export const queries: Record<string, QueryType> = {
@@ -299,6 +305,10 @@ export const queries: Record<string, QueryType> = {
   financialsCash: {
     types: ["cash:remove", "cash:add"],
     inputs: ["citizenid"],
+  },
+  loglist: {
+    types: ["logtype:idlist:use"],
+    inputs: ["citizenid", "steamId"],
   },
 };
 
