@@ -27,7 +27,7 @@ services:
       - mariadb-data:/var/lib/mysql
   
   backend:
-    image: dg-panel/backend
+    image: dg-panel/backend:latest
     container_name: dg-panel-gin
     restart: unless-stopped
     build:
@@ -39,7 +39,7 @@ services:
       - redis
   
   web:
-    image: dg-panel/frontend
+    image: dg-panel/frontend:latest
     container_name: dg-panel-web
     restart: unless-stopped
     build: "webui/."
