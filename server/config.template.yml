@@ -18,6 +18,8 @@ discord:
   # Guild id of server we are targeting
   # In this case: degrensRP
   guild: 706892662271246366
+  hooks:
+    reportlog: 
   roles:
     - name: developer
       id: 706903572058603541
