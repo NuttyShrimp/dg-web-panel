@@ -7,12 +7,15 @@ import (
 	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
+	"degrens/panel/internal/discord"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/graylogger"
 	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"errors"
 	"fmt"
+
+	disgo "github.com/disgoorg/disgo/discord"
 
 	"github.com/aidenwallis/go-utils/utils"
 )
@@ -59,7 +62,23 @@ func CreateNewReport(creator, title string, memberIds []string, logger log.Logge
 		logger.Error("Failed to announce new report", "error", ai.Message, "type", "message")
 	}
 	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", creator, title), "members", memberIds)
-	return report.ID, nil
+	err = discord.SendToReportWebHook(&disgo.WebhookMessageCreate{
+		Username: "Panel",
+		Embeds: []disgo.Embed{
+			{
+				Title:       "New report",
+				Type:        disgo.EmbedTypeRich,
+				Description: fmt.Sprintf("%s has created a new report with title: %s", creator, title),
+				Fields: []disgo.EmbedField{
+					{
+						Name:  "URL",
+						Value: fmt.Sprintf("https://panel.degrensrp.be/staff/reports/%d", report.ID),
+					},
+				},
+			},
+		},
+	})
+	return report.ID, err
 }
 
 func AddMemberToReport(userId string, reportId uint, steamId string) error {

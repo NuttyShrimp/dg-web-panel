@@ -32,11 +32,12 @@ type ConfigServer struct {
 }
 
 type ConfigDiscord struct {
-	RedirectURL  string       `yaml:"redirectURL"`
-	ClientID     string       `yaml:"clientID"`
-	ClientSecret string       `yaml:"clientSecret"`
-	Guild        string       `yaml:"guild"`
-	Roles        []ConfigRole `yaml:"roles"`
+	RedirectURL  string            `yaml:"redirectURL"`
+	ClientID     string            `yaml:"clientID"`
+	ClientSecret string            `yaml:"clientSecret"`
+	Guild        string            `yaml:"guild"`
+	Hooks        map[string]string `yaml:"hooks"`
+	Roles        []ConfigRole      `yaml:"roles"`
 }
 
 type ConfigRole struct {
@@ -76,12 +77,18 @@ type ConfigCfx struct {
 	ApiKey string `yaml:"apiKey"`
 }
 
+var config *Config
+
+func GetConfig() *Config {
+	return config
+}
+
 /*
 Load the config from the given path
 Path should start from the root of the project
 */
 func LoadConfig(path string) (*Config, error) {
-	config := &Config{}
+	config = &Config{}
 
 	file, err := os.Open(path)
 	if err != nil {
