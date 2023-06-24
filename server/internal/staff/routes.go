@@ -12,29 +12,28 @@ import (
 	"degrens/panel/internal/staff/reports"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type StaffRouter struct {
 	routes.Router
 }
 
-func NewStaffRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewStaffRouter(rg *gin.RouterGroup) {
 	router := &StaffRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/staff", role.New([]string{"staff"})),
-			Logger:      logger,
 		},
 	}
 	reportRG := rg.Group("/staff", role.New([]string{"staff", "player"}))
-	reports.NewReportRouter(reportRG, logger)
-	reportmessages.NewReportRouter(reportRG, logger)
-	InitStaffService(logger)
+	reports.NewReportRouter(reportRG)
+	reportmessages.NewReportRouter(reportRG)
+	InitStaffService()
 	router.RegisterRoutes()
 }
 
@@ -52,8 +51,8 @@ func (SR *StaffRouter) RegisterRoutes() {
 	SR.RouterGroup.POST("/ban/:id", SR.updateBan)
 	SR.RouterGroup.DELETE("/ban/:id", SR.removeBan)
 
-	business.NewBusinessRouter(SR.RouterGroup, SR.Logger)
-	players.NewPlayerRouter(SR.RouterGroup, SR.Logger)
+	business.NewBusinessRouter(SR.RouterGroup)
+	players.NewPlayerRouter(SR.RouterGroup)
 }
 
 func (SR *StaffRouter) DashboardHandler() gin.HandlerFunc {
@@ -75,7 +74,7 @@ func (SR *StaffRouter) FetchCfxPlayersHandler() gin.HandlerFunc {
 		// If the request takes long than 20s it is automatically yeeted, we force reset the mutex lock to prevent poising
 		plys, err := cfx.GetCfxPlayers()
 		if err != nil {
-			SR.Logger.Error("Failed to fetch information about cfx players", "error", err.Error())
+			logrus.WithError(err).Error("Failed to fetch information about cfx players")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Server Error",
 				Description: "We encountered an error while trying to fetch information about the players on the fiveM server",
@@ -89,7 +88,7 @@ func (SR *StaffRouter) FetchCfxPlayersHandler() gin.HandlerFunc {
 func (SR *StaffRouter) FetchStaffNotes(ctx *gin.Context) {
 	notes, err := GetAllNotes()
 	if err != nil {
-		SR.Logger.Error("Failed to retrieve staff notes", "error", err)
+		logrus.WithError(err).Error("Failed to retrieve staff notes")
 
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
@@ -106,7 +105,7 @@ func (SR *StaffRouter) createStaffNote(ctx *gin.Context) {
 	}{}
 	err := ctx.BindJSON(&body)
 	if err != nil {
-		SR.Logger.Error("Failed to parse staff create note body", "error", err)
+		logrus.WithError(err).Error("Failed to parse staff create note body")
 
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
@@ -123,7 +122,7 @@ func (SR *StaffRouter) createStaffNote(ctx *gin.Context) {
 	fmt.Printf("%+v", body)
 	err = CreateNote(userInfo.ID, body.Note)
 	if err != nil {
-		SR.Logger.Error("Failed to create staff note", "error", err)
+		logrus.WithError(err).Error("Failed to create staff note")
 
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
@@ -140,7 +139,7 @@ func (SR *StaffRouter) updateStaffNote(ctx *gin.Context) {
 	}{}
 	err := ctx.BindJSON(&body)
 	if err != nil {
-		SR.Logger.Error("Failed to parse staff update note body", "error", err)
+		logrus.WithError(err).Error("Failed to parse staff update note body")
 
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
@@ -158,7 +157,7 @@ func (SR *StaffRouter) updateStaffNote(ctx *gin.Context) {
 	}
 	noteId, err := strconv.ParseUint(noteIdStr, 10, 64)
 	if err != nil {
-		SR.Logger.Error("Failed to parse note id from update note req", "error", err, "noteIdParam", noteIdStr)
+		logrus.WithError(err).WithField("noteIdParam", noteIdStr).Error("Failed to parse note id from update note req")
 
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
@@ -175,7 +174,7 @@ func (SR *StaffRouter) updateStaffNote(ctx *gin.Context) {
 	userInfo := userInfoPtr.(*authinfo.AuthInfo)
 	err = UpdateNote(userInfo.ID, uint(noteId), body.Note)
 	if err != nil {
-		SR.Logger.Error("Failed to update staff note", "error", err, "noteId", noteId)
+		logrus.WithField("noteId", noteId).WithError(err).Error("Failed to update staff note")
 
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
@@ -197,7 +196,7 @@ func (SR *StaffRouter) deleteStaffNote(ctx *gin.Context) {
 	}
 	noteId, err := strconv.ParseUint(noteIdStr, 10, 64)
 	if err != nil {
-		SR.Logger.Error("Failed to parse note id from update note req", "error", err, "noteIdParam", noteIdStr)
+		logrus.WithField("noteIdParam", noteIdStr).WithError(err).Error("Failed to parse note id from update note req")
 
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
@@ -213,7 +212,7 @@ func (SR *StaffRouter) deleteStaffNote(ctx *gin.Context) {
 	userInfo := userInfoPtr.(*authinfo.AuthInfo)
 	err = DeleteNote(userInfo.ID, uint(noteId))
 	if err != nil {
-		SR.Logger.Error("Failed to delete staff note", "error", err, "noteId", noteId)
+		logrus.WithField("noteId", noteId).WithError(err).Error("Failed to delete staff note")
 
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
@@ -227,7 +226,7 @@ func (SR *StaffRouter) deleteStaffNote(ctx *gin.Context) {
 func (SR *StaffRouter) FetchBanList(ctx *gin.Context) {
 	list, err := penalties.GetBanList()
 	if err != nil {
-		SR.Logger.Error("Failed to fetch the cfx ban list", "error", err)
+		logrus.WithError(err).Error("Failed to fetch the cfx ban list")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
 			Description: "Failed to fetch the banlist",
@@ -247,7 +246,7 @@ func (SR *StaffRouter) updateBan(ctx *gin.Context) {
 	}
 	banId, err := strconv.ParseUint(banIdStr, 10, 64)
 	if err != nil {
-		SR.Logger.Error("Failed to convert the banId string to a uint", "error", err, "banId", banIdStr)
+		logrus.WithField("banId", banIdStr).WithError(err).Error("Failed to convert the banId string to a uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
 			Description: "Could not transform your banId to a valid number",
@@ -262,7 +261,7 @@ func (SR *StaffRouter) updateBan(ctx *gin.Context) {
 	}{}
 	err = ctx.ShouldBindJSON(&body)
 	if err != nil {
-		SR.Logger.Error("Failed to bind the body of an update ban request", "error", err, "banId", banIdStr)
+		logrus.WithField("banId", banIdStr).WithError(err).Error("Failed to bind the body of an update ban request", "error", err)
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
 			Description: "Could get all the needed info from your request",
@@ -272,7 +271,7 @@ func (SR *StaffRouter) updateBan(ctx *gin.Context) {
 
 	userId, err := users.GetUserIdentifierForCtx(ctx)
 	if err != nil {
-		SR.Logger.Error("Failed to get a user identifier string", "error", err, "banId", banIdStr)
+		logrus.WithField("banId", banIdStr).WithError(err).Error("Failed to get a user identifier string")
 		ctx.JSON(403, models.RouteErrorMessage{
 			Title:       "Authentication Error",
 			Description: "Could get valid identification for your request",
@@ -282,7 +281,7 @@ func (SR *StaffRouter) updateBan(ctx *gin.Context) {
 
 	err = penalties.UpdateBan(userId, uint(banId), body.Points, body.Length, body.Reason)
 	if err != nil {
-		SR.Logger.Error("Failed to delete a cfx ban", "error", err)
+		logrus.WithError(err).Error("Failed to delete a cfx ban")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
 			Description: "Failed to delete the requested ban",
@@ -304,7 +303,7 @@ func (SR *StaffRouter) removeBan(ctx *gin.Context) {
 
 	banId, err := strconv.ParseUint(banIdStr, 10, 64)
 	if err != nil {
-		SR.Logger.Error("Failed to convert the banId string to a uint", "error", err, "banId", banIdStr)
+		logrus.WithError(err).WithField("banId", banIdStr).Error("Failed to convert the banId string to a uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request Error",
 			Description: "Could not transform your banId to a valid number",
@@ -314,7 +313,7 @@ func (SR *StaffRouter) removeBan(ctx *gin.Context) {
 
 	userId, err := users.GetUserIdentifierForCtx(ctx)
 	if err != nil {
-		SR.Logger.Error("Failed to get a user identifier string", "error", err, "banId", banIdStr)
+		logrus.WithField("banId", banIdStr).WithError(err).Error("Failed to get a user identifier string")
 		ctx.JSON(403, models.RouteErrorMessage{
 			Title:       "Authentication Error",
 			Description: "Could get valid identification for your request",
@@ -324,7 +323,7 @@ func (SR *StaffRouter) removeBan(ctx *gin.Context) {
 
 	err = penalties.RemoveBan(userId, uint(banId))
 	if err != nil {
-		SR.Logger.Error("Failed to delete a cfx ban", "error", err)
+		logrus.WithError(err).Error("Failed to delete a cfx ban")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server Error",
 			Description: "Failed to delete the requested ban",
@@ -342,7 +341,7 @@ func (SR *StaffRouter) fetchCxLogs(ctx *gin.Context) {
 		var err error
 		page, err = strconv.ParseUint(pageStr, 10, 64)
 		if err != nil {
-			SR.Logger.Error("Failed to convert page to uint", "error", err, "page", pageStr)
+			logrus.WithField("page", pageStr).WithError(err).Error("Failed to convert page to uint")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to parse the current page number",
@@ -353,7 +352,7 @@ func (SR *StaffRouter) fetchCxLogs(ctx *gin.Context) {
 
 	logs, total, err := FetchCfxLogs(int(page), query)
 	if err != nil {
-		SR.Logger.Error("Failed to fetch panel logs from graylog", "error", err, "page", page)
+		logrus.WithField("page", page).WithError(err).Error("Failed to fetch panel logs from graylog")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch the panel logs",

@@ -6,13 +6,13 @@ import (
 	"degrens/panel/internal/staff/reports"
 	"degrens/panel/internal/users"
 	dgerrors "degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"encoding/json"
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 )
 
 type Room struct {
@@ -25,7 +25,7 @@ type Room struct {
 	register   chan *Client
 	unregister chan *Client
 
-	logger log.Logger
+	logger *logrus.Entry
 
 	report *reports.Report
 }
@@ -49,7 +49,7 @@ var (
 	rooms = make(map[uint]*Room)
 )
 
-func GetRoom(report *reports.Report, logger log.Logger) *Room {
+func GetRoom(report *reports.Report) *Room {
 	room, exists := rooms[report.Data.ID]
 	if !exists {
 		// Create room
@@ -58,7 +58,7 @@ func GetRoom(report *reports.Report, logger log.Logger) *Room {
 			register:   make(chan *Client),
 			unregister: make(chan *Client),
 			clients:    make(map[*Client]bool),
-			logger:     logger.With("roomId", report.Data.ID),
+			logger:     logrus.WithField("roomId", report.Data.ID),
 			report:     report,
 		}
 		rooms[report.Data.ID] = room
@@ -116,7 +116,7 @@ func (r *Room) generateError(message string) []byte {
 	}
 	byteMsg, err := json.Marshal(msg)
 	if err != nil {
-		r.logger.Error("Failed to generate error message for websocket", "error", err)
+		r.logger.WithError(err).Error("Failed to generate error message for websocket")
 		return []byte{}
 	}
 	return byteMsg
@@ -126,7 +126,7 @@ func (r *Room) parseIncomingMessage(msgArr []byte) (*WebsocketMessage, error) {
 	msg := WebsocketMessage{}
 	marshalErr := json.Unmarshal(msgArr, &msg)
 	if marshalErr != nil {
-		dgerrors.HandleJsonError(marshalErr, r.logger)
+		dgerrors.HandleJsonError(marshalErr, r.logger.Logger)
 		return nil, errors.New("Failed to parse message")
 	}
 	return &msg, nil
@@ -136,7 +136,7 @@ func (r *Room) sendMessages(c *Client, offset int) {
 	var msgs []panel_models.ReportMessage
 	err := db.MariaDB.Client.Order("id DESC").Offset(offset*50).Limit(50).Where("report_id = ?", r.report.Data.ID).Find(&msgs).Error
 	if err != nil {
-		r.logger.Error("Failed to fetch messages", "error", err)
+		r.logger.WithError(err).Error("Failed to fetch messages")
 		c.send <- r.generateError("Failed to fetch message batch")
 	}
 
@@ -147,7 +147,7 @@ func (r *Room) sendMessages(c *Client, offset int) {
 		// that message
 		err = SeedReportMessageMember(&msgs[i])
 		if err != nil {
-			r.logger.Error("Failed to seed reportmessage", "messageId", msgs[i].ID, "error", err)
+			r.logger.WithField("messageId", msgs[i].ID).WithError(err).Error("Failed to seed reportmessage")
 		}
 	}
 
@@ -157,7 +157,7 @@ func (r *Room) sendMessages(c *Client, offset int) {
 	}
 	responseStr, err := json.Marshal(response)
 	if err != nil {
-		r.logger.Error("Failed to encode websocket message while trying to load messages", "error", err)
+		r.logger.WithError(err).Error("Failed to encode websocket message while trying to load messages")
 		c.send <- r.generateError("Failed to fetch message batch")
 	}
 	c.send <- responseStr
@@ -170,12 +170,12 @@ func (r *Room) addReportMessage(msg WebsocketMessage, origin *Client) error {
 	}
 	reportMsg, err := r.report.AddMessage(r.report.Data.ID, msg.Data, origin.authInfo)
 	if err != nil {
-		r.logger.Error("Failed to save new report message", "error", err, "message", msg.Data)
+		r.logger.WithField("message", msg.Data).WithError(err).Error("Failed to save new report message")
 		return errors.New("Failed to save message")
 	}
 	err = SeedReportMessageMember(reportMsg)
 	if err != nil {
-		r.logger.Error("Failed to seed new report message", "error", err, "message", msg.Data)
+		r.logger.WithField("message", msg.Data).WithError(err).Error("Failed to seed new report message")
 		return errors.New("Failed to seed message")
 	}
 	// announce new message for all clients
@@ -185,7 +185,7 @@ func (r *Room) addReportMessage(msg WebsocketMessage, origin *Client) error {
 	}
 	responseStr, err := json.Marshal(response)
 	if err != nil {
-		r.logger.Error("Failed to encode websocket message while trying to announce new report message", "error", err)
+		r.logger.WithError(err).Error("Failed to encode websocket message while trying to announce new report message")
 		return errors.New("Failed to spread new message")
 	}
 	r.sendToClients(responseStr)
@@ -202,7 +202,7 @@ func (r *Room) removeReportMember(msg WebsocketMessage, origin *Client) error {
 	}
 	err := r.report.RemoveMember(steamId)
 	if err != nil {
-		r.logger.Error("Failed to remove member from report", "error", err)
+		r.logger.WithError(err).Error("Failed to remove member from report")
 		return errors.New("Failed to remove member")
 	}
 
@@ -212,7 +212,7 @@ func (r *Room) removeReportMember(msg WebsocketMessage, origin *Client) error {
 	}
 	responseStr, err := json.Marshal(response)
 	if err != nil {
-		r.logger.Error("Failed to encode websocket message while removing a member", "error", err)
+		r.logger.WithError(err).Error("Failed to encode websocket message while removing a member")
 		return errors.New("Failed to set new members")
 	}
 	r.sendToClients(responseStr)
@@ -231,7 +231,7 @@ func (r *Room) addReportMember(msg WebsocketMessage) error {
 	}
 	err := r.report.AddMember(steamId)
 	if err != nil {
-		r.logger.Error("Failed to add member", "error", err)
+		r.logger.WithError(err).Error("Failed to add member")
 		return errors.New("Failed to add member")
 	}
 
@@ -241,7 +241,7 @@ func (r *Room) addReportMember(msg WebsocketMessage) error {
 	}
 	responseStr, err := json.Marshal(response)
 	if err != nil {
-		r.logger.Error("Failed to encode websocket message while adding a member", "error", err)
+		r.logger.WithError(err).Error("Failed to encode websocket message while adding a member")
 		return errors.New("Failed to set new members")
 	}
 	r.sendToClients(responseStr)
@@ -255,7 +255,7 @@ func (r *Room) toggleReportState(msg WebsocketMessage) error {
 	}
 	err := r.report.ToggleState(toggle)
 	if err != nil {
-		r.logger.Error("Failed to toggle report state", "state", toggle)
+		r.logger.WithField("state", toggle).Error("Failed to toggle report state")
 		return errors.New("Failed to change report state")
 	}
 
@@ -265,7 +265,7 @@ func (r *Room) toggleReportState(msg WebsocketMessage) error {
 	}
 	responseStr, err := json.Marshal(response)
 	if err != nil {
-		r.logger.Error("Failed to encode websocket message while chaning state", "error", err)
+		r.logger.WithError(err).Error("Failed to encode websocket message while chaning state")
 		return errors.New("Failed to announce report state change")
 	}
 	r.sendToClients(responseStr)

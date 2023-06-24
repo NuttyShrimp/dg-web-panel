@@ -6,6 +6,8 @@ import (
 	"errors"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type TimelineEvent struct {
@@ -38,7 +40,7 @@ func fetchDashboardInfo() error {
 		if errors.Is(err, &models.RouteError{}) {
 			return err
 		}
-		logger.Error("An error occurred while fetching from the Cfx Api", "endpoint", "/info", "error", err.Error())
+		logrus.WithError(err).Error("An error occurred while fetching from the Cfx Api")
 		return &models.RouteError{
 			Message: models.RouteErrorMessage{
 				Title:       "Unexpected error from the fivem server",
@@ -48,7 +50,7 @@ func fetchDashboardInfo() error {
 		}
 	}
 	if ei.Message != "" {
-		logger.Error("Failed to fetch info from CfxServer", "error", ei.Message)
+		logrus.WithError(errors.New(ei.Message)).Error("Failed to fetch info from CfxServer")
 		return nil
 	}
 	// Get timeline Events from graylog
@@ -60,7 +62,7 @@ func fetchDashboardInfo() error {
 	for _, message := range *results {
 		t, err := time.Parse(time.RFC3339, message.Message["timestamp"])
 		if err != nil {
-			logger.Error("Failed to parse "+message.Message["timestamp"]+" to a time struct", "error", err)
+			logrus.WithError(err).Error("Failed to parse " + message.Message["timestamp"] + " to a time struct")
 			continue
 		}
 		event := TimelineEvent{

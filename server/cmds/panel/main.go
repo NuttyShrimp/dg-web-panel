@@ -9,9 +9,11 @@ import (
 	"degrens/panel/internal/storage"
 	"degrens/panel/internal/users"
 	graylog "degrens/panel/lib/graylogger"
-	"degrens/panel/lib/log"
+	"degrens/panel/lib/logs/sentryhook"
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/getsentry/sentry-go"
 )
@@ -32,28 +34,28 @@ func main() {
 		AttachStacktrace: true,
 		TracesSampleRate: 1.0,
 	}); err != nil {
-		fmt.Printf("Sentry initialization failed: %v\n", err)
+		logrus.Errorf("Sentry initialization failed: %v\n", err)
 	}
 
 	// Create logger
-	logger := log.New(conf.Server.Env == "development", "https://52914b9b7d394dc8962680061a942328@sentry.nuttyshrimp.me/4")
+	logrus.AddHook(sentryhook.Hook{})
 
-	db.InitDatabase(conf, logger)
-	graylog.InitGrayLogger(&conf.Graylog, logger)
-	api.CreateGraylogApi(&conf.Graylog, logger)
-	api.CreateCfxApi(&conf.Cfx, logger)
+	db.InitDatabase(conf)
+	graylog.InitGrayLogger(&conf.Graylog)
+	api.CreateGraylogApi(&conf.Graylog)
+	api.CreateCfxApi(&conf.Cfx)
 
 	// Create discord auth config
-	discord.InitDiscordConf(conf, logger)
+	discord.InitDiscordConf(conf)
 	users.InitUserRoles(conf)
-	storage.InitStorages(conf, logger)
+	storage.InitStorages(conf)
 
 	defer sentry.Flush(2 * time.Second)
 
-	r := router.SetupRouter(conf, logger)
+	r := router.SetupRouter(conf)
 	err = r.Run(fmt.Sprintf("%s:%d", conf.Server.Host, conf.Server.Port))
 	if err != nil {
-		logger.Errorf("Could not start server: %s", err)
+		logrus.Errorf("Could not start server: %s", err)
 		return
 	}
 }

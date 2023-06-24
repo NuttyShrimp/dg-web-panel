@@ -2,13 +2,14 @@ package api
 
 import (
 	"degrens/panel/internal/config"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
 	"net/http"
 	"reflect"
 	"regexp"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 type graylogApi struct {
@@ -18,10 +19,10 @@ type graylogApi struct {
 
 var GraylogApi graylogApi
 
-func CreateGraylogApi(c *config.ConfigGraylog, logger log.Logger) {
+func CreateGraylogApi(c *config.ConfigGraylog) {
 	regex := regexp.MustCompile(`/$`)
 	baseApi := api{
-		Logger:  logger.With("api", "Graylog"),
+		Logger:  logrus.WithField("api", "Graylog"),
 		baseURL: regex.ReplaceAllString(c.URL, "") + "/api",
 	}
 	GraylogApi = graylogApi{
@@ -34,13 +35,13 @@ func ValidateGraylogApi() bool {
 	version := &models.SystemInfo{}
 	_, err := GraylogApi.DoRequest(http.MethodGet, "/system", nil, &version)
 	if err != nil {
-		GraylogApi.Logger.Error("Failed to connect to graylog", "error", err.Error())
+		GraylogApi.Logger.WithError(err).Error("Failed to connect to graylog")
 		return false
 	}
 	stream := &models.Stream{}
 	_, err = GraylogApi.DoRequest(http.MethodGet, fmt.Sprint("/streams/", GraylogApi.Config.StreamId), nil, stream)
 	if err != nil {
-		GraylogApi.Logger.Error("Failed to fetch the stream", "error", err.Error())
+		GraylogApi.Logger.WithError(err).Error("Failed to fetch the stream")
 		return false
 	}
 	GraylogApi.Logger.Info("Did a successful request to graylog")
@@ -94,7 +95,10 @@ func FetchQuery(query string, limit, timeRange int) (*[]models.ResultMessage, er
 	messages := &models.Message{}
 	ei, err := GraylogApi.DoRequest(http.MethodGet, "/search/universal/relative", &options, messages)
 	if err != nil {
-		GraylogApi.Logger.Error("A query to graylog failed", "error", err, "query", query, "ErrorMsg", ei.Message, "ErrorType", ei.Type)
+		GraylogApi.Logger.WithFields(logrus.Fields{
+			"query":     query,
+			"errorMsg":  ei.Message,
+			"errorType": ei.Type}).WithError(err).Error("A query to graylog failed")
 		return nil, err
 	}
 	return &messages.Messages, nil

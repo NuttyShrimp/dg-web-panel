@@ -3,24 +3,24 @@ package storage
 import (
 	"degrens/panel/internal/config"
 	"degrens/panel/internal/db"
-	"degrens/panel/lib/log"
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	"github.com/sirupsen/logrus"
 )
 
 var cookieOptions CookieOptions
-var logger log.Logger
+var logger *logrus.Entry
 
-func InitCookieStore(conf *config.Config, logger2 log.Logger) {
+func InitCookieStore(conf *config.Config) {
 	cookieOptions = CookieOptions{
 		MaxAge: 86400 * 30,
 		Domain: conf.Server.GetCookieHost(),
 		Codecs: securecookie.CodecsFromPairs([]byte(conf.Server.SessionSecret)),
 	}
-	logger = logger2.With("module", "cookies")
+	logger = logrus.WithField("module", "cookies")
 }
 
 type CookieOptions struct {
@@ -39,20 +39,20 @@ func AddHiddenCookie(c *gin.Context, key string, value interface{}) bool {
 	// Create an uuid that we will use to get/store the value in redis
 	uuid, err := db.Redis.GenerateUUID()
 	if err != nil {
-		logger.Error("Could not generate UUID for hidden cookie", "error", err)
+		logger.WithError(err).Error("Could not generate UUID for hidden cookie")
 		return false
 	}
 	// Store the value in redis
 	err = db.Redis.Set(uuid, value)
 	if err != nil {
-		logger.Error("Could not store value in redis", "error", err)
+		logger.WithError(err).Error("Could not store value in redis")
 		return false
 	}
 	isSucces := setCookie(c, key, uuid)
 	if !isSucces {
 		err := db.Redis.Remove(uuid)
 		if err != nil {
-			logger.Error("Could not remove value from redis", "error", err)
+			logger.WithError(err).Error("Could not remove value from redis")
 		}
 		return false
 	}
@@ -66,7 +66,7 @@ func GetPublicCookie(c *gin.Context, key string, dst any) error {
 	}
 	err = securecookie.DecodeMulti(key, encodedCookie, dst, cookieOptions.Codecs...)
 	if err != nil {
-		logger.Error("Failed to decode cookie ", err.Error())
+		logger.WithError(err).Error("Failed to decode cookie")
 		return errors.New("Failed to parse cookie")
 	}
 	return nil
@@ -94,7 +94,7 @@ func setCookie(c *gin.Context, name string, value interface{}) bool {
 	// encode cookie
 	encoded, err := securecookie.EncodeMulti(name, value, cookieOptions.Codecs...)
 	if err != nil {
-		logger.Error("Failed to encode cookie with key: "+name, "error", err.Error())
+		logger.WithError(err).Error("Failed to encode cookie with key: " + name)
 		return false
 	}
 	// Maybe change to strict mode but should add param then to manage this for eg. state

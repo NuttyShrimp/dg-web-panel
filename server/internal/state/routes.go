@@ -2,21 +2,20 @@ package state
 
 import (
 	"degrens/panel/internal/routes"
-	"degrens/panel/lib/log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type StateRouter struct {
 	routes.Router
 }
 
-func NewStateRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewStateRouter(rg *gin.RouterGroup) {
 	router := &StateRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/state"),
-			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -30,6 +29,7 @@ func (ST *StateRouter) RegisterRoutes() {
 func (ST *StateRouter) ScheduleUpdate(ctx *gin.Context) {
 	wasSchedule := strconv.FormatBool(incomingUpdate)
 	scheduleUpdate()
+	logrus.Info("Scheduled an update")
 	ctx.String(200, wasSchedule)
 }
 

@@ -7,12 +7,12 @@ import (
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/graylogger"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 var br BusinessRouter
@@ -21,11 +21,10 @@ type BusinessRouter struct {
 	routes.Router
 }
 
-func NewBusinessRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewBusinessRouter(rg *gin.RouterGroup) {
 	br = BusinessRouter{
 		Router: routes.Router{
 			RouterGroup: rg.Group("/business"),
-			Logger:      logger,
 		},
 	}
 	br.RegisterRoutes()
@@ -48,7 +47,7 @@ func (BR *BusinessRouter) FetchAll(ctx *gin.Context) {
 	if cidParam != "" {
 		cid64, err := strconv.ParseUint(cidParam, 10, 32)
 		if err != nil {
-			BR.Logger.Error("Failed to convert cid to uint", "error", err, "cid", cid64)
+			logrus.WithField("cid", cid64).WithError(err).Error("Failed to convert cid to uint")
 			ctx.JSON(400, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to convert the given CID to a valid number",
@@ -60,7 +59,7 @@ func (BR *BusinessRouter) FetchAll(ctx *gin.Context) {
 	}
 	list, err := FetchBusinesses(&filter)
 	if err != nil {
-		BR.Logger.Error("Failed to fetch all businesses", "error", err)
+		logrus.WithError(err).Error("Failed to fetch all businesses")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch all businesses",
@@ -73,7 +72,7 @@ func (BR *BusinessRouter) FetchAll(ctx *gin.Context) {
 func (BR *BusinessRouter) FetchLogCount(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert id to uint", "error", err, "id", ctx.Param("id"))
+		logrus.WithField("id", ctx.Param("id")).WithError(err).Error("Failed to convert id to uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to convert the given Business id to a valid number",
@@ -82,7 +81,7 @@ func (BR *BusinessRouter) FetchLogCount(ctx *gin.Context) {
 	}
 	total, err := FetchLogCount(uint(id))
 	if err != nil {
-		BR.Logger.Error("Failed to fetch total amount of logs for a business", "error", err, "business_id", id)
+		logrus.WithField("business_id", id).WithError(err).Error("Failed to fetch total amount of logs for a business")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch the total amount of logs for the selected business",
@@ -97,7 +96,7 @@ func (BR *BusinessRouter) FetchLogCount(ctx *gin.Context) {
 func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert id to uint", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to convert id to uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to convert the given Business id to a valid number",
@@ -106,7 +105,10 @@ func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 	}
 	page, err := strconv.ParseUint(ctx.DefaultQuery("page", "0"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert page to uint", "error", err, "id", id, "page", ctx.Query("page"))
+		logrus.WithFields(logrus.Fields{
+			"id":   id,
+			"page": ctx.Query("page"),
+		}).WithError(err).Error("Failed to convert page to uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parseing error",
 			Description: "We encountered an error while trying to read page from URL",
@@ -115,7 +117,10 @@ func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 	}
 	logs, err := FetchLogs(uint(id), int(page))
 	if err != nil {
-		BR.Logger.Error("Failed to fetch logs for business", "error", err, "id", id, "page", page)
+		logrus.WithFields(logrus.Fields{
+			"id":   id,
+			"page": page,
+		}).WithError(err).Error("Failed to fetch logs for business")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch the business logs",
@@ -128,7 +133,7 @@ func (BR *BusinessRouter) FetchLogs(ctx *gin.Context) {
 func (BR *BusinessRouter) FetchEmployees(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert id to uint", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to convert id to uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to convert the given Business id to a valid number",
@@ -137,7 +142,7 @@ func (BR *BusinessRouter) FetchEmployees(ctx *gin.Context) {
 	}
 	list, err := FetchEmployees(uint(id))
 	if err != nil {
-		BR.Logger.Error("Failed to fetch employees for business", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to fetch employees for business")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch all employees for the selected business",
@@ -150,7 +155,7 @@ func (BR *BusinessRouter) FetchEmployees(ctx *gin.Context) {
 func (BR *BusinessRouter) DeleteBusiness(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert id to uint", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).WithError(err).Error("Failed to convert id to uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to convert the given Business id to a valid number",
@@ -161,14 +166,14 @@ func (BR *BusinessRouter) DeleteBusiness(ctx *gin.Context) {
 	ctxUserInfo, exists := ctx.Get("userInfo")
 	authInfo := ctxUserInfo.(*authinfo.AuthInfo)
 	if !exists {
-		BR.Logger.Error("Failed to get userinfo in request trying to make an API key")
+		logrus.Error("Failed to get userinfo in request trying to make an API key")
 		ctx.JSON(403, errors.Unauthorized)
 		return
 	}
 
 	err = DeleteBusiness(authInfo.ID, uint(id))
 	if err != nil {
-		BR.Logger.Error("Failed to delete business", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to delete business")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to delete the given business",
@@ -181,7 +186,7 @@ func (BR *BusinessRouter) DeleteBusiness(ctx *gin.Context) {
 func (BR *BusinessRouter) ChangeOwner(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert id to uint", "error", err, "id", id)
+		logrus.WithError(err).WithField("id", id).Error("Failed to convert id to uint")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to convert the given Business id to a valid number",
@@ -194,7 +199,7 @@ func (BR *BusinessRouter) ChangeOwner(ctx *gin.Context) {
 	}{}
 	err = ctx.BindJSON(&reqBody)
 	if err != nil {
-		BR.Logger.Error("Failed to bind body to struct when updating business owner", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to bind body to struct when updating business owner")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to parse the request data",
@@ -205,13 +210,16 @@ func (BR *BusinessRouter) ChangeOwner(ctx *gin.Context) {
 	ctxUserInfo, exists := ctx.Get("userInfo")
 	authInfo := ctxUserInfo.(*authinfo.AuthInfo)
 	if !exists {
-		BR.Logger.Error("Failed to get userinfo in request trying to make an API key")
+		logrus.Error("Failed to get userinfo in request trying to make an API key")
 		ctx.JSON(403, errors.Unauthorized)
 		return
 	}
 	err = ChangeOwner(authInfo.ID, uint(id), uint(reqBody.Cid))
 	if err != nil {
-		BR.Logger.Error("Failed to update the business owner", "error", err, "id", id, "newOwner", reqBody.Cid)
+		logrus.WithFields(logrus.Fields{
+			"id":       id,
+			"newOwner": reqBody.Cid,
+		}).WithError(err).Error("Failed to update the business owner")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to update the business owner",
@@ -230,7 +238,7 @@ func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 	}{}
 	err := ctx.BindJSON(&body)
 	if err != nil {
-		BR.Logger.Error("Failed to bind body to struct when createing business", "error", err)
+		logrus.WithError(err).Error("Failed to bind body to struct when createing business")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request error",
 			Description: "We encountered an issue while reading the info from your request",
@@ -239,13 +247,13 @@ func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 	}
 	userInfo, err := users.GetUserInfo(ctx)
 	if err != nil {
-		BR.Logger.Error("Failed to get userinfo while giving vehicle to player")
+		logrus.Error("Failed to get userinfo while giving vehicle to player")
 		ctx.JSON(403, errors.Unauthorized)
 		return
 	}
 	ai, err := api.CfxApi.DoRequest("POST", "/business/actions/new", &body, nil)
 	if err != nil {
-		BR.Logger.Error("Failed to create business on cfx", "error", err)
+		logrus.WithError(err).Error("Failed to create business on cfx")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an issue while trying to create a business",
@@ -253,7 +261,7 @@ func (BR *BusinessRouter) CreateBusiness(ctx *gin.Context) {
 		return
 	}
 	if ai.Message != "" {
-		BR.Logger.Error("Failed to create business on cfx", "error", ai.Message)
+		logrus.WithField("error", ai.Message).Error("Failed to create business on cfx")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an issue while trying to create a business",

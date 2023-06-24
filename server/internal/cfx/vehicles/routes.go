@@ -7,23 +7,22 @@ import (
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
 	"degrens/panel/lib/graylogger"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type VehiclesRouter struct {
 	routes.Router
 }
 
-func NewVehicleRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewVehicleRouter(rg *gin.RouterGroup) {
 	vr := VehiclesRouter{
 		Router: routes.Router{
 			RouterGroup: rg.Group("/vehicles"),
-			Logger:      logger,
 		},
 	}
 	vr.RegisterRoutes()
@@ -37,7 +36,7 @@ func (VR *VehiclesRouter) RegisterRoutes() {
 func (VR *VehiclesRouter) FetchAccounts(ctx *gin.Context) {
 	cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 32)
 	if err != nil {
-		VR.Logger.Error("Failed to convert citizenid to uint", "error", err, "cid", ctx.Param("cid"))
+		logrus.WithField("cid", ctx.Param("cid")).WithError(err).Error("Failed to convert citizenid to uint")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to identify the character you are trying to fetch the vehicles for",
@@ -47,7 +46,7 @@ func (VR *VehiclesRouter) FetchAccounts(ctx *gin.Context) {
 	var vehs *[]cfx_models.PlayerVehicles
 	vehs, err = FetchForCid(uint(cid))
 	if err != nil {
-		VR.Logger.Error("Failed to fetch vehicles for cid", "error", err, "cid", ctx.Param("cid"))
+		logrus.WithField("cid", ctx.Param("cid")).WithError(err).Error("Failed to fetch vehicles for cid")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: fmt.Sprintf("We encountered an error while trying to fetch the vehicles associated with cid: %d", cid),
@@ -63,7 +62,7 @@ func (VR *VehiclesRouter) GiveNewVehicle(ctx *gin.Context) {
 	}{}
 	err := ctx.BindJSON(&body)
 	if err != nil {
-		VR.Logger.Error("Failed to bind body to struct when createing business", "error", err)
+		logrus.WithError(err).Error("Failed to bind body to struct when createing business")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Request error",
 			Description: "We encountered an issue while reading the info from your request",
@@ -72,13 +71,13 @@ func (VR *VehiclesRouter) GiveNewVehicle(ctx *gin.Context) {
 	}
 	userInfo, err := users.GetUserInfo(ctx)
 	if err != nil {
-		VR.Logger.Error("Failed to get userinfo while giving vehicle to player")
+		logrus.Error("Failed to get userinfo while giving vehicle to player")
 		ctx.JSON(403, errors.Unauthorized)
 		return
 	}
 	ai, err := api.CfxApi.DoRequest("POST", "/vehicles/give", &body, nil)
 	if err != nil {
-		VR.Logger.Error("Failed to give vehicle to player", "error", err)
+		logrus.WithError(err).Error("Failed to give vehicle to player")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an issue while trying to give the vehicle to the player",
@@ -86,7 +85,7 @@ func (VR *VehiclesRouter) GiveNewVehicle(ctx *gin.Context) {
 		return
 	}
 	if ai.Message != "" {
-		VR.Logger.Error("Failed to give vehicle to player", "error", ai.Message)
+		logrus.WithField("error", ai.Message).Error("Failed to give vehicle to player")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an issue while trying to give the vehicle to the player",

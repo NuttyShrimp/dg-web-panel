@@ -10,17 +10,17 @@ import (
 	"degrens/panel/internal/discord"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/graylogger"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"errors"
 	"fmt"
 
 	disgo "github.com/disgoorg/disgo/discord"
+	"github.com/sirupsen/logrus"
 
 	"github.com/aidenwallis/go-utils/utils"
 )
 
-func CreateNewReport(creator, title string, memberIds []string, logger log.Logger) (uint, error) {
+func CreateNewReport(creator, title string, memberIds []string) (uint, error) {
 	members := []panel_models.ReportMember{}
 	for _, v := range memberIds {
 		plyInfo, err := cfx.GetCfxPlayerInfo(v)
@@ -55,11 +55,11 @@ func CreateNewReport(creator, title string, memberIds []string, logger log.Logge
 	ai, err := api.CfxApi.DoRequest("POST", "/admin/report/announce", &cfxInput, nil)
 	if err != nil {
 		graylogger.Log("reports:announce:error", "Failed to announce a new report to the cfx server", "reportId", report.ID, "title", report.Title)
-		logger.Error("Failed to announce new report", "error", err, "type", "error")
+		logrus.WithField("type", "error").WithError(err).Error("Failed to announce new report")
 	}
 	if ai.Message != "" {
 		graylogger.Log("reports:announce:error", "Failed to announce a new report to the cfx server", "reportId", report.ID, "title", report.Title)
-		logger.Error("Failed to announce new report", "error", ai.Message, "type", "message")
+		logrus.WithField("type", "message").WithError(errors.New(ai.Message)).Error("Failed to announce new report")
 	}
 	graylogger.Log("reports:created", fmt.Sprintf("%s has created a new report with title: %s", creator, title), "members", memberIds)
 	err = discord.SendToReportWebHook(&disgo.WebhookMessageCreate{

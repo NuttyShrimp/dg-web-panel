@@ -3,25 +3,21 @@ package admin
 import (
 	"degrens/panel/internal/auth/middlewares/role"
 	"degrens/panel/internal/routes"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
-
-var logger log.Logger
 
 type DevRouter struct {
 	routes.Router
 }
 
-func NewDevRouter(rg *gin.RouterGroup, logger2 log.Logger) {
-	logger = logger2
+func NewDevRouter(rg *gin.RouterGroup) {
 	router := &DevRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/dev", role.New([]string{"developer"})),
-			Logger:      logger2,
 		},
 	}
 	router.RegisterRoutes()
@@ -38,7 +34,7 @@ func (DV *DevRouter) fetchPanelLogs(ctx *gin.Context) {
 		var err error
 		page, err = strconv.ParseUint(pageStr, 10, 64)
 		if err != nil {
-			DV.Logger.Error("Failed to convert page to uint", "error", err, "page", pageStr)
+			logrus.WithField("page", pageStr).WithError(err).Error("Failed to convert page to uint")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to parse the current page number",
@@ -49,7 +45,7 @@ func (DV *DevRouter) fetchPanelLogs(ctx *gin.Context) {
 
 	logs, total, err := FetchPanelLogs(int(page), "*")
 	if err != nil {
-		DV.Logger.Error("Failed to fetch panel logs from graylog", "error", err, "page", page)
+		logrus.WithField("page", page).WithError(err).Error("Failed to fetch panel logs from graylog")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch the panel logs",

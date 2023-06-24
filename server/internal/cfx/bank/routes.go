@@ -4,23 +4,22 @@ import (
 	"degrens/panel/internal/routes"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type BankRouter struct {
 	routes.Router
 }
 
-func NewBankRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewBankRouter(rg *gin.RouterGroup) {
 	br := BankRouter{
 		Router: routes.Router{
 			RouterGroup: rg.Group("/bank"),
-			Logger:      logger,
 		},
 	}
 	br.RegisterRoutes()
@@ -34,7 +33,7 @@ func (BR *BankRouter) RegisterRoutes() {
 func (BR *BankRouter) FetchAccounts(ctx *gin.Context) {
 	cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 32)
 	if err != nil {
-		BR.Logger.Error("Failed to convert citizenid to uint", "error", err, "cid", ctx.Param("cid"))
+		logrus.WithField("cid", ctx.Param("cid")).WithError(err).Error("Failed to convert citizenid to uint")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to identify the character you are trying to fetch the bank accounts for",
@@ -44,7 +43,7 @@ func (BR *BankRouter) FetchAccounts(ctx *gin.Context) {
 
 	accs, err := getAccounts(uint(cid))
 	if err != nil {
-		BR.Logger.Error("Failed to fetch bank accounts", "error", err, "cid", ctx.Param("cid"))
+		logrus.WithField("cid", ctx.Param("cid")).WithError(err).Error("Failed to fetch bank accounts")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: fmt.Sprintf("We encountered an error while trying to fetch the bank accounts for cid: %d", cid),
@@ -69,7 +68,7 @@ func (BR *BankRouter) UpdateBalance(ctx *gin.Context) {
 		Balance float64 `json:"balance"`
 	}
 	if err := ctx.BindJSON(&body); err != nil {
-		BR.Logger.Error("Failed to bind request body", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to bind request body")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while getting the request information",
@@ -79,7 +78,7 @@ func (BR *BankRouter) UpdateBalance(ctx *gin.Context) {
 
 	bank, err := GetBankAccount(id)
 	if err != nil {
-		BR.Logger.Error("Failed to fetch bank account", "error", err, "accountId", id)
+		logrus.WithField("accountId", id).WithError(err).Error("Failed to fetch bank account")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: fmt.Sprintf("We encountered an error while trying to fetch the bank account for id: %s", id),
@@ -89,13 +88,13 @@ func (BR *BankRouter) UpdateBalance(ctx *gin.Context) {
 
 	userInfo, err := users.GetUserInfo(ctx)
 	if err != nil {
-		BR.Logger.Error("Failed to get userinfo while giving vehicle to player")
+		logrus.Error("Failed to get userinfo while giving vehicle to player")
 		ctx.JSON(403, errors.Unauthorized)
 		return
 	}
 
 	if err = bank.ChangeBalance(userInfo, body.Balance); err != nil {
-		BR.Logger.Error("Failed to update bank account balance", "error", err, "id", id)
+		logrus.WithField("id", id).WithError(err).Error("Failed to update bank account balance")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: fmt.Sprintf("We encountered an error while updating bank account (%s) to balance %f", id, body.Balance),

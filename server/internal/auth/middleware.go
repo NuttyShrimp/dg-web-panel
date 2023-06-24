@@ -6,13 +6,12 @@ import (
 	"degrens/panel/internal/auth/cfxtoken"
 	"degrens/panel/internal/storage"
 	"degrens/panel/internal/users"
-	"degrens/panel/lib/log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func NewMiddleWare(logger log.Logger) gin.HandlerFunc {
+func NewMiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check for header this is highest in rank
 		header := c.GetHeader("X-Api-Key")

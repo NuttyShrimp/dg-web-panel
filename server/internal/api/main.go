@@ -1,11 +1,12 @@
 package api
 
 import (
-	"degrens/panel/lib/log"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 type AddInput func(req *http.Request, input interface{})
@@ -19,7 +20,7 @@ type Api interface {
 
 type api struct {
 	baseURL string
-	Logger  log.Logger
+	Logger  *logrus.Entry
 }
 
 func (a *api) doInternalRequest(method, endpoint string, input, output interface{}, inputHandler AddInput, authHandler DoAuthentication) (*ErrorInfo, error) {
