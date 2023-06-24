@@ -5,13 +5,13 @@ import (
 	"degrens/panel/internal/routes"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"math"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/sirupsen/logrus"
 )
 
 type ReportRouter struct {
@@ -35,11 +35,10 @@ type UpdateReportTokensBody struct {
 	ID uint `json:"id"`
 }
 
-func NewReportRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewReportRouter(rg *gin.RouterGroup) {
 	router := &ReportRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/reports"),
-			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -58,7 +57,7 @@ func (RR *ReportRouter) RegisterRoutes() {
 func (RR *ReportRouter) FetchReports(ctx *gin.Context) {
 	var body FetchReportsBody
 	if err := ctx.ShouldBind(&body); err != nil {
-		RR.Logger.Error("Failed to read body on GET /staff/reports request", "error", err)
+		logrus.WithError(err).Error("Failed to read body on GET /staff/reports request")
 		ctx.JSON(500, errors.BodyParsingFailed)
 		return
 	}
@@ -72,7 +71,7 @@ func (RR *ReportRouter) FetchReports(ctx *gin.Context) {
 
 	reportList, err := FetchReports(body.Filter, body.Offset, body.Open, body.Closed, userInfo)
 	if err != nil {
-		RR.Logger.Error("Failed to retrieve reports", "error", err, "filter", body)
+		logrus.WithField("filter", body).WithError(err).Error("Failed to retrieve reports")
 
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Database Error",
@@ -83,7 +82,7 @@ func (RR *ReportRouter) FetchReports(ctx *gin.Context) {
 	var reportTotal int64
 	reportTotal, err = FetchReportCount(body.Filter, body.Offset, body.Open, body.Closed)
 	if err != nil {
-		RR.Logger.Error("Failed to retrieve report count", "error", err, "filter", body)
+		logrus.WithField("filter", body).WithError(err).Error("Failed to retrieve report count")
 
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Database Error",
@@ -101,19 +100,19 @@ func (RR *ReportRouter) NewReportHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body NewReportBody
 		if err := c.ShouldBindBodyWith(&body, binding.JSON); err != nil {
-			RR.Logger.Error("Failed to read body on a POST request to /staff/reports/new", "error", err)
+			logrus.WithError(err).Error("Failed to read body on a POST request to /staff/reports/new")
 			c.JSON(500, errors.BodyParsingFailed)
 			return
 		}
 		userInfo, err := users.GetUserInfo(c)
 		if err != nil {
-			RR.Logger.Error("Failed to retrieve user info", "error", err)
+			logrus.WithError(err).Error("Failed to retrieve user info")
 			c.JSON(404, errors.Unauthorized)
 			return
 		}
-		token, err := CreateNewReport(userInfo.Username, body.Title, body.Members, RR.Logger)
+		token, err := CreateNewReport(userInfo.Username, body.Title, body.Members)
 		if err != nil {
-			RR.Logger.Error("Failed to create new report", "error", err)
+			logrus.WithError(err).Error("Failed to create new report")
 			c.JSON(500, models.RouteErrorMessage{
 				Title:       "Server Error",
 				Description: "We encountered an error while creating a new report",
@@ -130,7 +129,7 @@ func (RR *ReportRouter) FetchReportHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		reportId, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 		if err != nil {
-			RR.Logger.Error("Failed to convert reportId to uint", "error", err, "id", ctx.Param("id"))
+			logrus.WithField("id", ctx.Param("id")).WithError(err).Error("Failed to convert reportId to uint")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to identify the report you are trying to fetch",
@@ -140,7 +139,7 @@ func (RR *ReportRouter) FetchReportHandler() gin.HandlerFunc {
 
 		report, err := FetchReport(uint(reportId))
 		if err != nil {
-			RR.Logger.Error("Failed to retrieve reports", "error", err, "id", reportId)
+			logrus.WithField("id", reportId).WithError(err).Error("Failed to retrieve reports")
 
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Database Error",
@@ -158,7 +157,7 @@ func (RR *ReportRouter) HandleNewReportMember() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		reportId, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 		if err != nil {
-			RR.Logger.Error("Failed to convert reportId to uint", "error", err, "id", ctx.Param("id"))
+			logrus.WithField("id", ctx.Param("id")).WithError(err).Error("Failed to convert reportId to uint")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to identify the report you are adding a member to",
@@ -174,7 +173,7 @@ func (RR *ReportRouter) HandleNewReportMember() gin.HandlerFunc {
 			return
 		}
 		if err != nil {
-			RR.Logger.Error("Failed to get user info", "error", err, "id", ctx.Param("id"))
+			logrus.WithField("id", ctx.Param("id")).WithError(err).Error("Failed to get user info")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to identify the report you are adding a member to",
@@ -183,7 +182,7 @@ func (RR *ReportRouter) HandleNewReportMember() gin.HandlerFunc {
 		}
 		userId, err := users.GetUserIdentifierForCtx(ctx)
 		if err != nil {
-			RR.Logger.Error("Failed to parse user info to a identifier", "error", err, "id", ctx.Param("id"))
+			logrus.WithField("id", ctx.Param("id")).WithError(err).Error("Failed to parse user info to a identifier")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Parsing error",
 				Description: "We encountered an error while trying to identify the report you are adding a member to",
@@ -192,7 +191,10 @@ func (RR *ReportRouter) HandleNewReportMember() gin.HandlerFunc {
 		}
 		err = AddMemberToReport(userId, uint(reportId), steamId)
 		if err != nil {
-			RR.Logger.Error("Failed to add member to report", "error", err.Error(), "steamId", steamId, "reportId", reportId)
+			logrus.WithFields(logrus.Fields{
+				"steamId":  steamId,
+				"reportId": reportId,
+			}).WithError(err).Error("Failed to add member to report")
 		}
 		ctx.JSON(200, gin.H{})
 	}

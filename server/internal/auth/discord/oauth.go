@@ -6,7 +6,6 @@ import (
 	"degrens/panel/internal/db"
 	panel_models "degrens/panel/internal/db/models/panel"
 	dgerrors "degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -17,6 +16,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
@@ -47,9 +47,9 @@ type DiscordToken struct {
 }
 
 var info *discordInfo
-var logger log.Logger
+var logger *logrus.Entry
 
-func InitDiscordConf(conf *config.Config, pLogger log.Logger) {
+func InitDiscordConf(conf *config.Config) {
 	info = &discordInfo{
 
 		Conf: &oauth2.Config{
@@ -70,7 +70,7 @@ func InitDiscordConf(conf *config.Config, pLogger log.Logger) {
 		GuildId: conf.Discord.Guild,
 		Roles:   conf.Discord.Roles,
 	}
-	logger = pLogger.With("module", "discord")
+	logger = logrus.WithField("module", "auth/discord")
 }
 
 func GetOAuthConf() *oauth2.Config {
@@ -91,7 +91,7 @@ func fetchUserIdentity(token *oauth2.Token) (*DiscordIdentity, error) {
 	err := fetchFromDiscordAPI(token, "users/@me", &user)
 
 	if err != nil {
-		logger.Error("Error while reading user info", "error", err)
+		logger.WithError(err).Error("Error while reading user info")
 		return nil, errors.New("error while getting user info")
 	}
 
@@ -103,7 +103,7 @@ func fetchGuildInfo(token *oauth2.Token) (*discordGuildMember, error) {
 	err := fetchFromDiscordAPI(token, fmt.Sprintf("users/@me/guilds/%s/member", info.GuildId), &member)
 
 	if err != nil {
-		logger.Error("Error while reading member info", "error", err.Error())
+		logger.WithError(err).Error("Error while reading member info")
 		return nil, errors.New("error while getting member info")
 	}
 
@@ -134,7 +134,7 @@ func RevokeAuthToken(token string) error {
 	resp, err := http.PostForm("https://discord.com/api/oauth2/token/revoke", params)
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			logger.Error(err.Error())
+			logger.Error(err)
 		}
 	}()
 	return err
@@ -151,16 +151,16 @@ func RefreshToken(userId uint) {
 	res, err := http.PostForm(info.Conf.Endpoint.TokenURL, params)
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			logger.Error(err.Error())
+			logger.Error(err)
 		}
 	}()
 	if err != nil {
-		logger.Error(fmt.Sprintf("Failed to refresh token for user %d", userId), "error", err.Error())
+		logger.WithError(err).Error(fmt.Sprintf("Failed to refresh token for user %d", userId))
 		return
 	}
 	DCToken := DiscordToken{}
 	if err := json.NewDecoder(res.Body).Decode(&DCToken); err != nil {
-		dgerrors.HandleJsonError(err, logger)
+		dgerrors.HandleJsonError(err, logger.Logger)
 		return
 	}
 	if DCToken.AccessToken == "" {

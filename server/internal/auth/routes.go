@@ -11,7 +11,6 @@ import (
 	"degrens/panel/internal/storage"
 	"degrens/panel/internal/users"
 	"degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"fmt"
 	"net/http"
@@ -19,6 +18,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type AuthRouter struct {
@@ -39,11 +39,10 @@ type DeleteAPIKeyBody struct {
 	Keys []string `json:"keys"`
 }
 
-func NewAuthRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewAuthRouter(rg *gin.RouterGroup) {
 	router := &AuthRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/auth"),
-			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -132,7 +131,7 @@ func (AR *AuthRouter) loginHandler() gin.HandlerFunc {
 
 			err := cfxauth.AuthorizeToken(c, authTokens[1])
 			if err != nil {
-				AR.Logger.Error("Failed to authorize a cfx token", "token", tokenHeader, "err", err)
+				logrus.WithError(err).WithField("token", tokenHeader).Error("Failed to authorize a cfx token")
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"error": "Failed to use cfx token to create session",
 				})
@@ -165,7 +164,7 @@ func (AR *AuthRouter) logoutHandler() gin.HandlerFunc {
 				})
 			}
 		default:
-			AR.Logger.Error("Logout procedure failed to determine authentication type", "info", fmt.Sprintf("%+v", userInfo))
+			logrus.WithField("info", fmt.Sprintf("%+v", userInfo)).Error("Logout procedure failed to determine authentication type")
 		}
 		storage.RemoveCookie(c, "userInfo")
 		c.String(http.StatusOK, "")
@@ -198,7 +197,7 @@ func (AR *AuthRouter) discordCallbackHandler() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "We encountered an error while trying to get your information",
 			})
-			AR.Logger.Error("Error while exchanging code for token", err)
+			logrus.WithError(err).Error("Error while exchanging code for token")
 			return
 		}
 
@@ -224,7 +223,7 @@ func (AR *AuthRouter) discordCallbackHandler() gin.HandlerFunc {
 		new_authinfo := authinfo.GetAuthInfoFromUser(user)
 		err = new_authinfo.Assign(c)
 		if err != nil {
-			AR.Logger.Error(err.Error())
+			logrus.Error(err)
 			c.Redirect(http.StatusTemporaryRedirect, "/errors/500")
 		}
 
@@ -232,11 +231,10 @@ func (AR *AuthRouter) discordCallbackHandler() gin.HandlerFunc {
 	}
 }
 
-func NewSecuredAuthRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewSecuredAuthRouter(rg *gin.RouterGroup) {
 	router := &SecuredAuthRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/auth"),
-			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -256,7 +254,7 @@ func (SAR *SecuredAuthRouter) roleCheckHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		target := ctx.Query("role")
 		if target == "" {
-			SAR.Logger.Error("Failed to parse role in /auth/role request", "target", target)
+			logrus.WithField("target", target).Error("Failed to parse role in /auth/role request")
 			ctx.JSON(400, models.RouteErrorMessage{
 				Title:       "Request error",
 				Description: "Encountered an error while trying to check access to a secure page",
@@ -265,7 +263,7 @@ func (SAR *SecuredAuthRouter) roleCheckHandler() gin.HandlerFunc {
 		}
 		hasAccess, err := users.HasRoleAccess(ctx, target)
 		if err != nil {
-			SAR.Logger.Error("Failed to check role in /auth/role request", "error", err)
+			logrus.WithError(err).Error("Failed to check role in /auth/role request")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Server error",
 				Description: "We encountered an error while trying to check the allowance to a page",
@@ -283,7 +281,7 @@ func (SAR *SecuredAuthRouter) fetchAPIKeys() gin.HandlerFunc {
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
 		if !exists {
-			SAR.Logger.Error("Failed to get userinfo while fetching API keys")
+			logrus.Error("Failed to get userinfo while fetching API keys")
 			ctx.JSON(403, errors.Unauthorized)
 			return
 		}
@@ -299,21 +297,21 @@ func (SAR *SecuredAuthRouter) handleAPIKeyCreation() gin.HandlerFunc {
 		var body NewAPIKeyBody
 		err := ctx.Copy().ShouldBindJSON(&body)
 		if err != nil {
-			SAR.Logger.Error("Failed to parse body in APIKey creation request", "error", err)
+			logrus.WithError(err).Error("Failed to parse body in APIKey creation request")
 			ctx.JSON(500, errors.BodyParsingFailed)
 			return
 		}
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
 		if !exists {
-			SAR.Logger.Error("Failed to get userinfo in request trying to make an API key")
+			logrus.Error("Failed to get userinfo in request trying to make an API key")
 			ctx.JSON(403, errors.Unauthorized)
 			return
 		}
 		var key string
 		key, err = apikeys.CreateAPIKey(userInfo.ID, body.Comment, time.Duration(body.Duration)*time.Minute)
 		if err != nil {
-			SAR.Logger.Error("Failed to create API key", "error", err, "body", body)
+			logrus.WithField("body", body).WithError(err).Error("Failed to create API key")
 			ctx.JSON(500, models.RouteErrorMessage{
 				Title:       "Server error",
 				Description: "We encountered an error in the process of creating your API key",
@@ -330,14 +328,14 @@ func (SAR *SecuredAuthRouter) handleAPIKeyDeletion() gin.HandlerFunc {
 		var body DeleteAPIKeyBody
 		err := ctx.ShouldBindJSON(&body)
 		if err != nil {
-			SAR.Logger.Error("Failed to parse body in APIKey deletion request", "error", err)
+			logrus.WithError(err).Error("Failed to parse body in APIKey deletion request")
 			ctx.JSON(500, errors.BodyParsingFailed)
 			return
 		}
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
 		if !exists {
-			SAR.Logger.Error("Failed to get userinfo in request trying to make an API key")
+			logrus.Error("Failed to get userinfo in request trying to make an API key")
 			ctx.JSON(403, errors.Unauthorized)
 			return
 		}
@@ -363,7 +361,7 @@ func (SAR *SecuredAuthRouter) fetchAllAPIKeys() gin.HandlerFunc {
 		ctxUserInfo, exists := ctx.Get("userInfo")
 		userInfo := ctxUserInfo.(*authinfo.AuthInfo)
 		if !exists {
-			SAR.Logger.Error("Failed to get userinfo in request to fetch all API keys")
+			logrus.Error("Failed to get userinfo in request to fetch all API keys")
 			ctx.JSON(403, errors.Unauthorized)
 			return
 		}

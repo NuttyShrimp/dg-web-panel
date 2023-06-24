@@ -18,7 +18,7 @@ var env *tests.Env
 
 func TestMain(m *testing.M) {
 	env = tests.LoadBareEnv()
-	storage.InitCookieStore(env.Config, env.Logger)
+	storage.InitCookieStore(env.Config)
 	storage.InitStateTokenStorage()
 	Codecs = securecookie.CodecsFromPairs([]byte(env.Config.Server.SessionSecret))
 	m.Run()

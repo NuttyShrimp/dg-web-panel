@@ -3,12 +3,12 @@ package redis
 import (
 	"context"
 	"degrens/panel/internal/config"
-	"degrens/panel/lib/log"
 	"encoding/json"
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
@@ -18,7 +18,7 @@ type Client struct {
 
 var Redis *Client
 
-func InitRedisClient(conf *config.Config, logger log.Logger) *Client {
+func InitRedisClient(conf *config.Config) *Client {
 	Redis = &Client{
 		client: redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%d", conf.Redis.Host, conf.Redis.Port),
@@ -29,10 +29,10 @@ func InitRedisClient(conf *config.Config, logger log.Logger) *Client {
 	}
 	err := Redis.client.Ping(Redis.ctx).Err()
 	if err != nil {
-		logger.Fatalf("Failed to connect to redis: %s", err)
+		logrus.Fatalf("Failed to connect to redis: %s", err)
 	}
 
-	logger.Info("Connected to redis")
+	logrus.Info("Connected to redis")
 	return Redis
 }
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aidenwallis/go-utils/utils"
+	"github.com/sirupsen/logrus"
 )
 
 func FetchCfxLogs(page int, query string) ([]*graylogger.GraylogMessage[string], int, error) {
@@ -41,7 +42,7 @@ func FetchCfxLogs(page int, query string) ([]*graylogger.GraylogMessage[string],
 
 		err := json.Unmarshal(msgStr, &msg)
 		if err != nil {
-			logger.Error("Failed to decode panel message", "error", err)
+			logrus.WithError(err).Error("Failed to decode panel message")
 			return nil
 		}
 		msgTime, _ := time.Parse(time.RFC3339, timestamp)

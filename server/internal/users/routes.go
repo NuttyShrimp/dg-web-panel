@@ -2,21 +2,20 @@ package users
 
 import (
 	"degrens/panel/internal/routes"
-	"degrens/panel/lib/log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type UserRouter struct {
 	routes.Router
 }
 
-func NewUserRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewUserRouter(rg *gin.RouterGroup) {
 	router := &UserRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/user"),
-			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -34,7 +33,7 @@ func (UR *UserRouter) meHandler() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Could not retrieve user info",
 			})
-			UR.Logger.Error("Failed to retrieve user info", "error", err)
+			logrus.WithError(err).Error("Failed to retrieve user info")
 			return
 		}
 		c.JSON(http.StatusOK, userInfo)

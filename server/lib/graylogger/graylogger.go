@@ -3,10 +3,11 @@ package graylogger
 import (
 	"bytes"
 	"degrens/panel/internal/config"
-	"degrens/panel/lib/log"
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type GraylogMessage[M interface{}] struct {
@@ -19,28 +20,32 @@ type GraylogMessage[M interface{}] struct {
 	Timestamp    int64  `json:"timestamp"`
 }
 
-var logger log.Logger
 var gelfURL string
 
-func InitGrayLogger(cfg *config.ConfigGraylog, logger2 log.Logger) {
-	logger = logger2
+func InitGrayLogger(cfg *config.ConfigGraylog) {
 	gelfURL = cfg.Gelf
 }
 
 func pushLog(msg *GraylogMessage[interface{}]) {
 	msgStr, err := json.Marshal(msg)
 	if err != nil {
-		logger.Error("Failed to serialize graylogger message", "message", &msg)
+		logrus.WithFields(logrus.Fields{
+			"message": &msg,
+		}).Error("Failed to serialize graylogger message")
 		return
 	}
 	resp, err := http.Post(gelfURL, "application/json", bytes.NewBuffer(msgStr))
 	if err != nil {
-		logger.Error("Failed to send graylogger message", "message", &msg, "error", err)
+		logrus.WithFields(logrus.Fields{
+			"message": &msg,
+		}).WithError(err).Error("Failed to send graylogger message")
 		return
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		logger.Error("Failed to close graylogger request", "message", &msg, "error", err)
+		logrus.WithFields(logrus.Fields{
+			"message": &msg,
+		}).WithError(err).Error("Failed to close graylogger request")
 	}
 }
 
@@ -54,7 +59,7 @@ func createMessage() *GraylogMessage[interface{}] {
 
 func Log(logtype, message string, kvpPair ...interface{}) {
 	if len(kvpPair)%2 == 1 {
-		logger.Errorf("log of %s has uneven key-value pairs", logtype)
+		logrus.Errorf("log of %s has uneven key-value pairs", logtype)
 		return
 	}
 	fields := make(map[string]interface{})
@@ -66,7 +71,10 @@ func Log(logtype, message string, kvpPair ...interface{}) {
 
 	fieldsStr, err := json.Marshal(&fields)
 	if err != nil {
-		logger.Error("failed to serialize log fields", "error", err, "logtype", logtype, "fields", fields)
+		logrus.WithFields(logrus.Fields{
+			"logtype": logtype,
+			"fields":  fields,
+		}).WithError(err).Error("failed to serialize log fields", "error", err, "logtype", logtype, "fields", fields)
 		return
 	}
 

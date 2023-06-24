@@ -2,7 +2,6 @@ package storage
 
 import (
 	"degrens/panel/internal/config"
-	"degrens/panel/lib/log"
 )
 
 type Storage interface {
@@ -14,7 +13,7 @@ type Storage interface {
 	String() string
 }
 
-func InitStorages(conf *config.Config, logger log.Logger) {
+func InitStorages(conf *config.Config) {
 	InitStateTokenStorage()
-	InitCookieStore(conf, logger)
+	InitCookieStore(conf)
 }

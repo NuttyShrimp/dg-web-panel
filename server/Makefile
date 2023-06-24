@@ -10,6 +10,9 @@ GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 run:
 	go run cmds/panel/main.go -config ./config.yml
 
+run-prod:
+	go run cmds/panel/main.go -config ./config.prodconn.yml
+
 run-redis:
 	go run cmds/panel/main.go -config ./config.redis.yml
 

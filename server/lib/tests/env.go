@@ -5,7 +5,6 @@ import (
 	"degrens/panel/internal/auth/discord"
 	"degrens/panel/internal/config"
 	"degrens/panel/internal/storage"
-	"degrens/panel/lib/log"
 )
 
 var loadedEnvs = map[string]bool{
@@ -15,7 +14,6 @@ var loadedEnvs = map[string]bool{
 
 type Env struct {
 	Config *config.Config
-	Logger log.Logger
 }
 
 func LoadBareEnv() *Env {
@@ -29,12 +27,11 @@ func LoadBareEnv() *Env {
 		panic(err)
 	}
 	env := Env{
-		Logger: log.New(true, "https://16ccf13e3a274fb9bcb6f827bd8f57d0@sentry.nuttyshrimp.me/11"),
 		Config: testConfig,
 	}
 
-	discord.InitDiscordConf(testConfig, env.Logger)
-	storage.InitStorages(testConfig, env.Logger)
+	discord.InitDiscordConf(testConfig)
+	storage.InitStorages(testConfig)
 
 	loadedEnvs["bare"] = true
 	return &env
@@ -46,7 +43,7 @@ func LoadGraylogEnv() *Env {
 		return nil
 	}
 
-	api.CreateGraylogApi(&env.Config.Graylog, env.Logger)
+	api.CreateGraylogApi(&env.Config.Graylog)
 
 	loadedEnvs["graylog"] = true
 	return env

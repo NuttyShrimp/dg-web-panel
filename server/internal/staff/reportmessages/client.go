@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"degrens/panel/internal/auth/authinfo"
 	dgerrors "degrens/panel/lib/errors"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"errors"
 	"net"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 )
 
 type Client struct {
@@ -23,7 +23,7 @@ type Client struct {
 	// Room sends data to this channel
 	send     chan []byte
 	authInfo *authinfo.AuthInfo
-	logger   log.Logger
+	logger   *logrus.Entry
 }
 
 type ClientMessage struct {
@@ -76,13 +76,13 @@ func (c *Client) readRoutine() {
 		c.room.unregister <- c
 		err := c.conn.Close()
 		if err != nil {
-			c.logger.Error("Failed to properly close report WS", "error", err)
+			c.logger.WithError(err).Error("Failed to properly close report WS")
 		}
 	}()
 
 	err := c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	if err != nil {
-		c.logger.Error("Failed to set read deadline in report WS", "error", err)
+		c.logger.WithError(err).Error("Failed to set read deadline in report WS")
 	}
 	c.conn.SetPongHandler(func(appData string) error {
 		return c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -91,7 +91,7 @@ func (c *Client) readRoutine() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure, websocket.CloseNormalClosure, websocket.CloseNoStatusReceived) {
-				c.room.logger.Error("Report websocket was closed unexpectedly", "error", err)
+				c.room.logger.WithError(err).Error("Report websocket was closed unexpectedly")
 			}
 			break
 		}
@@ -110,7 +110,7 @@ func (c *Client) writeRoutine() {
 		ticker.Stop()
 		err := c.conn.Close()
 		if err != nil && !errors.Is(err, net.ErrClosed) {
-			c.logger.Error("Failed to properly close report WS", "error", err)
+			c.logger.WithError(err).Error("Failed to properly close report WS")
 		}
 	}()
 	doRoutine := false
@@ -119,13 +119,13 @@ func (c *Client) writeRoutine() {
 		case message, ok := <-c.send:
 			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err != nil {
-				c.logger.Error("Failed to set Write Deadline for report WS", "error", err)
+				c.logger.WithError(err).Error("Failed to set Write Deadline for report WS")
 			}
 			if !ok {
 				// The hub closed the channel.
 				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				if err != nil && !errors.Is(err, websocket.ErrCloseSent) {
-					c.logger.Error("Failed to close a report WS", "error", err)
+					c.logger.WithError(err).Error("Failed to close a report WS")
 				}
 				doRoutine = true
 			}
@@ -144,7 +144,7 @@ func (c *Client) sendQueuedMsg(message []byte) {
 	}
 	_, err = w.Write(message)
 	if err != nil {
-		c.logger.Error("Failed to send a message to the report WS", "error", err)
+		c.logger.WithError(err).Error("Failed to send a message to the report WS")
 		return
 	}
 	// Add queued chat messages to the current websocket message.
@@ -152,12 +152,12 @@ func (c *Client) sendQueuedMsg(message []byte) {
 	for i := 0; i < n; i++ {
 		_, err := w.Write([]byte{'\n'})
 		if err != nil {
-			c.logger.Error("Failed to send a newline through a report WS", "error", err)
+			c.logger.WithError(err).Error("Failed to send a newline through a report WS")
 			return
 		}
 		_, err = w.Write(<-c.send)
 		if err != nil {
-			c.logger.Error("Failed to send a chat message through a report WS", "error", err)
+			c.logger.WithError(err).Error("Failed to send a chat message through a report WS")
 			return
 		}
 	}

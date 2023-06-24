@@ -5,22 +5,21 @@ import (
 	"degrens/panel/internal/auth/middlewares/role"
 	"degrens/panel/internal/cfx/penalties"
 	"degrens/panel/internal/routes"
-	"degrens/panel/lib/log"
 	"degrens/panel/lib/utils"
 	"degrens/panel/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type PlayerRouter struct {
 	routes.Router
 }
 
-func NewPlayerRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewPlayerRouter(rg *gin.RouterGroup) {
 	router := &PlayerRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/player", role.New([]string{"staff"})),
-			Logger:      logger,
 		},
 	}
 
@@ -53,7 +52,7 @@ func (PR *PlayerRouter) FetchPlayerBanned(ctx *gin.Context) {
 	steamId := ctx.Param("steamId")
 	until, err := penalties.IsPlayerBanned(steamId)
 	if err != nil {
-		PR.Logger.Error("Failed to fetch player ban status", "error", err, "steamId", steamId)
+		logrus.WithError(err).WithField("steamId", steamId).Error("Failed to fetch player ban status")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "Failed to fetch player ban status",
@@ -72,7 +71,7 @@ func (PR *PlayerRouter) FetchActiveCid(ctx *gin.Context) {
 	}
 	actCid, err := GetActiveCharacter(steamId)
 	if err != nil {
-		PR.Logger.Error("Failed to fetch characters for steamid", "error", err, "steamid", steamId)
+		logrus.WithError(err).WithField("steamid", steamId).Error("Failed to fetch characters for steamid")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to fetch the user characters",
@@ -91,7 +90,7 @@ func (PR *PlayerRouter) FetchPenalties(ctx *gin.Context) {
 	}
 	list, err := penalties.GetPlayerPenalties(steamId)
 	if err != nil {
-		PR.Logger.Error("Failed to fetch penalties for steamid", "error", err, "steamid", steamId)
+		logrus.WithField("steamid", steamId).WithError(err).Error("Failed to fetch penalties for steamid")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to fetch the user penalties",
@@ -109,7 +108,7 @@ func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
 	body := penalties.WarnInfo{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
-		PR.Logger.Error("Failed to bind body for warn action", "error", err, "target", steamId)
+		logrus.WithField("target", steamId).WithError(err).Error("Failed to bind body for warn action")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to read the requests body",
@@ -119,7 +118,7 @@ func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
 	body.Target = steamId
 	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/warn", &body, nil)
 	if err != nil {
-		PR.Logger.Error("Failed to warn the player on fivem server", "error", err, "target", steamId)
+		logrus.WithError(err).WithField("target", steamId).Error("Failed to warn the player on fivem server")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to warn the player from the server",
@@ -127,7 +126,10 @@ func (PR *PlayerRouter) WarnPlayer(ctx *gin.Context) {
 		return
 	}
 	if ai.Message != "" {
-		PR.Logger.Error("Failed to warn the player on fivem server", "error", ai.Message, "target", steamId)
+		logrus.WithFields(logrus.Fields{
+			"error":  ai.Message,
+			"target": steamId,
+		}).Error("Failed to warn the player on fivem server")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to warn the player from the server",
@@ -145,7 +147,7 @@ func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
 	body := penalties.KickInfo{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
-		PR.Logger.Error("Failed to bind body for kick action", "error", err, "target", steamId)
+		logrus.WithField("target", steamId).WithError(err).Error("Failed to bind body for kick action")
 		ctx.JSON(400, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to read the requests body",
@@ -155,7 +157,7 @@ func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
 	body.Target = steamId
 	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/kick", &body, nil)
 	if err != nil {
-		PR.Logger.Error("Failed to kick player on fivem server", "error", err, "target", steamId)
+		logrus.WithField("target", steamId).WithError(err).Error("Failed to kick player on fivem server")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to kick the player from the server",
@@ -163,7 +165,10 @@ func (PR *PlayerRouter) KickPlayer(ctx *gin.Context) {
 		return
 	}
 	if ai.Message != "" {
-		PR.Logger.Error("Failed to kick player on fivem server", "error", ai.Message, "target", steamId)
+		logrus.WithFields(logrus.Fields{
+			"error":  ai.Message,
+			"target": steamId,
+		}).Error("Failed to kick player on fivem server")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to kick the player from the server",
@@ -181,7 +186,7 @@ func (PR *PlayerRouter) BanPlayer(ctx *gin.Context) {
 	body := penalties.BanInfo{}
 	err := ctx.ShouldBindJSON(&body)
 	if err != nil {
-		PR.Logger.Error("Failed to bind body for ban action", "error", err, "target", steamId)
+		logrus.WithField("target", steamId).WithError(err).Error("Failed to bind body for ban action")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to read the requests body",
@@ -191,7 +196,7 @@ func (PR *PlayerRouter) BanPlayer(ctx *gin.Context) {
 	body.Target = steamId
 	ai, err := api.CfxApi.DoRequest("POST", "/admin/actions/ban", &body, nil)
 	if err != nil {
-		PR.Logger.Error("Failed to ban player on fivem server", "error", err, "target", steamId)
+		logrus.WithField("target", steamId).WithError(err).Error("Failed to ban player on fivem server")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to ban the player from the server",
@@ -199,7 +204,11 @@ func (PR *PlayerRouter) BanPlayer(ctx *gin.Context) {
 		return
 	}
 	if ai.Message != "" {
-		PR.Logger.Error("Failed to ban player on fivem server", "error", ai.Message, "target", steamId)
+		logrus.WithFields(
+			logrus.Fields{
+				"error":  ai.Message,
+				"target": steamId,
+			}).Error("Failed to ban player on fivem server")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to ban the player from the server",

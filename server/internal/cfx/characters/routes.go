@@ -5,7 +5,6 @@ import (
 	"degrens/panel/internal/cfx/bank"
 	"degrens/panel/internal/cfx/vehicles"
 	"degrens/panel/internal/routes"
-	"degrens/panel/lib/log"
 	"degrens/panel/lib/utils"
 	"degrens/panel/models"
 	"fmt"
@@ -13,17 +12,17 @@ import (
 
 	aiden_utils "github.com/aidenwallis/go-utils/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type CharacterRouter struct {
 	routes.Router
 }
 
-func NewCharacterRouter(rg *gin.RouterGroup, logger log.Logger) {
+func NewCharacterRouter(rg *gin.RouterGroup) {
 	router := &CharacterRouter{
 		routes.Router{
 			RouterGroup: rg.Group("/character"),
-			Logger:      logger,
 		},
 	}
 	router.RegisterRoutes()
@@ -36,14 +35,15 @@ func (CR *CharacterRouter) RegisterRoutes() {
 	CR.RouterGroup.GET("/active", CR.FetchActiveCharacters)
 	CR.RouterGroup.GET("/:cid/info", CR.FetchCharInfo)
 	CR.RouterGroup.GET("/:cid/reputation", CR.FetchCharRep)
-	bank.NewBankRouter(CR.RouterGroup, CR.Logger)
-	vehicles.NewVehicleRouter(CR.RouterGroup, CR.Logger)
+	bank.NewBankRouter(CR.RouterGroup)
+	vehicles.NewVehicleRouter(CR.RouterGroup)
 }
 
 func (CR *CharacterRouter) ValidateCID(ctx *gin.Context) {
 	cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 32)
+	log := logrus.WithField("cid", ctx.Param("cid"))
 	if err != nil {
-		CR.Logger.Error("Failed to convert citizenid to uint", "error", err, "cid", ctx.Param("cid"))
+		log.WithError(err).Error("Failed to convert citizenid to uint")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to identify the character you are trying to fetch",
@@ -61,7 +61,7 @@ func (CR *CharacterRouter) ValidateCID(ctx *gin.Context) {
 func (CR *CharacterRouter) FetchAllCharacters(ctx *gin.Context) {
 	chars, err := GetAllCharacters()
 	if err != nil {
-		CR.Logger.Error("Failed to fetch all characters", "error", err, "id", ctx.Param("id"))
+		logrus.WithError(err).Error("Failed to fetch all characters")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while fetch all characters you are trying to fetch",
@@ -73,8 +73,9 @@ func (CR *CharacterRouter) FetchAllCharacters(ctx *gin.Context) {
 
 func (CR *CharacterRouter) FetchCharInfo(ctx *gin.Context) {
 	cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 32)
+	log := logrus.WithField("cid", ctx.Param("cid"))
 	if err != nil {
-		CR.Logger.Error("Failed to convert citizenid to uint", "error", err, "cid", ctx.Param("cid"))
+		log.WithError(err).Error("Failed to convert citizenid to uint")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to identify the character you are trying to fetch",
@@ -83,7 +84,7 @@ func (CR *CharacterRouter) FetchCharInfo(ctx *gin.Context) {
 	}
 	char, err := GetCharacterInfo(uint(cid))
 	if err != nil {
-		CR.Logger.Error("Failed to fetch character info", "error", err, "cid", cid)
+		log.WithError(err).Error("Failed to fetch character info")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: fmt.Sprint("We encountered an error while trying to fetch the info for the character with cid %i", cid),
@@ -95,8 +96,9 @@ func (CR *CharacterRouter) FetchCharInfo(ctx *gin.Context) {
 
 func (CR *CharacterRouter) FetchCharRep(ctx *gin.Context) {
 	cid, err := strconv.ParseInt(ctx.Param("cid"), 10, 32)
+	log := logrus.WithField("cid", ctx.Param("cid"))
 	if err != nil {
-		CR.Logger.Error("Failed to convert citizenid to uint", "error", err, "cid", ctx.Param("cid"))
+		log.WithError(err).Error("Failed to convert citizenid to uint")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to identify the character you are trying to fetch reputation for",
@@ -106,7 +108,7 @@ func (CR *CharacterRouter) FetchCharRep(ctx *gin.Context) {
 	rep, err := GetCharacterReputation(uint(cid))
 
 	if err != nil {
-		CR.Logger.Error("Failed to fetch character reputation", "error", err, "cid", ctx.Param("cid"))
+		log.WithError(err).Error("Failed to fetch character reputation")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to fetch the character reputation",
@@ -134,7 +136,7 @@ func (CR *CharacterRouter) FetchUserCharacters(ctx *gin.Context) {
 	}
 	chars, err := GetCharactersForSteamId(steamid)
 	if err != nil {
-		CR.Logger.Error("Failed to fetch characters for steamid", "error", err, "steamid", steamid)
+		logrus.WithField("steamId", steamid).WithError(err).Error("Failed to fetch characters for steamid")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Parsing error",
 			Description: "We encountered an error while trying to fetch the user characters",
@@ -147,7 +149,7 @@ func (CR *CharacterRouter) FetchUserCharacters(ctx *gin.Context) {
 func (CR *CharacterRouter) FetchActiveCharacters(ctx *gin.Context) {
 	activeInfo, err := cfx.GetActivePlayers()
 	if err != nil {
-		CR.Logger.Error("Failed to fetch active players", "error", err)
+		logrus.WithError(err).Error("Failed to fetch active players")
 		ctx.JSON(500, models.RouteErrorMessage{
 			Title:       "Server error",
 			Description: "We encountered an error while trying to fetch the active users",

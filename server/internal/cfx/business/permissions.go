@@ -4,6 +4,8 @@ import (
 	"degrens/panel/internal/api"
 	"degrens/panel/lib/cache"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var permissionCache = cache.InitCache[string, uint](1 * time.Hour)
@@ -12,11 +14,11 @@ func refetchBusinessPerms() bool {
 	perms := make(map[string]uint)
 	ei, err := api.CfxApi.DoRequest("GET", "/business/permissions", nil, &perms)
 	if err != nil {
-		br.Logger.Error("Failed to fetch business permissions", "error", err)
+		logrus.WithError(err).Error("Failed to fetch business permissions")
 		return false
 	}
 	if ei.Message != "" {
-		br.Logger.Error("Failed to fetch business permissions", "msg", ei.Message)
+		logrus.WithField("msg", ei.Message).Error("Failed to fetch business permissions")
 		return false
 	}
 	for perm, mask := range perms {

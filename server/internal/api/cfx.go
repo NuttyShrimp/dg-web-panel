@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"degrens/panel/internal/config"
-	"degrens/panel/lib/log"
 	"degrens/panel/models"
 	"encoding/json"
 	"errors"
@@ -11,6 +10,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type cfxApi struct {
@@ -20,11 +21,11 @@ type cfxApi struct {
 
 var CfxApi cfxApi
 
-func CreateCfxApi(c *config.ConfigCfx, logger log.Logger) {
+func CreateCfxApi(c *config.ConfigCfx) {
 	regex := regexp.MustCompile(`/$`)
 	baseApi := api{
 		baseURL: regex.ReplaceAllString(c.Server, "") + "/dg-api",
-		Logger:  logger.With("api", "Cfx"),
+		Logger:  logrus.WithField("api", "Cfx"),
 	}
 	CfxApi = cfxApi{
 		api:    baseApi,
@@ -49,7 +50,7 @@ func (ca *cfxApi) DoRequest(method, endpoint string, input, output interface{}) 
 func (ca *cfxApi) addInput(req *http.Request, input interface{}) {
 	body, err := json.Marshal(input)
 	if err != nil {
-		ca.Logger.Error("Failed to encode input to JSON for Cfx request", "error", err.Error())
+		ca.Logger.WithError(err).Error("Failed to encode input to JSON for Cfx request")
 		return
 	}
 	buf := bytes.NewBuffer(body)

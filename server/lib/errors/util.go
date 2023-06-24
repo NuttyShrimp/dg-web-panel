@@ -1,15 +1,19 @@
 package errors
 
 import (
-	"degrens/panel/lib/log"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
-func HandleJsonError(err error, logger log.Logger) {
+func HandleJsonError(err error, logger *logrus.Logger) {
+	if logger == nil {
+		logger = logrus.StandardLogger()
+	}
 	var syntaxError *json.SyntaxError
 	var unmarshalTypeError *json.UnmarshalTypeError
 
