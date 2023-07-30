@@ -64,5 +64,11 @@ func SetupRouter(conf *config.Config) *gin.Engine {
 	characters.NewCharacterRouter(securedapiRG)
 	state.NewStateRouter(securedapiRG)
 
+	if conf.Server.Env != "production" {
+		r.GET("/", func(ctx *gin.Context) {
+			ctx.Redirect(307, "http://localhost:3001")
+		})
+	}
+
 	return r
 }
