@@ -17,6 +17,8 @@ export const menus: MenuEntry[] = [
       adminOpenClose: "Open/Close menu",
       adminDevmode: "Toggled devmode",
       coreJoinLeave: "Join/Left",
+      policeDroppedWhileCuffed: "Dropped while cuffed",
+      charSpawned: "Char spawn locations",
     },
   },
   {
@@ -308,6 +310,14 @@ export const queries: Record<string, QueryType> = {
   },
   loglist: {
     types: ["logtype:idlist:use"],
+    inputs: ["citizenid", "steamId"],
+  },
+  policeDroppedWhileCuffed: {
+    types: ["police:interactions:droppedWithCuffs"],
+    inputs: ["citizenid"],
+  },
+  charSpawned: {
+    types: ["chars:spawn"],
     inputs: ["citizenid", "steamId"],
   },
 };
