@@ -19,6 +19,7 @@ import { Business } from "./staff/Business";
 import { DevActionPage } from "./dev/Actions";
 import { BanListPage } from "./staff/BanList";
 import { AdminLogList as AdminLogList } from "./staff/LogList";
+import { FlyerRequestPage } from "./dev/FlyerRequests";
 
 type ExtNonIndexRouteObject = Omit<NonIndexRouteObject, "children"> & {
   children?: ExtRouteObject[];
@@ -158,6 +159,11 @@ export const devRoute: ExtRouteObject = {
       path: "actions",
       title: "Actions",
       element: <DevActionPage />,
+    },
+    {
+      path: "flyer_requests",
+      title: "Flyer Requests",
+      element: <FlyerRequestPage />,
     },
   ],
 };
