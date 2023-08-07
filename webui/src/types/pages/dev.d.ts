@@ -12,4 +12,11 @@ declare namespace Dev {
     label: string;
     endpoint: string;
   }
+
+  interface Flyer {
+    id: number;
+    character: CfxState.Character;
+    link: string;
+    approved: boolean;
+  }
 }

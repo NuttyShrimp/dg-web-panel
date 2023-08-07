@@ -3,6 +3,7 @@ package router
 import (
 	"degrens/panel/internal/admin"
 	"degrens/panel/internal/auth"
+	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/cfx/characters"
 	"degrens/panel/internal/config"
 	"degrens/panel/internal/staff"
@@ -63,6 +64,7 @@ func SetupRouter(conf *config.Config) *gin.Engine {
 	admin.NewDevRouter(securedapiRG)
 	characters.NewCharacterRouter(securedapiRG)
 	state.NewStateRouter(securedapiRG)
+	cfx.NewCfxRouter(securedapiRG)
 
 	if conf.Server.Env != "production" {
 		r.GET("/", func(ctx *gin.Context) {
