@@ -2,6 +2,7 @@ import { Center, Container, LoadingOverlay, Tabs } from "@mantine/core";
 import { InfoIcon } from "@primer/octicons-react";
 import { BankInfo } from "@src/components/Characters/Bank";
 import { CharacterInfo } from "@src/components/Characters/Info";
+import { RealEstateList } from "@src/components/Characters/RealEstate/RealEstateList";
 import { SelectCharacter } from "@src/components/Characters/Select";
 import { VehicleInfo } from "@src/components/Characters/Vehicles";
 import { FontAwesomeIcon } from "@src/components/Icon";
@@ -75,6 +76,9 @@ export const CharacterPage = () => {
           <Tabs.Tab value="inventory" icon={<FontAwesomeIcon icon={"backpack"} size={"sm"} />}>
             Inventory
           </Tabs.Tab>
+          <Tabs.Tab value="real_estate" icon={<FontAwesomeIcon icon={"house"} size={"sm"} />}>
+            Real Estate
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="info">
@@ -87,6 +91,10 @@ export const CharacterPage = () => {
 
         <Tabs.Panel value="vehicles">
           <VehicleInfo cid={Number(cid)} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="real_estate">
+          <RealEstateList cid={Number(cid)} />
         </Tabs.Panel>
       </Tabs>
     </Container>

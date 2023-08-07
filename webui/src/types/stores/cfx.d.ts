@@ -83,4 +83,23 @@ declare namespace CfxState {
       role: Role;
     }
   }
+
+  namespace RealEstate {
+    interface Location {
+      id: number;
+      name: string;
+      garage: string;
+      clothing: string;
+      stash: string;
+      logout: string;
+      access: Access[];
+    }
+
+    interface Access {
+      locationId: number;
+      owner: boolean;
+      citizenId: number;
+      character: Character;
+    }
+  }
 }
