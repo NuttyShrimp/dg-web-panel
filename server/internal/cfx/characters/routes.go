@@ -3,6 +3,7 @@ package characters
 import (
 	"degrens/panel/internal/cfx"
 	"degrens/panel/internal/cfx/bank"
+	"degrens/panel/internal/cfx/realestate"
 	"degrens/panel/internal/cfx/vehicles"
 	"degrens/panel/internal/routes"
 	"degrens/panel/lib/utils"
@@ -37,6 +38,7 @@ func (CR *CharacterRouter) RegisterRoutes() {
 	CR.RouterGroup.GET("/:cid/reputation", CR.FetchCharRep)
 	bank.NewBankRouter(CR.RouterGroup)
 	vehicles.NewVehicleRouter(CR.RouterGroup)
+	realestate.NewRealEstateRouter(CR.RouterGroup)
 }
 
 func (CR *CharacterRouter) ValidateCID(ctx *gin.Context) {
