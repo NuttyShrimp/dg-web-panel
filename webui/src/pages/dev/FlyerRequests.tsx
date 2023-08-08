@@ -8,9 +8,9 @@ import { queryClient } from "@src/helpers/queryClient";
 import { axiosInstance } from "@src/helpers/axiosInstance";
 
 const FlyerCard = ({ flyer, canApprove }: { flyer: Dev.Flyer; canApprove?: boolean }) => (
-  <Card shadow="sm" p="lg" radius="md" withBorder>
+  <Card shadow="sm" m="xs" p="lg" radius="md" withBorder>
     <Card.Section>
-      <Image src={flyer.link} height={160} alt={flyer.link} />
+      <Image src={flyer.link} height={200} alt={flyer.link} fit="contain" />
     </Card.Section>
 
     <Text size="sm" mt={"sm"}>
