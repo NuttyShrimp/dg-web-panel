@@ -15,6 +15,8 @@ declare namespace CfxState {
     last_updated: string;
     created_at: string;
     steamId: string;
+    // Only in active char list
+    serverId?: number;
     user: {
       steamId: string;
       name: string;
