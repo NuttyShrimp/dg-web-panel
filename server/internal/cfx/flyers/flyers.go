@@ -68,8 +68,11 @@ func (FR *FlyerRouter) ApproveFlyer(ctx *gin.Context) {
 		return
 	}
 
-	db.CfxMariaDB.Client.Model(&cfx_models.FlyerRequest{}).Where("id = ?", id).Update("approved", true)
-	graylogger.Log("cfx:flyers:approve", fmt.Sprintf("%s(%d) has approved flyer request %d", userInfo.Username, userInfo.ID, id), "id", id)
+	flyerRequest := cfx_models.FlyerRequest{}
+	db.CfxMariaDB.Client.Where("id = ?", id).First(&flyerRequest)
+	flyerRequest.Approved = true
+	db.CfxMariaDB.Client.Save(&flyerRequest)
+	graylogger.Log("cfx:flyers:approve", fmt.Sprintf("%s(%d) has approved flyer request %d", userInfo.Username, userInfo.ID, id), "flyer", flyerRequest)
 
 	ctx.JSON(200, gin.H{})
 }
