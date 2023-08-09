@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"strconv"
 
-	aiden_utils "github.com/aidenwallis/go-utils/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -158,7 +157,5 @@ func (CR *CharacterRouter) FetchActiveCharacters(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(200, aiden_utils.SliceMap(activeInfo, func(info cfx.ActivePlayerInfo) uint {
-		return info.CitizenId
-	}))
+	ctx.JSON(200, activeInfo)
 }
