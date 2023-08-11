@@ -19,6 +19,7 @@ export const menus: MenuEntry[] = [
       coreJoinLeave: "Join/Left",
       policeDroppedWhileCuffed: "Dropped while cuffed",
       charSpawned: "Char spawn locations",
+      policeprisonleftzone: "Prison left zone while jailed",
     },
   },
   {
@@ -318,6 +319,10 @@ export const queries: Record<string, QueryType> = {
   },
   charSpawned: {
     types: ["chars:spawn"],
+    inputs: ["citizenid", "steamId"],
+  },
+  policeprisonleftzone: {
+    types: ["police:prison:leftZone"],
     inputs: ["citizenid", "steamId"],
   },
 };
