@@ -12,7 +12,7 @@ import (
 func AuthorizeToken(ctx *gin.Context, token string) error {
 	id := cfxtoken.GetNewToken()
 	tokenInfo := cfxtoken.TokenInfo{}
-	ai, err := api.CfxApi.DoRequest("GET", fmt.Sprintf("/token/info/%s", token), nil, &tokenInfo)
+	ai, err := api.CfxApi.DoRequest("GET", fmt.Sprintf("/tokens/info/%s", token), nil, &tokenInfo)
 	if err != nil {
 		return err
 	}
