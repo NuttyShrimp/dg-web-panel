@@ -48,6 +48,15 @@ func (ca *cfxApi) DoRequest(method, endpoint string, input, output interface{}) 
 }
 
 func (ca *cfxApi) addInput(req *http.Request, input interface{}) {
+	if req.Method == "GET" {
+		// Add input as query parameters
+		query := req.URL.Query()
+		for k, v := range input.(map[string]string) {
+			query.Add(k, v)
+		}
+		req.URL.RawQuery = query.Encode()
+		return
+	}
 	body, err := json.Marshal(input)
 	if err != nil {
 		ca.Logger.WithError(err).Error("Failed to encode input to JSON for Cfx request")
