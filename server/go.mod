@@ -17,8 +17,8 @@ require (
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	gopkg.in/yaml.v3 v3.0.1
-	gorm.io/driver/mysql v1.3.3
-	gorm.io/gorm v1.23.5
+	gorm.io/driver/mysql v1.4.7
+	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
-	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
@@ -57,4 +57,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.29.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gorm.io/datatypes v1.2.0 // indirect
 )

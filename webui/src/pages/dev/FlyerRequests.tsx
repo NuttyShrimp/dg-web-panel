@@ -54,6 +54,65 @@ const FlyerCard = ({ flyer, canApprove }: { flyer: Dev.Flyer; canApprove?: boole
   </Card>
 );
 
+const RetrievedFlyers = () => {
+  const {
+    data: items,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Inventory.Item[], Error>({
+    queryKey: ["flyers", "retrieved"],
+    queryFn: () => basicGet<Inventory.Item[]>("/cfx/flyers/retrieved"),
+  });
+
+  if (isError) {
+    return (
+      <div>
+        <h3>Error</h3>
+        <div>An unexpected error occurred {error.message}</div>
+        {import.meta.env.DEV && <pre>{JSON.stringify(error, null, 2)}</pre>}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <Title order={2} mb={"xs"}>
+        Existing Flyers
+      </Title>
+      {isLoading && <LoadingSpinner />}
+      <Flex wrap={"wrap"}>
+        {items?.map(item => (
+          <Card shadow="sm" m="xs" p="lg" radius="md" withBorder key={item.id}>
+            <Card.Section>
+              <Image src={item.metadata.link} height={200} alt={item.metadata.link} fit="contain" />
+            </Card.Section>
+
+            <Text size="sm" mt={"sm"}>
+              {item.inventory}
+            </Text>
+
+            <Flex justify={"space-between"}>
+              <Button
+                variant="light"
+                color="red"
+                mt="md"
+                radius="md"
+                onClick={async () => {
+                  await axiosInstance.delete(`/cfx/inventory/${item.id}`);
+                  queryClient.invalidateQueries(["flyers", "retrieved"]);
+                }}
+              >
+                Remove
+              </Button>
+            </Flex>
+          </Card>
+        ))}
+      </Flex>
+    </div>
+  );
+};
+
 export const FlyerRequestPage = () => {
   const {
     data: flyers,
@@ -101,6 +160,8 @@ export const FlyerRequestPage = () => {
           <FlyerCard flyer={flyer} key={flyer.id} />
         ))}
       </Flex>
+      <Divider mt={"xs"} />
+      <RetrievedFlyers />
     </div>
   );
 };
