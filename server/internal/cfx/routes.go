@@ -2,6 +2,7 @@ package cfx
 
 import (
 	"degrens/panel/internal/cfx/flyers"
+	"degrens/panel/internal/cfx/inventory"
 	"degrens/panel/internal/routes"
 
 	"github.com/gin-gonic/gin"
@@ -22,4 +23,5 @@ func NewCfxRouter(rg *gin.RouterGroup) {
 
 func (CR *CfxRouter) RegisterRoutes() {
 	flyers.NewFlyerRouter(CR.RouterGroup)
+	inventory.NewInventoryRouter(CR.RouterGroup)
 }

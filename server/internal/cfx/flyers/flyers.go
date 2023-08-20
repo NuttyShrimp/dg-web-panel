@@ -1,6 +1,7 @@
 package flyers
 
 import (
+	"degrens/panel/internal/cfx/inventory"
 	"degrens/panel/internal/db"
 	cfx_models "degrens/panel/internal/db/models/cfx"
 	"degrens/panel/internal/routes"
@@ -32,6 +33,7 @@ func NewFlyerRouter(rg *gin.RouterGroup) {
 
 func (FR *FlyerRouter) RegisterRoutes() {
 	FR.RouterGroup.GET("/", FR.FetchAllFlyers)
+	FR.RouterGroup.GET("/retrieved", FR.FetchAllExistingFlyers)
 	FR.RouterGroup.POST("/:id", FR.ApproveFlyer)
 	FR.RouterGroup.DELETE("/:id", FR.RemoveFlyer)
 }
@@ -48,6 +50,20 @@ func (FR *FlyerRouter) FetchAllFlyers(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, flyers)
+}
+
+func (FR *FlyerRouter) FetchAllExistingFlyers(ctx *gin.Context) {
+	metadata := map[string]string{"link": ""}
+	items, err := inventory.FetchItemsByMetadata(metadata)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		logrus.WithError(err).Error("Failed to fetch flyer items")
+		ctx.JSON(500, models.RouteErrorMessage{
+			Title:       "Server error",
+			Description: "We encountered an error while fetching the flyer items",
+		})
+		return
+	}
+	ctx.JSON(200, items)
 }
 
 func (FR *FlyerRouter) ApproveFlyer(ctx *gin.Context) {
