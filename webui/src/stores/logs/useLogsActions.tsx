@@ -7,9 +7,13 @@ export const useLogsActions = () => {
   const setTotalPanelLogs = useSetRecoilState(logState.totalPanelLogs);
   const setTotalCfxLogs = useSetRecoilState(logState.totalCfxLogs);
 
-  const fetchPanelLogs = async (page = 0) => {
+  const fetchPanelLogs = async (page = 0, query: string) => {
     try {
-      const resp = await axiosInstance.get<{ logs: Logs.Log[]; total: number }>(`/dev/logs?page=${page}`);
+      const URLParams = new URLSearchParams({
+        page: String(page),
+        query,
+      });
+      const resp = await axiosInstance.get<{ logs: Logs.Log[]; total: number }>(`/dev/logs?${URLParams.toString()}`);
       if (resp.status >= 400) {
         showNotification({
           title: "Failed to fetch panel logs",
