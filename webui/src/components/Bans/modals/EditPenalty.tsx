@@ -32,7 +32,7 @@ export const EditPenaltyModal = (props: { penalty: CfxState.Penalty }) => {
     await axiosInstance.post(`/staff/ban/${props.penalty.id}`, {
       reason,
       points,
-      length: perma ? -1 : Math.round(length.getTime() / 1000),
+      length: perma ? -1 : Math.round((length.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     });
     setUpdating(false);
     showNotification({
