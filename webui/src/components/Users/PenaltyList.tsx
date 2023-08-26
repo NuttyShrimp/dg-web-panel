@@ -26,7 +26,7 @@ export const UserPenaltyList = ({ steamId }: { steamId: string }) => {
   return (
     <SimpleTimeline
       list={data.map(c => ({
-        title: `reason: ${c.reason} | points: ${c.points}`,
+        title: `reason: ${c.reason} | points: ${c.points}${c.length != 0 ? ` | length: ${c.length}` : ""}`,
         time: dayjs(c.date).add(c.length, "day").unix(),
         type: c.penalty,
       }))}
