@@ -1,5 +1,6 @@
 import { Button, Checkbox, Group, NumberInput } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
+import { DateTimePicker } from "@mantine/dates";
+import { closeAllModals } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { PenaltyReasonSelector } from "@src/components/Inputs/PenaltyReasonSelector";
 import { classInfo, reasons as penaltyReasons } from "@src/data/PenaltyReasons";
@@ -111,11 +112,11 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
       reason: reasons.join(", "),
       length: perma ? -1 : Math.round((length.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
     });
+    closeAllModals();
+    const lengthTxt = length.getTime() < Date.now() ? "permanent" : displayUnixDate(length.getTime() / 1000);
     showNotification({
       title: "Banned player",
-      message: `Successfully banned the player with steamid: ${steamId} for ${
-        length.getTime() < Date.now() ? "permanent" : displayUnixDate(length.getTime() / 1000)
-      }`,
+      message: `Successfully banned the player with steamid: ${steamId} for ${lengthTxt}`,
       color: "green",
     });
   };
@@ -133,7 +134,7 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
       />
       <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(Number(v) ?? 0)} />
       <Group gap={5} align="flex-end">
-        <DatePickerInput
+        <DateTimePicker
           label="Ban Length"
           placeholder="Pick a unban date"
           value={length}

@@ -10,7 +10,7 @@ export const UserBanStatus = ({ steamId }: { steamId: string }) => {
   });
 
   if (isLoading) {
-    return <Badge>Loading ban status</Badge>;
+    return <Badge variant="light">Loading ban status</Badge>;
   }
   if (isError) {
     return (
@@ -25,5 +25,11 @@ export const UserBanStatus = ({ steamId }: { steamId: string }) => {
     );
   }
 
-  return data.until ? <Badge color="red">Banned until: {displayTimeDate(data.until)}</Badge> : <></>;
+  return data.until ? (
+    <Badge variant="light" color="red">
+      Banned until: {displayTimeDate(data.until)}
+    </Badge>
+  ) : (
+    <></>
+  );
 };

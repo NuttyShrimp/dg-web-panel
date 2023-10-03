@@ -15,7 +15,9 @@ export const ActiveCharBadge = ({ steamId, cid }: { steamId: string; cid: number
     return (
       <HoverCard width={280} shadow="md">
         <HoverCard.Target>
-          <Badge color="red">Active character error (hover me)</Badge>
+          <Badge variant="light" color="red">
+            Active character error (hover me)
+          </Badge>
         </HoverCard.Target>
         <HoverCard.Dropdown>
           <Text size="sm">{error.message}</Text>
@@ -27,5 +29,9 @@ export const ActiveCharBadge = ({ steamId, cid }: { steamId: string; cid: number
   if (cid !== data) {
     return <></>;
   }
-  return <Badge color="green">Active</Badge>;
+  return (
+    <Badge variant="light" color="green">
+      Active
+    </Badge>
+  );
 };

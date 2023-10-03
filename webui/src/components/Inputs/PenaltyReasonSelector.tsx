@@ -11,11 +11,20 @@ declare interface PRSProps {
 export const PenaltyReasonSelector = (props: PRSProps) => {
   const defaultReasons = useMemo(() => {
     const values: ComboboxData = [];
+    const classToReasons: Record<string, string[]> = {};
     for (const key in reasons) {
+      if (!classToReasons[reasons[key]]) {
+        classToReasons[reasons[key]] = [];
+      }
+      classToReasons[reasons[key]].push(key);
+    }
+    for (const pClass in classToReasons) {
       values.push({
-        value: key,
-        label: `${key} (${reasons[key]})`,
-        group: reasons[key],
+        group: pClass,
+        items: classToReasons[pClass].map(r => ({
+          value: r,
+          label: `${r} (${pClass})`,
+        })),
       });
     }
     return values;
