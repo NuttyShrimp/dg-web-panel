@@ -51,7 +51,7 @@ export const QueryMenu = ({ setQuery }: { setQuery: (q: string) => void }) => {
         {menus.map(m => (
           <Menu position="left" trigger="hover" key={`staff-query-builder-${m.label}`}>
             <Menu.Target>
-              <Menu.Item icon={<ChevronLeftIcon />}>{m.label}</Menu.Item>
+              <Menu.Item leftSection={<ChevronLeftIcon />}>{m.label}</Menu.Item>
             </Menu.Target>
             <Menu.Dropdown>
               {Object.entries(m.actions).map(([action, label]) => (

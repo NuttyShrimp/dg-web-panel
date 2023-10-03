@@ -1,6 +1,6 @@
 import { axiosInstance } from "@src/helpers/axiosInstance";
 import { noteState } from "@src/stores/notes/state";
-import { JSONContent } from "@tiptap/core";
+import { JSONContent } from "@tiptap/react";
 import { useCallback } from "react";
 import { useSetRecoilState } from "recoil";
 

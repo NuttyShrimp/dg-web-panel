@@ -1,5 +1,5 @@
 import { Button, Checkbox, Group, NumberInput } from "@mantine/core";
-import { DatePicker } from "@mantine/dates";
+import { DatePickerInput } from "@mantine/dates";
 import { showNotification } from "@mantine/notifications";
 import { PenaltyReasonSelector } from "@src/components/Inputs/PenaltyReasonSelector";
 import { classInfo, reasons as penaltyReasons } from "@src/data/PenaltyReasons";
@@ -49,7 +49,7 @@ export const WarnUserModal = ({ steamId }: { steamId: string }) => {
           setReasons(r);
         }}
       />
-      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
+      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(Number(v) ?? 0)} />
       <Button onClick={doWarn} mt="xs">
         Warn
       </Button>
@@ -82,7 +82,7 @@ export const KickUserModal = ({ steamId }: { steamId: string }) => {
           setReasons(r);
         }}
       />
-      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
+      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(Number(v) ?? 0)} />
       <Button onClick={doKick} mt="xs">
         Kick
       </Button>
@@ -131,9 +131,9 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
           setReasons(r);
         }}
       />
-      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(v ?? 0)} />
-      <Group spacing={5} align="flex-end">
-        <DatePicker
+      <NumberInput label={"Points (optional)"} value={points} onChange={v => setPoints(Number(v) ?? 0)} />
+      <Group gap={5} align="flex-end">
+        <DatePickerInput
           label="Ban Length"
           placeholder="Pick a unban date"
           value={length}

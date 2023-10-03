@@ -45,7 +45,7 @@ export const CharacterPage = () => {
     return <Navigate to="/errors/404" replace />;
   }
   if (cidState === 0) {
-    return <LoadingOverlay visible overlayBlur={7} />;
+    return <LoadingOverlay visible overlayProps={{ blur: 7 }} />;
   }
   if (cidState === 2) {
     return <Navigate to="/errors/404" replace />;
@@ -64,19 +64,19 @@ export const CharacterPage = () => {
       </Center>
       <Tabs variant="pills" defaultValue={"info"} keepMounted={false} pt={"sm"}>
         <Tabs.List mb={"xs"}>
-          <Tabs.Tab value="info" icon={<InfoIcon size={14} />}>
+          <Tabs.Tab value="info" leftSection={<InfoIcon size={14} />}>
             Info
           </Tabs.Tab>
-          <Tabs.Tab value="bank" icon={<FontAwesomeIcon icon={"building-columns"} size={"sm"} />}>
+          <Tabs.Tab value="bank" leftSection={<FontAwesomeIcon icon={"building-columns"} size={"sm"} />}>
             Bank
           </Tabs.Tab>
-          <Tabs.Tab value="vehicles" icon={<FontAwesomeIcon icon={"car"} size={"sm"} />}>
+          <Tabs.Tab value="vehicles" leftSection={<FontAwesomeIcon icon={"car"} size={"sm"} />}>
             Vehicles
           </Tabs.Tab>
-          <Tabs.Tab value="inventory" icon={<FontAwesomeIcon icon={"backpack"} size={"sm"} />}>
+          <Tabs.Tab value="inventory" leftSection={<FontAwesomeIcon icon={"backpack"} size={"sm"} />}>
             Inventory
           </Tabs.Tab>
-          <Tabs.Tab value="real_estate" icon={<FontAwesomeIcon icon={"house"} size={"sm"} />}>
+          <Tabs.Tab value="real_estate" leftSection={<FontAwesomeIcon icon={"house"} size={"sm"} />}>
             Real Estate
           </Tabs.Tab>
         </Tabs.List>

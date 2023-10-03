@@ -47,7 +47,7 @@ export const BusinessLogs: FC<{ id: number }> = ({ id }) => {
     return (
       <div>
         <Center>
-          <Stack spacing={"xs"}>
+          <Stack gap={"xs"}>
             <Center>
               <Loader />
             </Center>
@@ -75,15 +75,15 @@ export const BusinessLogs: FC<{ id: number }> = ({ id }) => {
       <List>
         {logs.map(l => (
           <List.Entry key={l.id}>
-            <Stack spacing={4}>
-              <Text weight="bolder">{l.type}</Text>
+            <Stack gap={4}>
+              <Text fw="bolder">{l.type}</Text>
               <Text>{l.action}</Text>
             </Stack>
           </List.Entry>
         ))}
       </List>
       <Center mt={"xs"}>
-        <Pagination page={page} onChange={setPage} total={Math.ceil(totalLogs / 50)} />
+        <Pagination value={page} onChange={setPage} total={Math.ceil(totalLogs / 50)} />
       </Center>
     </div>
   );

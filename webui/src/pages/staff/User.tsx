@@ -38,13 +38,13 @@ export const UserPage = () => {
       <Divider mb={"xs"} />
       <Tabs variant="pills" defaultValue={"info"} keepMounted={false} pt={"sm"}>
         <Tabs.List mb={"xs"}>
-          <Tabs.Tab value="info" icon={<InfoIcon size={14} />}>
+          <Tabs.Tab value="info" leftSection={<InfoIcon size={14} />}>
             Info
           </Tabs.Tab>
-          <Tabs.Tab value="chars" icon={<FontAwesomeIcon icon="users" size={"sm"} />}>
+          <Tabs.Tab value="chars" leftSection={<FontAwesomeIcon icon="users" size={"sm"} />}>
             Characters
           </Tabs.Tab>
-          <Tabs.Tab value="penalties" icon={<FontAwesomeIcon icon="hammer-war" size={"sm"} />}>
+          <Tabs.Tab value="penalties" leftSection={<FontAwesomeIcon icon="hammer-war" size={"sm"} />}>
             Penalties
           </Tabs.Tab>
           <UserActionMenu steamId={steamid} />
@@ -52,32 +52,32 @@ export const UserPage = () => {
         <Tabs.Panel value="info">
           <div>
             <Flex>
-              <Text weight={"bolder"}>Name:&nbsp;</Text>
+              <Text fw={"bolder"}>Name:&nbsp;</Text>
               <Text>{player.name}</Text>
             </Flex>
             <Flex>
-              <Text weight={"bolder"}>SteamId:&nbsp;</Text>
+              <Text fw={"bolder"}>SteamId:&nbsp;</Text>
               <Text>{player.steamId}</Text>
             </Flex>
             <Flex>
-              <Text weight={"bolder"}>DiscordId:&nbsp;</Text>
+              <Text fw={"bolder"}>DiscordId:&nbsp;</Text>
               <Text>{player.discordId}</Text>
             </Flex>
             <Flex>
-              <Text weight={"bolder"}>First Joined:&nbsp;</Text>
+              <Text fw={"bolder"}>First Joined:&nbsp;</Text>
               <Text>{displayDate(player.created_at)}</Text>
             </Flex>
             <Flex>
-              <Text weight={"bolder"}>Last Update:&nbsp;</Text>
+              <Text fw={"bolder"}>Last Update:&nbsp;</Text>
               <Text>{displayDate(player.last_updated)}</Text>
             </Flex>
             <Flex>
-              <Text weight={"bolder"}>Points:&nbsp;</Text>
+              <Text fw={"bolder"}>Points:&nbsp;</Text>
               <Text>{player.points.points}</Text>
             </Flex>
             {player.points.points > 0 && (
               <Flex>
-                <Text weight={"bolder"}>Points reset-day:&nbsp;</Text>
+                <Text fw={"bolder"}>Points reset-day:&nbsp;</Text>
                 <Text>
                   {displayTimeDate(dayjs(player.points.updated_at).add(player.points.points, "d").toString())}
                 </Text>

@@ -54,11 +54,11 @@ export const Login = () => {
         <Text size={"md"}>To access the panel, you&apos;ll need to login via discord</Text>
         <Button
           onClick={handleDiscordLogin}
-          sx={{
+          style={{
             marginTop: "5vh",
           }}
           loading={!canLogin}
-          leftIcon={<i className="fa-brands fa-discord"></i>}
+          leftSection={<i className="fa-brands fa-discord"></i>}
         >
           {" "}
           Login via discord

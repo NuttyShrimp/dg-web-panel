@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
-import { DatePicker, TimeInput } from "@mantine/dates";
+import { DateTimePicker } from "@mantine/dates";
 import { showNotification } from "@mantine/notifications";
 import { CommentIcon } from "@primer/octicons-react";
 import { axiosInstance } from "@src/helpers/axiosInstance";
@@ -30,21 +30,21 @@ const CreateAPIKeyModal: FC<{ open: boolean; onClose: () => void }> = ({ open, o
     }
   };
 
+  // TODO: Tes this datetimepicker
   return (
     <Modal opened={open} onClose={onClose} title="Create new API key">
       <Stack>
         <TextInput
-          icon={<CommentIcon />}
+          leftSection={<CommentIcon />}
           value={comment}
           onChange={e => setComment(e.currentTarget.value)}
           placeholder="comment"
           label="Comment"
         />
         <Group grow>
-          <DatePicker value={expiryDate} onChange={setExpiryDate} minDate={dayjs(new Date()).toDate()} />
-          <TimeInput value={expiryDate} onChange={setExpiryDate} />
+          <DateTimePicker value={expiryDate} onChange={setExpiryDate} minDate={dayjs(new Date()).toDate()} />
         </Group>
-        <Group position="right">
+        <Group justify="flex-end">
           <Button onClick={createKey}>Create</Button>
         </Group>
       </Stack>

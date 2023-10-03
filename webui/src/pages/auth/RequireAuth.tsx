@@ -53,7 +53,7 @@ export const RequireAuth: FC<{ role: string }> = ({ role }) => {
 
   return (
     <>
-      <LoadingOverlay visible={infoLock || loading} overlayBlur={7} />
+      <LoadingOverlay visible={infoLock || loading} overlayProps={{ blur: 7 }} />
       <Outlet />
     </>
   );

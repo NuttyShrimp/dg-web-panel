@@ -25,9 +25,9 @@ export const ChangeBalanceModal = (props: { balance?: number; accountId: string 
       <NumberInput
         min={0}
         decimalSeparator="."
-        precision={2}
+        decimalScale={2}
         value={balance}
-        onChange={val => setBalance(val ?? 0)}
+        onChange={val => setBalance(Number(val) ?? 0)}
         disabled={updating}
       />
       <Button mt={"xs"} onClick={updateBalance} loading={updating}>

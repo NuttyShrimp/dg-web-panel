@@ -56,11 +56,11 @@ export const ApiKeyList = () => {
   return (
     <div>
       <Modal />
-      <Group position="right" pb={"sm"}>
-        <Button leftIcon={<TrashIcon />} color={"red"} disabled={selection.length === 0} onClick={deleteKeys}>
+      <Group justify="flex-end" pb={"sm"}>
+        <Button leftSection={<TrashIcon />} color={"red"} disabled={selection.length === 0} onClick={deleteKeys}>
           Delete
         </Button>
-        <Button leftIcon={<PlusIcon />} onClick={openModal}>
+        <Button leftSection={<PlusIcon />} onClick={openModal}>
           Add
         </Button>
       </Group>
@@ -78,11 +78,7 @@ export const ApiKeyList = () => {
           {keys.map(key => (
             <tr key={key.key}>
               <td>
-                <Checkbox
-                  checked={selection.includes(key.key)}
-                  onChange={() => toggleRow(key.key)}
-                  transitionDuration={0}
-                />
+                <Checkbox checked={selection.includes(key.key)} onChange={() => toggleRow(key.key)} />
               </td>
               <td>{key.key}</td>
               <td>{key.comment}</td>

@@ -40,11 +40,11 @@ export const BusinessActionMenu = ({ id }: { id: number }) => {
   return (
     <Menu shadow={"md"} width={150} disabled={busy}>
       <Menu.Target>
-        <Button leftIcon={<GearIcon />}>Actions</Button>
+        <Button leftSection={<GearIcon />}>Actions</Button>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Item onClick={onChangeOwnerClick}>Change owner (Existing employees only)</Menu.Item>
-        <Menu.Item color="red" icon={<TrashIcon size={14} />} onClick={onDelClick}>
+        <Menu.Item color="red" leftSection={<TrashIcon size={14} />} onClick={onDelClick}>
           Delete
         </Menu.Item>
       </Menu.Dropdown>

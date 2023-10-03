@@ -44,33 +44,33 @@ export const CharacterInfo: FC<{ cid: number }> = ({ cid }) => {
       <Divider mb={"xs"} />
       <Title size="h3">Character info</Title>
       <Flex>
-        <Text weight={"bolder"}>SteamId:&nbsp;</Text>
+        <Text fw={"bolder"}>SteamId:&nbsp;</Text>
         <Link to={`/staff/users/${characterInfo?.user.steamId}`}>
           <Text>{characterInfo?.user.steamId}</Text>
         </Link>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Citizenid:&nbsp;</Text>
+        <Text fw={"bolder"}>Citizenid:&nbsp;</Text>
         <Text>{characterInfo?.citizenid}</Text>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Birthdate:&nbsp;</Text>
+        <Text fw={"bolder"}>Birthdate:&nbsp;</Text>
         <Text>{characterInfo?.info.birthdate}</Text>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Phone Nr.:&nbsp;</Text>
+        <Text fw={"bolder"}>Phone Nr.:&nbsp;</Text>
         <Text>{characterInfo?.info.phone}</Text>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Gender:&nbsp;</Text>
+        <Text fw={"bolder"}>Gender:&nbsp;</Text>
         <Text>{characterInfo?.info.gender ? "Woman" : "Man"}</Text>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Created at:&nbsp;</Text>
+        <Text fw={"bolder"}>Created at:&nbsp;</Text>
         <Text>{displayDate(characterInfo.created_at)}</Text>
       </Flex>
       <Flex>
-        <Text weight={"bolder"}>Last updated:&nbsp;</Text>
+        <Text fw={"bolder"}>Last updated:&nbsp;</Text>
         <Text>{displayDate(characterInfo.last_updated)}</Text>
       </Flex>
       <Divider my={"sm"} />

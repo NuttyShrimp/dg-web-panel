@@ -15,8 +15,8 @@ export const BusinessEmployees = ({ id }: { id: number }) => {
     <List>
       {employees.map(e => (
         <List.Entry key={e.id}>
-          <Stack spacing={4}>
-            <Text weight={"bolder"}>
+          <Stack gap={4}>
+            <Text fw={"bolder"}>
               {e.character.info.firstname} {e.character.info.lastname} |{" "}
               <Link to={`/staff/characters/${e.character.citizenid}`}>{e.character.citizenid}</Link> |{" "}
               <Link to={`/staff/users/${e.character.steamId}`}>{e.character.steamId}</Link>

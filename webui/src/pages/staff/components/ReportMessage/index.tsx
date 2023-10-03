@@ -16,7 +16,7 @@ export const ReportMessage: FC<{ message: ReportState.Message }> = ({ message })
       <div className="report-message-header">
         <div>
           <Avatar src={message.sender.avatarUrl} radius="xl" size={"sm"} />
-          <Text className="report-message-title" weight={"bold"} ml={"xs"}>
+          <Text className="report-message-title" fw={"bold"} ml={"xs"}>
             {message.sender.username}
             <span> op {displayTimeDate(message.createdAt)}</span>
           </Text>

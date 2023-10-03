@@ -58,14 +58,14 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
       <List>
         {characterBankAccs.map(acc => (
           <List.Entry key={acc.accountId}>
-            <Stack w={"100%"} spacing="xs">
-              <Group position="apart">
-                <Text weight={"bolder"}>{acc.name}</Text>
+            <Stack w={"100%"} gap="xs">
+              <Group justify="space-between">
+                <Text fw={"bolder"}>{acc.name}</Text>
                 <Button onClick={() => openBalanceProfile(acc.accountId, acc.balance)}>Change Balance</Button>
               </Group>
               <Text>€{acc.balance}</Text>
               <Group grow>
-                <Group spacing={"xs"}>
+                <Group gap={"xs"}>
                   <Text>Deposit</Text>
                   {acc.permissions.deposit ? (
                     <CheckIcon fill={theme.colors.green[6]} />
@@ -73,7 +73,7 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
                     <XIcon fill={theme.colors.red[6]} />
                   )}
                 </Group>
-                <Group spacing={"xs"}>
+                <Group gap={"xs"}>
                   <Text>Withdraw</Text>
                   {acc.permissions.withdraw ? (
                     <CheckIcon fill={theme.colors.green[6]} />
@@ -81,7 +81,7 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
                     <XIcon fill={theme.colors.red[6]} />
                   )}
                 </Group>
-                <Group spacing={"xs"}>
+                <Group gap={"xs"}>
                   <Text>Transfer</Text>
                   {acc.permissions.transfer ? (
                     <CheckIcon fill={theme.colors.green[6]} />
@@ -89,7 +89,7 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
                     <XIcon fill={theme.colors.red[6]} />
                   )}
                 </Group>
-                <Group spacing={"xs"}>
+                <Group gap={"xs"}>
                   <Text>View transitions</Text>
                   {acc.permissions.transactions ? (
                     <CheckIcon fill={theme.colors.green[6]} />

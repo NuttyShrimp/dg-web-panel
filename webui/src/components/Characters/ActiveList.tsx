@@ -31,7 +31,7 @@ export const ActiveCharacterList = () => {
         {data.map(c => (
           <List.Entry key={c.citizenid}>
             <Link noColor to={`/staff/characters/${c.citizenid}`}>
-              <Text weight={"bolder"}>
+              <Text fw={"bolder"}>
                 {c.info.firstname} {c.info.lastname} | {c.citizenid} | {c.serverId}
               </Text>
               <Text>{c.user.name}</Text>

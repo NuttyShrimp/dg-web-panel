@@ -1,24 +1,25 @@
-FROM node:16 as builder
+FROM node:16-slim as base
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+COPY . /app
 WORKDIR /app
 
-ENV PATH /app/node_modules/.bin:$PATH
+FROM base AS prod-deps
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-COPY package.json ./package.json
-COPY yarn.lock ./yarn.lock
-COPY .npmrc ./.npmrc
-
-RUN yarn install --quiet
-
-COPY . .
-
-RUN yarn build
+FROM base AS build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
 
 FROM nginx:alpine
 
 RUN rm -rf /usr/share/nginx/html/*
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build /app/dist /usr/share/nginx/html
 
 COPY config/nginx.conf /etc/nginx/nginx.conf
 

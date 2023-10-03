@@ -1,21 +1,22 @@
-import { Autocomplete, Box, Text } from "@mantine/core";
+import { Box, Text } from "@mantine/core";
 import { cfxState } from "@src/stores/cfx/state";
 import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
-import { FC, forwardRef, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { useRecoilValue } from "recoil";
+import { AutoComplete } from "@src/components/ui/Autocomplete";
 
 declare type UserItemProps = React.ComponentPropsWithoutRef<"div"> & CfxState.Player;
 
-const SelectItem = forwardRef<HTMLDivElement, UserItemProps>(({ steamId, name, ...others }: UserItemProps, ref) => (
-  <div ref={ref} {...others}>
+const SelectItem = ({ steamId, name, ...others }: UserItemProps) => (
+  <div {...others}>
     <Box>
       <Text size="sm">{name}</Text>
-      <Text size="xs" color="dimmed">
+      <Text size="xs" c="dimmed">
         {steamId}
       </Text>
     </Box>
   </div>
-));
+);
 
 const caseInsensitiveMatch = (s1: string, s2: string) => s1.toLowerCase().includes(s2.toLowerCase().trim());
 
@@ -33,9 +34,8 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
   }, []);
 
   return (
-    <Autocomplete
+    <AutoComplete
       placeholder="Search a user"
-      nothingFound="No user found"
       itemComponent={SelectItem}
       defaultValue={steamId}
       data={players.map(p => ({
@@ -43,12 +43,12 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
         value: String(p.steamId),
         label: p.name,
       }))}
-      filter={(value, item) =>
-        caseInsensitiveMatch(item.name, value) ||
-        caseInsensitiveMatch(item.steamId, value) ||
-        caseInsensitiveMatch(item.discordId, value)
+      filter={(item, search) =>
+        caseInsensitiveMatch(item.name, search) ||
+        caseInsensitiveMatch(item.steamId, search) ||
+        caseInsensitiveMatch(item.discordId, search)
       }
-      onItemSubmit={i => onChange?.(i.steamId)}
+      onOptionSubmit={i => onChange?.(i)}
     />
   );
 };

@@ -216,7 +216,7 @@ export const StaffReport = () => {
   return (
     <Container size="md">
       <Group align={"top"}>
-        <Stack style={{ flexGrow: 1 }} spacing={0} w={"65%"}>
+        <Stack style={{ flexGrow: 1 }} gap={0} w={"65%"}>
           <Box mb="xs">
             <Title className="report-title" order={3}>
               {report.title}
@@ -233,12 +233,12 @@ export const StaffReport = () => {
             <CommentEditor value="" onSubmit={sendNewMsg} />
           </div>
         </Stack>
-        <Stack w={"25%"} spacing={4}>
+        <Stack w={"25%"} gap={4}>
           <Button onClick={toggleReportState} color={report.open ? "dg-prim" : "red"}>
             {report.open ? "Close" : "Reopen"}
           </Button>
           <Divider />
-          <Group position="apart">
+          <Group justify="space-between">
             <Title order={4}>Members</Title>
             <ActionIcon onClick={openAddMemberModal}>
               <PlusIcon />
@@ -248,8 +248,8 @@ export const StaffReport = () => {
           {report.members &&
             report.members.map(m => (
               <Card key={m.steamId} shadow="xs" radius="xs" p="xs">
-                <Group position="apart">
-                  <Stack spacing={1}>
+                <Group justify="space-between">
+                  <Stack gap={1}>
                     <Text>{m.name}</Text>
                     <Text size={"xs"}>{m.steamId}</Text>
                   </Stack>

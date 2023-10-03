@@ -1,7 +1,7 @@
-import { MultiSelect } from "@mantine/core";
-import type { SelectItem } from "@mantine/core";
+import { TagsInput } from "@mantine/core";
+import { ComboboxData } from "@mantine/core";
 import { reasons } from "@src/data/PenaltyReasons";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 declare interface PRSProps {
   reasons: string[];
@@ -9,9 +9,8 @@ declare interface PRSProps {
 }
 
 export const PenaltyReasonSelector = (props: PRSProps) => {
-  const [extraReasons, setExtraReasons] = useState<SelectItem[]>([]);
   const defaultReasons = useMemo(() => {
-    const values: SelectItem[] = [];
+    const values: ComboboxData = [];
     for (const key in reasons) {
       values.push({
         value: key,
@@ -22,20 +21,12 @@ export const PenaltyReasonSelector = (props: PRSProps) => {
     return values;
   }, []);
   return (
-    <MultiSelect
+    <TagsInput
       label="Penalty Reasons"
       placeholder="Select or create the reasons"
-      searchable
-      creatable
-      data={[...extraReasons, ...defaultReasons]}
+      data={defaultReasons}
       value={props.reasons}
       onChange={props.setReasons}
-      getCreateLabel={q => `Add ${q}`}
-      onCreate={q => {
-        const item = { value: q, label: q };
-        setExtraReasons(r => [...r, item]);
-        return item;
-      }}
     />
   );
 };

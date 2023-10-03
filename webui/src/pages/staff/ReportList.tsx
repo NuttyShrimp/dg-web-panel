@@ -54,17 +54,17 @@ export const StaffReports = () => {
         <div className="reports-list-wrapper">
           <div className="reports-list-container">
             <div className="reports-list-header">
-              <Group spacing={"xs"}>
-                <Text size={"sm"} weight={filter.open ? 700 : 400} onClick={handleOpenFilter}>
+              <Group gap={"xs"}>
+                <Text size={"sm"} fw={filter.open ? 700 : 400} onClick={handleOpenFilter}>
                   {filter.open && <CheckIcon size={16} />}
                   Open
                 </Text>
-                <Text size={"sm"} weight={filter.closed ? 700 : 400} onClick={handleClosedFilter}>
+                <Text size={"sm"} fw={filter.closed ? 700 : 400} onClick={handleClosedFilter}>
                   {filter.closed && <CheckIcon size={16} />}
                   Closed
                 </Text>
               </Group>
-              <Group spacing="xs" className="reports-list-actions">
+              <Group gap="xs" className="reports-list-actions">
                 <SearchInput value={filter.search} onChange={updateSearchValue} />
                 <Tooltip label={"Create new report"} position="bottom">
                   <div onClick={() => setCreateReport(true)}>
@@ -77,7 +77,7 @@ export const StaffReports = () => {
           </div>
         </div>
         <Center mt={"md"}>
-          <Pagination total={pagination.total} siblings={2} page={pagination.current} onChange={handlePageChange} />
+          <Pagination total={pagination.total} siblings={2} value={pagination.current} onChange={handlePageChange} />
         </Center>
       </Container>
     </>

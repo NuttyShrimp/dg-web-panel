@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "../Icon";
 
 export const SimpleTimeline: FC<SimpleTimeline.Props> = props => {
   return (
-    <Timeline active={props.list.length}>
+    <Timeline active={props.list.length} bulletSize={props.bulletSize ?? 24}>
       {props.list.map(e => (
         <Timeline.Item
           key={`timeline-item-${e.time}`}
@@ -14,7 +14,6 @@ export const SimpleTimeline: FC<SimpleTimeline.Props> = props => {
           bullet={
             e.type && <FontAwesomeIcon icon={EventIcons?.[e.type as keyof typeof EventIcons] ?? "bug"} size={"xs"} />
           }
-          bulletSize={props.bulletSize ?? 24}
         >
           <Text size="xs">{formatRelativeTime(e.time)}</Text>
         </Timeline.Item>

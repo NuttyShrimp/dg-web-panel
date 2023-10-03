@@ -92,7 +92,7 @@ export const NoteList = () => {
           {notes.map(n => (
             <NoteEntry key={n.id} note={n} selected={selNote === n.id} />
           ))}
-          <Button onClick={openNewNoteModal} leftIcon={<PlusIcon />}>
+          <Button onClick={openNewNoteModal} leftSection={<PlusIcon />}>
             Add
           </Button>
         </Stack>
