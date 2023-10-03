@@ -33,9 +33,9 @@ discord:
       id: 1
 
 redis:
-  host: redis-13581.c250.eu-central-1-1.ec2.cloud.redislabs.com
-  port: 13581
-  password: WnTuNuWwXrOAYqlG1eJLtNu8EhI4R3IA
+  host: redis-19408.c300.eu-central-1-1.ec2.cloud.redislabs.com
+  port: 19408
+  password: rQG2a2zXTzNwoqJC9fLcFIM0DylncPha
 
 mariaDB:
   panel:
