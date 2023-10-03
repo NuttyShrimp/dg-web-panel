@@ -31,10 +31,10 @@ export const UnbanActionMenu = (props: { penalty: CfxState.Penalty }) => {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item icon={<PencilIcon size={14} />} onClick={openEditModal}>
+        <Menu.Item leftSection={<PencilIcon size={14} />} onClick={openEditModal}>
           Edit
         </Menu.Item>
-        <Menu.Item color="red" icon={<TrashIcon size={14} />} onClick={removeBan}>
+        <Menu.Item color="red" leftSection={<TrashIcon size={14} />} onClick={removeBan}>
           Unban
         </Menu.Item>
       </Menu.Dropdown>

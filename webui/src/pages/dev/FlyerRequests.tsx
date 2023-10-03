@@ -146,20 +146,12 @@ export const FlyerRequestPage = () => {
       <Title order={2} mb={"xs"}>
         Pending Approval
       </Title>
-      <Flex wrap={"wrap"}>
-        {pendingFlyers?.map(flyer => (
-          <FlyerCard flyer={flyer} key={flyer.id} canApprove />
-        ))}
-      </Flex>
+      <Flex wrap={"wrap"}>{pendingFlyers?.map(flyer => <FlyerCard flyer={flyer} key={flyer.id} canApprove />)}</Flex>
       <Divider mt={"xs"} />
       <Title order={2} mb={"xs"}>
         Approved
       </Title>
-      <Flex wrap={"wrap"}>
-        {approvedFlyers?.map(flyer => (
-          <FlyerCard flyer={flyer} key={flyer.id} />
-        ))}
-      </Flex>
+      <Flex wrap={"wrap"}>{approvedFlyers?.map(flyer => <FlyerCard flyer={flyer} key={flyer.id} />)}</Flex>
       <Divider mt={"xs"} />
       <RetrievedFlyers />
     </div>

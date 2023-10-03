@@ -55,7 +55,7 @@ export const SearchInput: FC<SearchInputProps> = props => {
           focused && (
             <animated.div style={styles}>
               <TextInput
-                icon={<i className="fas fa-magnifying-glass" />}
+                leftSection={<i className="fas fa-magnifying-glass" />}
                 placeholder="Search"
                 radius={"xl"}
                 onChange={updateValue}

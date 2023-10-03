@@ -7,17 +7,17 @@ export const UserActionMenu = ({ steamId }: { steamId: string }) => {
   return (
     <Menu width={200}>
       <Menu.Target>
-        <Button leftIcon={<GearIcon size={14} />}>Actions</Button>
+        <Button leftSection={<GearIcon size={14} />}>Actions</Button>
       </Menu.Target>
       <Menu.Dropdown>
         <Menu.Label>Penalise</Menu.Label>
-        <Menu.Item onClick={() => warnUser(steamId)} icon={<AlertIcon />}>
+        <Menu.Item onClick={() => warnUser(steamId)} leftSection={<AlertIcon />}>
           Warn
         </Menu.Item>
-        <Menu.Item onClick={() => kickUser(steamId)} icon={<FontAwesomeIcon icon="boot" />} color="orange">
+        <Menu.Item onClick={() => kickUser(steamId)} leftSection={<FontAwesomeIcon icon="boot" />} color="orange">
           Kick
         </Menu.Item>
-        <Menu.Item onClick={() => banUser(steamId)} icon={<FontAwesomeIcon icon="hammer-war" />} color="red">
+        <Menu.Item onClick={() => banUser(steamId)} leftSection={<FontAwesomeIcon icon="hammer-war" />} color="red">
           Ban
         </Menu.Item>
         <Menu.Divider />

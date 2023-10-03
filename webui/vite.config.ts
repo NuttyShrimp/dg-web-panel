@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import Checker from "vite-plugin-checker";
-import viteSentry from "vite-plugin-sentry";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
 
@@ -25,22 +25,23 @@ export default defineConfig(({ mode }) => ({
         lintCommand: "eslint --ext ts,tsx src",
       },
     }),
-    viteSentry({
+    sentryVitePlugin({
       url: "https://sentry.nuttyshrimp.me",
       authToken: "5e2d7e8c0d6a42348a0c50dbf655896524c8414752804c8ea1ca04e357be9cd8",
       org: "nutty",
       project: "degrens-panel-frontend",
       debug: true,
-      deploy: {
-        env: mode === "production" ? "production" : "development",
+      disable: false,
+      release: {
+        setCommits: {
+          auto: true,
+        },
+        deploy: {
+          env: mode === "production" ? "production" : "development",
+        },
       },
-      setCommits: {
-        auto: true,
-      },
-      sourceMaps: {
-        include: ["../html/assets"],
+      sourcemaps: {
         ignore: ["node_modules"],
-        urlPrefix: "~/assets",
       },
     }),
   ],

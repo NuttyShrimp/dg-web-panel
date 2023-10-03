@@ -30,16 +30,16 @@ export const BanListPage = () => {
           {banList.map(b => (
             <List.Entry key={b.id}>
               <Flex justify={"space-between"} w={"100%"}>
-                <Stack spacing={4}>
+                <Stack gap={4}>
                   <Link to={`/staff/users/${b.steamId}`} style={{ width: "100%" }}>
-                    <Text weight={"bolder"}>{b.steamId}</Text>
+                    <Text fw={"bolder"}>{b.steamId}</Text>
                   </Link>
                   <Flex>
-                    <Text weight={"bolder"}>Reason:</Text>
+                    <Text fw={"bolder"}>Reason:</Text>
                     <Text>&nbsp;{b.reason}</Text>
                   </Flex>
                   <Flex>
-                    <Text weight={"bolder"}>Until:</Text>
+                    <Text fw={"bolder"}>Until:</Text>
                     <Text>
                       &nbsp;
                       {b.length === -1 ? "Permanently" : dayjs(b.date).add(b.length, "d").format("DD/MM/YYYY HH:mm")}

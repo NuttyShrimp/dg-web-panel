@@ -31,18 +31,18 @@ export const StaffDashboard = () => {
   return (
     <Container my="sm" size="xl">
       <Grid gutter={"sm"}>
-        <Grid.Col xs={4}>
+        <Grid.Col span={{ xs: 4 }}>
           <p>Join Events</p>
           <Divider pb="sm" />
           <SimpleTimeline list={info?.joinEvents ?? []} />
         </Grid.Col>
-        <Grid.Col xs={4}>
+        <Grid.Col span={{ xs: 4 }}>
           <Stack>
             <NumberCard title="Active Players" count={info.activePlayers} />
             <NoteList />
           </Stack>
         </Grid.Col>
-        <Grid.Col xs={4}>
+        <Grid.Col span={{ xs: 4 }}>
           <Stack>
             <NumberCard title="Players in Queue" count={info.queuedPlayers} />
             <DnDList

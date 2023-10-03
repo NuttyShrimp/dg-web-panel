@@ -1,7 +1,6 @@
-import { MantineThemeOverride } from "@mantine/styles/lib/theme/types/MantineTheme";
+import { createTheme, DefaultMantineColor, MantineColorsTuple } from "@mantine/core";
 
-export const theme: MantineThemeOverride = {
-  colorScheme: "dark",
+export const theme = createTheme({
   colors: {
     "dg-prim": [
       "#C6CAEA",
@@ -54,14 +53,12 @@ export const theme: MantineThemeOverride = {
   },
   primaryColor: "dg-prim",
   headings: { fontFamily: "Greycliff CF, sans serif" },
-};
-
-import { Tuple, DefaultMantineColor } from "@mantine/core";
+});
 
 type ExtendedCustomColors = "dg-prim" | "dg-prim-dark" | "dg-sec" | "dg-tert" | DefaultMantineColor;
 
 declare module "@mantine/core" {
   export interface MantineThemeColorsOverride {
-    colors: Record<ExtendedCustomColors, Tuple<string, 10>>;
+    colors: Record<ExtendedCustomColors, MantineColorsTuple>;
   }
 }

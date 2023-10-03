@@ -28,13 +28,13 @@ export const Business = () => {
       </Title>
       <Tabs variant="pills" defaultValue={"info"} keepMounted={false} pt={"sm"}>
         <Tabs.List mb={"xs"}>
-          <Tabs.Tab value="info" icon={<InfoIcon size={14} />}>
+          <Tabs.Tab value="info" leftSection={<InfoIcon size={14} />}>
             Info
           </Tabs.Tab>
-          <Tabs.Tab value="employees" icon={<FontAwesomeIcon icon={"users"} size={"sm"} />}>
+          <Tabs.Tab value="employees" leftSection={<FontAwesomeIcon icon={"users"} size={"sm"} />}>
             Employees
           </Tabs.Tab>
-          <Tabs.Tab value="logs" icon={<FontAwesomeIcon icon={"book"} size={"sm"} />}>
+          <Tabs.Tab value="logs" leftSection={<FontAwesomeIcon icon={"book"} size={"sm"} />}>
             Action Logs
           </Tabs.Tab>
           {userInfo && userInfo.roles.includes("developer") && <BusinessActionMenu id={Number(id)} />}

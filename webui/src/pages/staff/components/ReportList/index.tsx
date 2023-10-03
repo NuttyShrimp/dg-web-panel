@@ -32,7 +32,7 @@ const ReportEntry: FC<{ report: ReportState.Report }> = ({ report }) => {
             {report.title}
           </Title>
           <div className="report-list-entry-date">
-            <Text color={"dimmed"} size={"xs"}>
+            <Text c={"dimmed"} size={"xs"}>
               #{report.id} opened {formatRelativeTime(new Date(report.createdAt).getTime() / 1000)}
             </Text>
             {report.updatedAt && (
@@ -69,7 +69,7 @@ export const ReportList: FC<{}> = () => {
   if (reports.length < 1) {
     return (
       <Center mt={"lg"}>
-        <Text color={"dimmed"} size={"lg"} weight={700}>
+        <Text c={"dimmed"} size={"lg"} fw={700}>
           No reports found
         </Text>
       </Center>

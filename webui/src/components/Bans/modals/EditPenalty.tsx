@@ -1,5 +1,5 @@
 import { Button, Checkbox, Group, NumberInput, TextInput } from "@mantine/core";
-import { DatePicker } from "@mantine/dates";
+import { DatePickerInput } from "@mantine/dates";
 import { closeAllModals } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { axiosInstance } from "@src/helpers/axiosInstance";
@@ -46,9 +46,9 @@ export const EditPenaltyModal = (props: { penalty: CfxState.Penalty }) => {
   return (
     <>
       <TextInput label={"Reason"} value={reason} onChange={e => setReason(e.currentTarget.value)}></TextInput>
-      <NumberInput label={"Points"} value={points} onChange={v => setPoints(v ?? 0)} />
-      <Group spacing={5} align="flex-end">
-        <DatePicker
+      <NumberInput label={"Points"} value={points} onChange={v => setPoints(Number(v) ?? 0)} />
+      <Group gap={5} align="flex-end">
+        <DatePickerInput
           label="Ban Length"
           placeholder="Pick a unban date"
           value={length}

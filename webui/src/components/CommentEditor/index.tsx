@@ -27,7 +27,7 @@ export const CommentEditor: FC<CommentEditorProps> = props => {
       <div>
         <EditorContent editor={editor} />
       </div>
-      <Group position="apart">
+      <Group justify="space-between">
         <Button color={"green"} onClick={handleSubmit}>
           Submit
         </Button>

@@ -87,7 +87,7 @@ export const VehicleInfo: FC<{ cid: number }> = ({ cid }) => {
                     <Button>Actions</Button>
                   </Menu.Target>
                   <Menu.Dropdown>
-                    <Menu.Item icon={<ArrowSwitchIcon size={14} />}>Transfer Ownership</Menu.Item>
+                    <Menu.Item leftSection={<ArrowSwitchIcon size={14} />}>Transfer Ownership</Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
               </td>

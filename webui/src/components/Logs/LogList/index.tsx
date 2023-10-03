@@ -37,7 +37,7 @@ const LogInfo = ({ log }: { log: Logs.Log }) => (
       .filter(lk => log[lk as keyof Logs.Log] !== "")
       .map(key => (
         <Box key={`${log._id}-${key}`} pt={2}>
-          <Text weight={"bolder"} size="xs">
+          <Text fw={"bolder"} size="xs">
             {key.replace(/^_/, "")}
           </Text>
           <Code className="log-entry-value" block>
@@ -63,7 +63,7 @@ export const LogEntryList = ({ logs }: { logs: Logs.Log[] }) => {
         <List.Entry key={l._id}>
           <Flex direction={"column"} w={"100%"}>
             <Box onClick={() => toggledFocus(l._id)} w={"100%"} style={{ cursor: "pointer" }}>
-              <Text weight={"bolder"}>{displayUnixDate(l.timestamp)}</Text>
+              <Text fw={"bolder"}>{displayUnixDate(l.timestamp)}</Text>
               <Text>{l.short_message}</Text>
             </Box>
             {focusedLogs.includes(l._id) && (
@@ -150,7 +150,7 @@ export const LogList = (props: LogListProps) => {
         )}
       </List>
       <Pagination
-        page={page}
+        value={page}
         onChange={p => {
           setPage(p);
         }}

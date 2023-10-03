@@ -1,0 +1,9 @@
+.link-component {
+  text-decoration: none;
+  &.no-color:hover {
+    text-decoration-line: "unset";
+  }
+  &.color:hover {
+    text-decoration-line: "underline";
+  }
+}

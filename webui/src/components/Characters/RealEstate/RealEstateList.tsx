@@ -31,8 +31,8 @@ export const RealEstateList = ({ cid }: { cid: number }) => {
       <List>
         {data.map(loc => (
           <List.Entry key={loc.id}>
-            <Stack w={"100%"} spacing={"xs"}>
-              <Text weight={"bolder"}>{loc.name}</Text>
+            <Stack w={"100%"} gap={"xs"}>
+              <Text fw={"bolder"}>{loc.name}</Text>
               <Flex wrap="wrap">
                 {loc.access.map(acc => (
                   <Paper

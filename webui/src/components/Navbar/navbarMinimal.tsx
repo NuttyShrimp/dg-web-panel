@@ -1,45 +1,13 @@
-import { ReactComponent as Logo } from "@assets/logo.svg";
+import Logo from "@assets/logo.svg?react";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { Avatar, Center, createStyles, Navbar, Stack, Tooltip, UnstyledButton } from "@mantine/core";
+import { Avatar, Center, Stack, Tooltip, UnstyledButton } from "@mantine/core";
 import { FC, ReactNode } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { animated, easings, useSpring } from "react-spring";
 import { authState } from "@stores/auth/state";
 import { navbarState } from "@src/stores/navbar/state";
 import { useAuthActions } from "@src/stores/auth/useAuthActions";
-
-const useStyles = createStyles(theme => ({
-  link: {
-    width: theme.spacing.lg * 2 + theme.spacing.xs / 2,
-    height: theme.spacing.lg * 2 + theme.spacing.xs / 2,
-    borderRadius: theme.radius.md,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: theme.colors.dark[0],
-
-    "&:hover": {
-      backgroundColor: theme.fn.rgba(theme.colors["dg-prim"][1], 0.25),
-      "& i": {
-        color: theme.colors["dg-prim"][3],
-      },
-    },
-
-    "& i": {
-      color: theme.colors.gray[4],
-    },
-  },
-
-  active: {
-    "&": {
-      backgroundColor: theme.fn.rgba(theme.colors["dg-prim"][1], 0.25),
-      "& i": {
-        color: theme.colors["dg-prim"][3],
-      },
-    },
-  },
-}));
 
 interface NavbarLinkProps {
   icon: ReactNode;
@@ -53,7 +21,6 @@ interface NavbarLinkProps {
 function NavbarLink({ icon, label, onClick, roles, url }: NavbarLinkProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { classes, cx } = useStyles();
   const userInfo = useRecoilValue(authState.userInfo);
 
   if (url) {
@@ -62,11 +29,8 @@ function NavbarLink({ icon, label, onClick, roles, url }: NavbarLinkProps) {
 
   if (!roles || userInfo?.roles.some(role => roles.includes(role))) {
     return (
-      <Tooltip label={label} position="right" withArrow transitionDuration={0}>
-        <UnstyledButton
-          onClick={onClick}
-          className={cx(classes.link, { [classes.active]: url && location.pathname.startsWith(url) })}
-        >
+      <Tooltip label={label} position="right" withArrow>
+        <UnstyledButton onClick={onClick} data-active={url && location.pathname.startsWith(url)} className={"link"}>
           {icon}
         </UnstyledButton>
       </Tooltip>
@@ -112,12 +76,12 @@ export const NavbarMinimal: FC<{ canOpen: boolean }> = ({ canOpen }) => {
   };
 
   return (
-    <Navbar width={{ base: 70 }} p="sm" style={isExtOpen ? { borderColor: "transparent" } : undefined}>
+    <div className="navbar-minimal" style={{ borderColor: isExtOpen ? "transparent" : "inherit", width: 70 }}>
       <Center>
         <Logo />
       </Center>
-      <Navbar.Section grow mt={30}>
-        <Stack align="center" spacing={10}>
+      <div className="section grow">
+        <Stack align="center" gap={10}>
           <NavbarLink icon={<i className="fa fa-house-blank" />} onClick={() => navigate("/")} label={"Home"} />
           <NavbarLink
             icon={<i className="fas fa-swords" />}
@@ -139,12 +103,12 @@ export const NavbarMinimal: FC<{ canOpen: boolean }> = ({ canOpen }) => {
           />
           <NavbarLink icon={<i className="fas fa-code" />} label={"Developer"} url={"/dev"} roles={["developer"]} />
         </Stack>
-      </Navbar.Section>
-      <Navbar.Section mt={50}>
-        <Stack align="center" spacing={10}>
+      </div>
+      <div className="section">
+        <Stack align="center" gap={10}>
           {userInfo ? (
             <>
-              <Avatar src={userInfo.avatarUrl} size={45} />
+              <Avatar src={userInfo.avatarUrl} size={45} radius={"sm"} />
               <ExtensionToggle canOpen={canOpen} />
               <NavbarLink
                 icon={<i className="fas fa-right-from-bracket" />}
@@ -156,7 +120,7 @@ export const NavbarMinimal: FC<{ canOpen: boolean }> = ({ canOpen }) => {
             <NavbarLink icon={<i className="fas fa-right-to-bracket" />} label="Login" onClick={handleLoginButton} />
           )}
         </Stack>
-      </Navbar.Section>
-    </Navbar>
+      </div>
+    </div>
   );
 };

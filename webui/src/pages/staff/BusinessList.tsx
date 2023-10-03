@@ -21,8 +21,8 @@ export const BusinessList = () => {
           {businesses.map(b => (
             <List.Entry key={b.id}>
               <Link to={`/staff/business/${b.id}`} style={{ width: "100%" }} noColor>
-                <Stack spacing={5}>
-                  <Text weight={"bolder"}>
+                <Stack gap={5}>
+                  <Text fw={"bolder"}>
                     {b.label} | {b.name} | {b.id}
                   </Text>
                   <Text size={"sm"}>type: {b.type.name}</Text>

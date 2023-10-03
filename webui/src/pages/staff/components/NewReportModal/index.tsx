@@ -51,11 +51,11 @@ export const NewReportModal: FC<{ open: boolean; onClose: () => void }> = props 
         limit={20}
         label={"Members (staff excluded)"}
         data={cfxPlayers}
-        nothingFound="Nothing found"
+        nothingFoundMessage="Nothing found"
         value={data.members}
         onChange={data => changeDataEntry("members", data)}
       />
-      <Group position="right" pt={"md"}>
+      <Group justify="flex-end" pt={"md"}>
         <Button color={"dg-prim"} onClick={addReport} loading={creatingReport}>
           <p>Create</p>
         </Button>

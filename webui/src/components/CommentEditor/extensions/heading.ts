@@ -1,4 +1,4 @@
-import { DEFAULT_THEME, MantineThemeBase } from "@mantine/core";
+import { DEFAULT_THEME, type MantineTheme } from "@mantine/core";
 import { theme } from "@src/styles/theme";
 import HeadingTT from "@tiptap/extension-heading";
 import { mergeAttributes } from "@tiptap/react";
@@ -8,7 +8,7 @@ const Heading = HeadingTT.extend({
     const combinedTheme = { ...DEFAULT_THEME.headings, ...theme.headings };
     const hasLevel = HeadingTT.options.levels.includes(node.attrs.level);
     const level = hasLevel ? node.attrs.level : this.options.levels[0];
-    const lvlStyles = combinedTheme.sizes?.[`h${level}` as keyof MantineThemeBase["headings"]["sizes"]];
+    const lvlStyles = combinedTheme.sizes?.[`h${level}` as keyof MantineTheme["headings"]["sizes"]];
 
     return [
       `h${level}`,
