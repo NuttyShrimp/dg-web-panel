@@ -30,6 +30,14 @@ export const WarnUserModal = ({ steamId }: { steamId: string }) => {
   const [points, setPoints] = useState(0);
 
   const doWarn = async () => {
+    if (reasons.length === 0) {
+      showNotification({
+        title: "Ban error",
+        message: `You should add a reason for the ban (Don't forget to press enter if you entered a custom one)`,
+        color: "red",
+      });
+      return;
+    }
     await axiosInstance.post(`/staff/player/${steamId}/warn`, {
       reason: reasons.join(", "),
       points,
@@ -63,6 +71,14 @@ export const KickUserModal = ({ steamId }: { steamId: string }) => {
   const [points, setPoints] = useState(0);
 
   const doKick = async () => {
+    if (reasons.length === 0) {
+      showNotification({
+        title: "Ban error",
+        message: `You should add a reason for the ban (Don't forget to press enter if you entered a custom one)`,
+        color: "red",
+      });
+      return;
+    }
     await axiosInstance.post(`/staff/player/${steamId}/kick`, {
       reason: reasons.join(", "),
       points,
@@ -102,6 +118,14 @@ export const BanUserModal = ({ steamId }: { steamId: string }) => {
       showNotification({
         title: "Ban error",
         message: `The unban date cannot empty`,
+        color: "red",
+      });
+      return;
+    }
+    if (reasons.length === 0) {
+      showNotification({
+        title: "Ban error",
+        message: `You should add a reason for the ban (Don't forget to press enter if you entered a custom one)`,
         color: "red",
       });
       return;
