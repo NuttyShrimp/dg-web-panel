@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/aidenwallis/go-utils/utils"
 )
@@ -137,6 +138,12 @@ func (r *Report) AddMessage(reportId uint, message interface{}, sender *authinfo
 		reportMessage.UserID = &sender.ID
 	}
 	err = db.MariaDB.Client.Create(&reportMessage).Error
+	if err != nil {
+		return nil, err
+	}
+
+	r.Data.UpdatedAt = time.Now()
+	err = r.saveToDB()
 	if err != nil {
 		return nil, err
 	}
