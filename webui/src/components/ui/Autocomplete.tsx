@@ -28,7 +28,7 @@ export const AutoComplete = ({
 
   const options = useMemo(
     () =>
-      filteredData.map(item => (
+      filteredData.slice(0, 10).map(item => (
         <Combobox.Option value={item.value} key={item.value}>
           {itemComponent && itemComponent(item)}
         </Combobox.Option>
@@ -61,7 +61,7 @@ export const AutoComplete = ({
         />
       </Combobox.Target>
 
-      <Combobox.Dropdown>
+      <Combobox.Dropdown mah={200} style={{ overflowY: "auto" }}>
         <Combobox.Options>{options}</Combobox.Options>
       </Combobox.Dropdown>
     </Combobox>
