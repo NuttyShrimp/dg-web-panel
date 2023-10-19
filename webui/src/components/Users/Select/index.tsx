@@ -1,7 +1,7 @@
 import { Box, Text } from "@mantine/core";
 import { cfxState } from "@src/stores/cfx/state";
 import { useCfxPlayer } from "@src/stores/cfx/hooks/useCfxPlayer";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { useRecoilValue } from "recoil";
 import { AutoComplete } from "@src/components/ui/Autocomplete";
 
@@ -33,16 +33,20 @@ export const UserSelect: FC<{ steamId?: string; onChange?: (steamId: string | nu
     }
   }, []);
 
+  const options = useMemo(() => {
+    return players.map(p => ({
+      ...p,
+      value: String(p.steamId),
+      label: p.name,
+    }));
+  }, [players]);
+
   return (
     <AutoComplete
       placeholder="Search a user"
       itemComponent={SelectItem}
       defaultValue={steamId}
-      data={players.map(p => ({
-        ...p,
-        value: String(p.steamId),
-        label: p.name,
-      }))}
+      data={options}
       filter={(item, search) =>
         caseInsensitiveMatch(item.name, search) ||
         caseInsensitiveMatch(item.steamId, search) ||
