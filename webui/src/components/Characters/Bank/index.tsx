@@ -42,7 +42,7 @@ export const BankInfo: FC<{ cid: number }> = ({ cid }) => {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [cid]);
   if (!characterBankAccs) {
     return (
       <Container>
