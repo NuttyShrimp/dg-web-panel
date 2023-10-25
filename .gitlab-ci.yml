@@ -20,7 +20,7 @@ stages:
       - server/.golangci-lint/
 
 compile server:
-  image: golang:latest
+  image: golang:1.21
   stage: build
   only:
     changes:
@@ -37,7 +37,7 @@ compile server:
 lint:
   extends: 
     - .go_setup
-  image: golangci/golangci-lint:v1.50-alpine
+  image: golangci/golangci-lint:v1.55-alpine
   stage: test
   script:
     - golangci-lint --version
