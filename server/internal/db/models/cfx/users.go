@@ -20,6 +20,17 @@ type User struct {
 	Points       AdminPoints `gorm:"foreignKey:SteamId" json:"points"`
 }
 
+// nolint:gocritic,unused
+func (item *User) compare(other User) int {
+	if item.SteamId == other.SteamId {
+		return 0
+	}
+	if item.SteamId < other.SteamId {
+		return -1
+	}
+	return 1
+}
+
 type Penalties struct {
 	Id        uint        `json:"id" gorm:"primaryKey"`
 	SteamId   string      `json:"steamId" gorm:"column:steamId"`
