@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"golang.org/x/exp/slices"
 )
 
 type PlayersCache struct {
@@ -45,6 +47,7 @@ func GetCfxPlayers() (*[]cfx_models.User, error) {
 
 	cache.Players.Data = append(cache.Players.Data, updatedPly...)
 	cache.Players.Data = append(cache.Players.Data, newPlys...)
+	cache.Players.Data = slices.Compact(cache.Players.Data)
 	cache.Players.UpdatedAt = time.Now()
 	return &cache.Players.Data, nil
 }
