@@ -86,6 +86,7 @@ func GetHiddenCookie(c *gin.Context, key string, dst any) error {
 }
 
 func RemoveCookie(c *gin.Context, key string) {
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(key, "", -1, "/", cookieOptions.Domain, true, false)
 }
 

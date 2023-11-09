@@ -9,6 +9,7 @@ import (
 	"degrens/panel/internal/staff"
 	"degrens/panel/internal/state"
 	"degrens/panel/internal/users"
+	"degrens/panel/lib"
 	"degrens/panel/lib/ratelimiter"
 	"net/http"
 	"time"
@@ -23,7 +24,6 @@ import (
 func SetupRouter(conf *config.Config) *gin.Engine {
 	// Create a new gin Router
 	r := gin.New()
-	// TODO: set proxy when deploying
 	err := r.SetTrustedProxies(nil)
 	if err != nil {
 		logrus.Fatal("Failed to set the trusted proxies", "error", err)
@@ -56,6 +56,7 @@ func SetupRouter(conf *config.Config) *gin.Engine {
 
 	// Register routes
 	auth.NewAuthRouter(apiRG)
+	state.NewStateRouter(apiRG)
 
 	securedapiRG := r.Group("/api", auth.NewMiddleWare())
 	auth.NewSecuredAuthRouter(securedapiRG)
@@ -63,7 +64,6 @@ func SetupRouter(conf *config.Config) *gin.Engine {
 	staff.NewStaffRouter(securedapiRG)
 	admin.NewDevRouter(securedapiRG)
 	characters.NewCharacterRouter(securedapiRG)
-	state.NewStateRouter(securedapiRG)
 	cfx.NewCfxRouter(securedapiRG)
 
 	if conf.Server.Env != "production" {
