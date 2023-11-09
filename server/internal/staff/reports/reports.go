@@ -44,7 +44,7 @@ func CreateNewReport(creator, title string, memberIds []string) (uint, error) {
 	}
 	for i := range members {
 		members[i].ReportID = report.ID
-		db.MariaDB.Client.Save(members[i])
+		db.MariaDB.Client.Save(&members[i])
 	}
 	cfxInput := models.CfxReportAnnouncement{
 		ID: report.ID,

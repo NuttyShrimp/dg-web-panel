@@ -1,6 +1,7 @@
 package state
 
 import (
+	"degrens/panel/internal/auth"
 	"degrens/panel/internal/routes"
 	"strconv"
 
@@ -23,7 +24,7 @@ func NewStateRouter(rg *gin.RouterGroup) {
 
 func (ST *StateRouter) RegisterRoutes() {
 	ST.RouterGroup.GET("/schedule/update", ST.FetchScheduledUpdate)
-	ST.RouterGroup.POST("/schedule/update", ST.ScheduleUpdate)
+	ST.RouterGroup.POST("/schedule/update", auth.NewMiddleWare(), ST.ScheduleUpdate)
 }
 
 func (ST *StateRouter) ScheduleUpdate(ctx *gin.Context) {

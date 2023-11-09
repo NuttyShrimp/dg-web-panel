@@ -39,6 +39,9 @@ func main() {
 
 	// Create logger
 	logrus.AddHook(sentryhook.Hook{})
+	if conf.Server.Env == "development" {
+		logrus.SetLevel(logrus.TraceLevel)
+	}
 
 	db.InitDatabase(conf)
 	graylog.InitGrayLogger(&conf.Graylog)

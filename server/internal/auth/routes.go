@@ -137,6 +137,7 @@ func (AR *AuthRouter) loginHandler() gin.HandlerFunc {
 				})
 				return
 			}
+			logrus.Debug("Successfully authorized cfx token")
 			c.JSON(200, gin.H{})
 		}
 	}
